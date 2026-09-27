@@ -25,6 +25,7 @@
     <a href="{{ route('cuenta.perfil') }}"><x-icon name="user-circle" :size="18" /> Perfil y foto</a>
     <a href="{{ route('cuenta.seguridad') }}"><x-icon name="shield-check" :size="18" /> Seguridad y contraseña</a>
     <a href="{{ route('verificacion') }}"><x-icon name="seal-check" :size="18" /> Verificación de identidad</a>
+    <a href="{{ route('cuenta.invitaciones') }}"><x-icon name="paper-plane-tilt" :size="18" /> Invitá a alguien</a>
     @if ($user->isAdmin())
       <a href="{{ route('admin.verificaciones') }}"><x-icon name="gear" :size="18" /> Administración</a>
     @endif

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Account\InvitationController;
 use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\PasswordPolicyController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\VerificationController;
 use App\Livewire\HostOnboarding;
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class)->name('home');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+Route::get('/invitacion/{token}', InvitationAcceptController::class)->middleware('throttle:20,1')->name('invitacion.aceptar');
 Route::get('/experiencias/{experience}', [ExperienceController::class, 'show'])->name('experiencias.show');
 
 Route::middleware('guest')->group(function () {
@@ -38,6 +41,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/cuenta', [ProfileController::class, 'update'])->name('cuenta.perfil.update');
     Route::get('/cuenta/seguridad', [PasswordController::class, 'edit'])->name('cuenta.seguridad');
     Route::put('/cuenta/seguridad', [PasswordController::class, 'update'])->name('cuenta.seguridad.update');
+    Route::middleware('verified.level:1')->group(function () {
+        Route::get('/cuenta/invitaciones', [InvitationController::class, 'index'])->name('cuenta.invitaciones');
+        Route::post('/cuenta/invitaciones/email', [InvitationController::class, 'sendEmail'])->middleware('throttle:10,1')->name('cuenta.invitaciones.email');
+        Route::post('/cuenta/invitaciones/enlace', [InvitationController::class, 'createLink'])->middleware('throttle:10,1')->name('cuenta.invitaciones.enlace');
+    });
     Route::get('/verificacion', [VerificationController::class, 'index'])->name('verificacion');
     Route::post('/verificacion', [VerificationController::class, 'store'])->name('verificacion.store');
     Route::post('/verificacion/codigo', [VerificationController::class, 'confirm'])->name('verificacion.confirmar');

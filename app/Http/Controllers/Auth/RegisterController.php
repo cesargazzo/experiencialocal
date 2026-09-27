@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Enums\VerificationType;
 use App\Http\Controllers\Controller;
+use App\Models\Invitation;
 use App\Models\User;
 use App\Services\SecurityLog;
 use App\Services\VerificationService;
@@ -15,9 +16,11 @@ use Illuminate\View\View;
 
 class RegisterController extends Controller
 {
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('auth.register');
+        $invitation = Invitation::findUsableByToken((string) $request->session()->get('invitation_token'));
+
+        return view('auth.register', ['invitation' => $invitation?->load('inviter')]);
     }
 
     public function store(Request $request, VerificationService $verifications, SecurityLog $securityLog): RedirectResponse
@@ -36,6 +39,13 @@ class RegisterController extends Controller
 
         $user = User::create([...$data, 'country_code' => $data['nationality_code']]);
         $securityLog->record('register', $user, ['nationality' => $user->nationality_code], $user->email);
+
+        $invitation = Invitation::findUsableByToken((string) $request->session()->pull('invitation_token'));
+        if ($invitation) {
+            $invitation->forceFill(['accepted_by' => $user->id, 'accepted_at' => now()])->save();
+            $user->forceFill(['invited_by' => $invitation->inviter_id])->save();
+            $securityLog->record('invitation.accepted', $user, ['invitation_id' => $invitation->id, 'inviter_id' => $invitation->inviter_id], $user->email);
+        }
 
         // Nivel 1 arranca acá: se envían los códigos de email y teléfono.
         $verifications->submit($user, VerificationType::Email);

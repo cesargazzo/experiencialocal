@@ -42,6 +42,9 @@ class SecurityEvent extends Model
         'session.expired' => 'Sesión o formulario vencido',
         'probe.suspicious' => 'Rastreo sospechoso',
         'error.server' => 'Error del servidor',
+        'invitation.sent' => 'Invitación por email',
+        'invitation.link_created' => 'Enlace de invitación',
+        'invitation.accepted' => 'Invitación aceptada',
     ];
 
     protected function casts(): array
