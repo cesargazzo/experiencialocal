@@ -133,6 +133,25 @@ class AccountAreaTest extends TestCase
     }
 
     #[Test]
+    public function the_postal_code_is_optional_and_validated_by_country(): void
+    {
+        $user = User::factory()->create();
+        $location = $this->location();
+
+        $this->actingAs($user)->put(route('cuenta.perfil.update'), [...$location, 'postal_code' => ' f5360 abc '])->assertSessionHasNoErrors();
+        $this->assertSame('F5360ABC', $user->fresh()->postal_code);
+
+        $this->actingAs($user)->put(route('cuenta.perfil.update'), [...$location, 'postal_code' => '53'])->assertSessionHasErrors('postal_code');
+        $this->assertSame('F5360ABC', $user->fresh()->postal_code);
+
+        $this->actingAs($user)->put(route('cuenta.perfil.update'), [...$location, 'postal_code' => ''])->assertSessionHasNoErrors();
+        $this->assertNull($user->fresh()->postal_code);
+
+        $this->actingAs($user)->put(route('cuenta.perfil.update'), ['country_code' => 'UY', 'city' => 'Montevideo', 'postal_code' => '11200'])->assertSessionHasNoErrors();
+        $this->assertSame('11200', $user->fresh()->postal_code);
+    }
+
+    #[Test]
     public function host_onboarding_starts_with_the_persons_province_and_city(): void
     {
         $mendoza = Province::where('code', 'AR-M')->value('id');

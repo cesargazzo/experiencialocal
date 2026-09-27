@@ -20,6 +20,7 @@
       <div class="summary">
         <div><span>Nacionalidad</span><strong>{{ $user->nationality_code ?? '—' }}</strong></div>
         <div><span>Vive en</span><strong>{{ $user->locationLabel() ?? '—' }}</strong></div>
+        <div><span>Código postal</span><strong>{{ $user->postal_code ?? '—' }}</strong></div>
         <div><span>Fecha de nacimiento</span><strong>{{ $user->birth_date?->format('d/m/Y') ?? '—' }}</strong></div>
         <div><span>Alta</span><strong>{{ $user->created_at->timezone(config('tinku.timezone'))->format('d/m/Y H:i') }}</strong></div>
         <div><span>Invitada por</span><strong>{{ $user->invitedBy?->name ?? '—' }}</strong></div>

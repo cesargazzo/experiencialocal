@@ -55,10 +55,17 @@
               </div>
             @endforeach
           </div>
-          <div class="field">
-            <label for="city">Ciudad</label>
-            <input id="city" name="city" value="{{ old('city', $user->city) }}" maxlength="80" autocomplete="address-level2" placeholder="Ej.: Chilecito" required>
-            @error('city')<span class="error" style="display:block">{{ $message }}</span>@enderror
+          <div class="grid-2">
+            <div class="field">
+              <label for="city">Ciudad</label>
+              <input id="city" name="city" value="{{ old('city', $user->city) }}" maxlength="80" autocomplete="address-level2" placeholder="Ej.: Chilecito" required>
+              @error('city')<span class="error" style="display:block">{{ $message }}</span>@enderror
+            </div>
+            <div class="field">
+              <label for="postal_code">Código postal <span class="hint">(opcional)</span></label>
+              <input id="postal_code" name="postal_code" value="{{ old('postal_code', $user->postal_code) }}" maxlength="12" autocomplete="postal-code" placeholder="Ej.: 5360" style="text-transform:uppercase">
+              @error('postal_code')<span class="error" style="display:block">{{ $message }}</span>@enderror
+            </div>
           </div>
         </fieldset>
         <div class="grid-2">

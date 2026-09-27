@@ -39,6 +39,13 @@ class ProfileController extends Controller
         $locked = $this->identityIsLocked($user);
         $birthDateLocked = $locked && $user->birth_date !== null;
 
+        $isArgentina = $request->input('country_code') === 'AR';
+
+        if (is_string($request->input('postal_code'))) {
+            $postalCode = mb_strtoupper(trim($request->input('postal_code')));
+            $request->merge(['postal_code' => $isArgentina ? str_replace([' ', '-'], '', $postalCode) : $postalCode]);
+        }
+
         $countryHasProvinces = Province::query()->where('country_code', $request->input('country_code'))->exists();
 
         $data = $request->validate([
@@ -49,6 +56,7 @@ class ProfileController extends Controller
                 ? ['required', Rule::exists('provinces', 'id')->where('country_code', $request->input('country_code'))]
                 : ['exclude'],
             'city' => ['required', 'string', 'max:80'],
+            'postal_code' => ['nullable', 'string', 'max:12', $isArgentina ? 'regex:/^([A-Z]\d{4}[A-Z]{3}|\d{4})$/' : 'regex:/^[A-Z0-9][A-Z0-9 \-]{1,10}[A-Z0-9]$/'],
         ], [
             'birth_date.before_or_equal' => 'Tenés que tener al menos '.config('tinku.min_age').' años para usar Tinku.',
             'birth_date.after' => 'Revisá la fecha de nacimiento.',
@@ -57,9 +65,12 @@ class ProfileController extends Controller
             'province_id.required' => 'Elegí tu provincia.',
             'province_id.exists' => 'Elegí una provincia de la lista.',
             'city.required' => 'Contanos en qué ciudad vivís.',
+            'postal_code.regex' => $isArgentina
+                ? 'Revisá el código postal: son 4 números (5360) o el formato nuevo (F5360ABC).'
+                : 'Revisá el código postal.',
         ]);
 
-        $user->update([...$data, 'province_id' => $data['province_id'] ?? null]);
+        $user->update([...$data, 'province_id' => $data['province_id'] ?? null, 'postal_code' => $data['postal_code'] ?? null]);
 
         return back()->with('status', 'Guardamos tus datos.');
     }

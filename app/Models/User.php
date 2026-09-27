@@ -24,7 +24,7 @@ use Illuminate\Support\Str;
  * Una sola cuenta con varios roles: todo usuario es participante, es anfitrión
  * si tiene un HostProfile y es administrador si tiene el flag is_admin.
  */
-#[Fillable(['name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'nationality_code', 'locale', 'avatar_path'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'nationality_code', 'locale', 'avatar_path'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
