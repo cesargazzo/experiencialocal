@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ExperienceStatus;
 use App\Models\Category;
 use App\Models\Experience;
 use App\Models\Plan;
@@ -27,7 +28,14 @@ class HomeController extends Controller
             ->orderByDesc('reviews_count')
             ->get();
 
+        // Al anfitrión se le aclara que lo suyo sin publicar no aparece en esta lista.
+        $hostProfile = $request->user()?->hostProfile;
+        $myHiddenExperiences = $hostProfile
+            ? $hostProfile->experiences()->where('status', '!=', ExperienceStatus::Published)->where('status', '!=', ExperienceStatus::Archived)->get(['id', 'title', 'slug', 'status', 'approved_at', 'rejection_reason'])
+            : collect();
+
         return view('home', [
+            'myHiddenExperiences' => $myHiddenExperiences,
             'categories' => $categories,
             'activeCategory' => $activeCategory,
             'experiences' => $experiences,

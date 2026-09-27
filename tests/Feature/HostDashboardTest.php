@@ -71,4 +71,19 @@ class HostDashboardTest extends TestCase
             ->assertOk()
             ->assertDontSee('owner-bar', false);
     }
+
+    #[Test]
+    public function the_home_page_tells_the_host_why_their_experience_is_not_listed(): void
+    {
+        $experience = Experience::factory()->inReview()->create(['title' => 'Caminata por el río Amarillo']);
+
+        $this->actingAs($experience->host->user)->get(route('home'))
+            ->assertOk()
+            ->assertSee('Tu experiencia')
+            ->assertSee('Caminata por el río Amarillo')
+            ->assertSee('(en revisión)')
+            ->assertSee('solo se listan las publicadas');
+
+        $this->actingAs(User::factory()->create())->get(route('home'))->assertDontSee('Caminata por el río Amarillo');
+    }
 }

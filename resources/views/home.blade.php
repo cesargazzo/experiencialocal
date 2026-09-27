@@ -52,6 +52,13 @@
         <div><p class="eyebrow">Experiencias</p><h2 class="title">Elegí qué hacer. <span class="hl">Conocé con quién.</span></h2></div>
         <p class="lead">Cada experiencia muestra qué incluye, quién la ofrece, el precio final y las opiniones de quienes fueron.</p>
       </div>
+      @if ($myHiddenExperiences->isNotEmpty())
+        <p class="notice" style="margin-bottom:20px">
+          {{ $myHiddenExperiences->count() === 1 ? 'Tu experiencia' : 'Tus experiencias' }}
+          @foreach ($myHiddenExperiences as $mine)<a href="{{ route('experiencias.show', $mine) }}">{{ $mine->title }}</a> ({{ Str::lower($mine->statusLabel()) }})@if (! $loop->last), @endif @endforeach
+          todavía no {{ $myHiddenExperiences->count() === 1 ? 'aparece' : 'aparecen' }} acá: solo se listan las publicadas. <a href="{{ route('anfitrion.panel') }}">Mirá tu espacio de anfitrión</a>.
+        </p>
+      @endif
       <div class="chips">
         <a class="chip {{ $activeCategory ? '' : 'is-active' }}" href="{{ route('home', request()->except('cat')) }}#experiencias" @if (! $activeCategory) aria-current="true" @endif>Todas</a>
         @foreach ($categories as $c)
