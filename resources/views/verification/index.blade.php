@@ -52,7 +52,7 @@
                       <div class="grid-2">
                         <div class="field"><label for="doc-country">País que lo emitió</label>
                           <select id="doc-country" name="document_country" x-model="country" required>
-                            @foreach (\App\Support\CountryList::all() as $code => $name)<option value="{{ $code }}">{{ $name }}</option>@endforeach
+                            <x-country-options />
                           </select>
                         </div>
                         <div class="field"><label for="doc-type">Tipo</label>

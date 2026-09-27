@@ -34,11 +34,9 @@
           <legend class="hint" style="margin-bottom:8px">Dónde vivís. Lo podés cambiar cuando te mudes.</legend>
           <div class="grid-2">
             <div class="field">
-              <label for="country_code">País</label>
+              <label for="country_code">País de residencia</label>
               <select id="country_code" name="country_code" x-model="country" autocomplete="country" required>
-                @foreach ($countries as $code => $countryName)
-                  <option value="{{ $code }}" @selected($selectedCountry === $code)>{{ $countryName }}</option>
-                @endforeach
+                <x-country-options :selected="$selectedCountry" />
               </select>
               @error('country_code')<span class="error" style="display:block">{{ $message }}</span>@enderror
             </div>

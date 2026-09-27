@@ -24,7 +24,6 @@ class ProfileController extends Controller
             'user' => $user,
             'nameLocked' => $this->identityIsLocked($user),
             'birthDateLocked' => $this->identityIsLocked($user) && $user->birth_date !== null,
-            'countries' => CountryList::all(),
             'dietaryOptions' => DietaryOption::cases(),
             'provincesByCountry' => Province::query()
                 ->whereIn('country_code', Country::active()->pluck('code'))

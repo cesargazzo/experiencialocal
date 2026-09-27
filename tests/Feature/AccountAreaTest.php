@@ -107,7 +107,11 @@ class AccountAreaTest extends TestCase
         $user = User::factory()->level(VerificationLevel::Document)->create(['name' => 'Ana Molina']);
         $laRioja = Province::where('code', 'AR-F')->value('id');
 
-        $this->actingAs($user)->get(route('cuenta.perfil'))->assertOk()->assertSee('Provincia')->assertSee('Ciudad');
+        $this->actingAs($user)->get(route('cuenta.perfil'))->assertOk()
+            ->assertSee('País de residencia')
+            ->assertSeeInOrder(['Argentina', 'Países de la región', 'Bolivia', 'Uruguay', 'Resto del mundo', 'Alemania', 'Otro país'])
+            ->assertSee('Provincia')
+            ->assertSee('Ciudad');
         $this->actingAs($user)->put(route('cuenta.perfil.update'), ['country_code' => 'AR', 'province_id' => $laRioja, 'city' => 'Chilecito'])
             ->assertSessionHasNoErrors();
 
