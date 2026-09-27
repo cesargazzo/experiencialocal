@@ -111,6 +111,21 @@ class User extends Authenticatable
         return (bool) $this->dietary_needs?->isNotEmpty() || filled($this->food_allergies);
     }
 
+    public function termsAcceptances(): HasMany
+    {
+        return $this->hasMany(TermsAcceptance::class);
+    }
+
+    /** Si aceptó la versión exigida o una posterior. Sin términos publicados no hay nada que aceptar. */
+    public function hasAcceptedRequiredTerms(): bool
+    {
+        $required = TermsVersion::required();
+
+        return $required === null || $this->termsAcceptances()
+            ->whereHas('version', fn ($query) => $query->where('published_at', '>=', $required->published_at))
+            ->exists();
+    }
+
     public function hostProfile(): HasOne
     {
         return $this->hasOne(HostProfile::class);

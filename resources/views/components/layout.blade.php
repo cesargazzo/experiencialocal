@@ -128,7 +128,7 @@
             <li><a href="{{ route('home', ['cat' => $c->slug]) }}#experiencias">{{ $c->name }}</a></li>
           @endforeach
         </ul></div>
-        <div><h4>Anfitriones</h4><ul><li><a href="{{ route('anfitrion.registro') }}">Publicar una experiencia</a></li><li><a href="{{ route('home') }}#planes">Planes</a></li><li><a href="{{ route('home') }}#como-ganas">Cómo ganás</a></li></ul></div>
+        <div><h4>Anfitriones</h4><ul><li><a href="{{ route('anfitrion.registro') }}">Publicar una experiencia</a></li><li><a href="{{ route('home') }}#planes">Planes</a></li><li><a href="{{ route('home') }}#como-ganas">Cómo ganás</a></li><li><a href="{{ route('terminos') }}">Términos y condiciones</a></li></ul></div>
         <div><h4>Tinku</h4><ul><li><a href="{{ route('verificacion') }}">Verificación de identidad</a></li><li><a href="#">Seguridad</a></li><li><a href="#">Ayuda</a></li></ul></div>
       </div>
       <div class="footer__bottom">

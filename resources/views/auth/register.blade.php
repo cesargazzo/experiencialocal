@@ -20,9 +20,21 @@
             </select>
             <span class="hint">Define cómo validamos tu documento. Argentinos por RENAPER; el resto por un proveedor internacional.</span>
           </div>
+        </div>
+        <hr class="form-divider">
+        <div class="grid-2">
           <div class="field"><label for="password">Contraseña</label><x-password-input name="password" autocomplete="new-password" aria-describedby="password-requirements" />@error('password')<span class="error" style="display:block">{{ $message }}</span>@enderror<x-password-requirements id="password-requirements" /></div>
           <div class="field"><label for="password_confirmation">Repetí la contraseña</label><x-password-input name="password_confirmation" autocomplete="new-password" /><x-password-match /></div>
         </div>
+        @if ($terms)
+          <input type="hidden" name="terms_version_id" value="{{ $terms->id }}">
+          <label class="toggle-row terms-accept">
+            <input type="checkbox" name="accept_terms" value="1" @checked(old('accept_terms')) required>
+            <span>Leí y acepto los <a href="{{ route('terminos') }}" target="_blank" rel="noopener">términos y condiciones</a> (versión {{ $terms->version }}).</span>
+          </label>
+          @error('accept_terms')<span class="error" style="display:block">{{ $message }}</span>@enderror
+          @error('terms_version_id')<span class="error" style="display:block">{{ $message }}</span>@enderror
+        @endif
         <div class="wizard__actions"><a class="btn btn--ghost" href="{{ route('login') }}">Ya tengo cuenta</a><button class="btn btn--secondary" type="submit">Creá tu cuenta <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
       </form>
     </section>

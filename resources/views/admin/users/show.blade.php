@@ -31,6 +31,15 @@
     </section>
 
     <section class="wizard__panel">
+      <h2>Términos aceptados</h2>
+      @forelse ($user->termsAcceptances as $acceptance)
+        <div class="summary"><div><span>Versión {{ $acceptance->version->version }} · {{ $acceptance->context === 'register' ? 'al registrarse' : 'al ingresar' }}</span><strong>{{ $acceptance->accepted_at->timezone(config('tinku.timezone'))->format('d/m/Y H:i') }} · {{ $acceptance->ip }}</strong></div></div>
+      @empty
+        <p class="hint">No aceptó ninguna versión todavía.</p>
+      @endforelse
+    </section>
+
+    <section class="wizard__panel">
       <h2>Validar a mano</h2>
       <p>Aprueba las verificaciones que falten hasta el nivel elegido. El motivo queda en el registro de seguridad.</p>
       <form method="post" action="{{ route('admin.usuarios.validar') }}">

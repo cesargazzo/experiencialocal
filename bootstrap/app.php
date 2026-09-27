@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureIsAdmin;
 use App\Http\Middleware\EnsurePasswordIsChanged;
+use App\Http\Middleware\EnsureTermsAccepted;
 use App\Http\Middleware\EnsureVerificationLevel;
 use App\Http\Middleware\RecordLastSeen;
 use App\Services\SecurityLog;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             EnsureAccountIsActive::class,
             EnsurePasswordIsChanged::class,
+            EnsureTermsAccepted::class,
             RecordLastSeen::class,
         ]);
 

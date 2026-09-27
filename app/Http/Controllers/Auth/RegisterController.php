@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\VerificationType;
 use App\Http\Controllers\Controller;
 use App\Models\Invitation;
+use App\Models\TermsAcceptance;
+use App\Models\TermsVersion;
 use App\Models\User;
 use App\Services\SecurityLog;
 use App\Services\VerificationService;
@@ -23,11 +25,20 @@ class RegisterController extends Controller
     {
         $invitation = Invitation::findUsableByToken((string) $request->session()->get('invitation_token'));
 
-        return view('auth.register', ['invitation' => $invitation?->load('inviter')]);
+        return view('auth.register', ['invitation' => $invitation?->load('inviter'), 'terms' => TermsVersion::current()]);
     }
 
     public function store(Request $request, VerificationService $verifications, SecurityLog $securityLog): RedirectResponse
     {
+        $terms = TermsVersion::current();
+        $request->validate($terms ? [
+            'terms_version_id' => ['required', 'integer', 'in:'.$terms->id],
+            'accept_terms' => ['accepted'],
+        ] : [], [
+            'accept_terms.accepted' => 'Para crear tu cuenta tenés que aceptar los términos y condiciones.',
+            'terms_version_id.in' => 'Los términos cambiaron mientras completabas el formulario. Revisá la versión nueva.',
+        ]);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
@@ -42,6 +53,9 @@ class RegisterController extends Controller
 
         $user = User::create([...$data, 'country_code' => $data['nationality_code']]);
         $securityLog->record('register', $user, ['nationality' => $user->nationality_code], $user->email);
+        if ($terms) {
+            TermsAcceptance::record($user, $terms, $request, 'register');
+        }
 
         $invitation = Invitation::findUsableByToken((string) $request->session()->pull('invitation_token'));
         if ($invitation) {

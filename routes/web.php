@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ExperienceController as AdminExperienceController
 use App\Http\Controllers\Admin\PasswordPolicyController;
 use App\Http\Controllers\Admin\PlatformSettingsController;
 use App\Http\Controllers\Admin\SecurityLogController;
+use App\Http\Controllers\Admin\TermsController as AdminTermsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HostDashboardController;
 use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\SeoController;
+use App\Http\Controllers\TermsController;
 use App\Http\Controllers\VerificationController;
 use App\Livewire\HostOnboarding;
 use App\Livewire\ManageExperience;
@@ -32,6 +34,8 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/invitacion/{token}', InvitationAcceptController::class)->middleware('throttle:20,1')->name('invitacion.aceptar');
 Route::get('/experiencias/{experience}', [ExperienceController::class, 'show'])->name('experiencias.show');
+Route::get('/terminos', [TermsController::class, 'show'])->name('terminos');
+Route::get('/terminos/version/{terms:version}', [TermsController::class, 'version'])->name('terminos.version');
 
 Route::middleware('guest')->group(function () {
     Route::get('/ingresar', [LoginController::class, 'create'])->name('login');
@@ -46,6 +50,8 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/salir', [LoginController::class, 'destroy'])->name('logout');
+    Route::get('/terminos/aceptar', [TermsController::class, 'acceptForm'])->name('terminos.aceptar');
+    Route::post('/terminos/aceptar', [TermsController::class, 'accept'])->name('terminos.aceptar.store');
     Route::get('/cuenta', [ProfileController::class, 'edit'])->name('cuenta.perfil');
     Route::put('/cuenta', [ProfileController::class, 'update'])->name('cuenta.perfil.update');
     Route::put('/cuenta/alimentacion', [ProfileController::class, 'updateDiet'])->name('cuenta.alimentacion.update');
@@ -79,6 +85,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/experiencias/{experience}/reactivar', [AdminExperienceController::class, 'resume'])->name('experiencias.reactivar');
         Route::post('/experiencias/{experience}/aprobar', [AdminExperienceController::class, 'approve'])->name('experiencias.aprobar');
         Route::post('/experiencias/{experience}/rechazar', [AdminExperienceController::class, 'reject'])->name('experiencias.rechazar');
+        Route::get('/terminos', [AdminTermsController::class, 'index'])->name('terminos');
+        Route::get('/terminos/nueva', [AdminTermsController::class, 'create'])->name('terminos.create');
+        Route::post('/terminos', [AdminTermsController::class, 'store'])->name('terminos.store');
+        Route::get('/terminos/{terms}/editar', [AdminTermsController::class, 'edit'])->name('terminos.edit');
+        Route::put('/terminos/{terms}', [AdminTermsController::class, 'update'])->name('terminos.update');
+        Route::post('/terminos/{terms}/publicar', [AdminTermsController::class, 'publish'])->name('terminos.publicar');
+        Route::get('/terminos/{terms}/aceptaciones', [AdminTermsController::class, 'acceptances'])->name('terminos.aceptaciones');
         Route::get('/contrasenas', [PasswordPolicyController::class, 'edit'])->name('contrasenas');
         Route::get('/seguridad', [SecurityLogController::class, 'index'])->name('seguridad');
         Route::get('/auditoria', [AuditLogController::class, 'index'])->name('auditoria');
