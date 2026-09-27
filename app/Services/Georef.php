@@ -24,10 +24,11 @@ class Georef
      */
     public function normalize(string $address, ?string $city = null, ?string $province = null): ?array
     {
-        $query = array_filter(['direccion' => $address, 'provincia' => $province, 'localidad' => $city, 'max' => 1]);
+        // Georef filtra por localidad con "localidad_censal" (con "localidad" responde error).
+        $query = array_filter(['direccion' => $address, 'provincia' => $province, 'localidad_censal' => $city, 'max' => 1]);
 
         // Con localidad primero; si no aparece, solo con la provincia.
-        foreach ([$query, array_diff_key($query, ['localidad' => true])] as $attempt) {
+        foreach ([$query, array_diff_key($query, ['localidad_censal' => true])] as $attempt) {
             $found = data_get($this->get('direcciones', $attempt), 'direcciones.0');
             if ($found) {
                 $lat = data_get($found, 'ubicacion.lat');
@@ -63,9 +64,9 @@ class Georef
             return null;
         }
 
-        $query = array_filter(['nombre' => trim($parts['street']), 'provincia' => $province, 'localidad' => $city, 'max' => 1]);
+        $query = array_filter(['nombre' => trim($parts['street']), 'provincia' => $province, 'localidad_censal' => $city, 'max' => 1]);
         $found = data_get($this->get('calles', $query), 'calles.0')
-            ?? data_get($this->get('calles', array_diff_key($query, ['localidad' => true])), 'calles.0');
+            ?? data_get($this->get('calles', array_diff_key($query, ['localidad_censal' => true])), 'calles.0');
 
         if (! $found || empty($found['nombre'])) {
             return null;

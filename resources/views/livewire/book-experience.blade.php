@@ -38,6 +38,21 @@
       </div>
 
       @auth
+        @if (auth()->user()->required_features?->isNotEmpty())
+          <div class="diet-check">
+            <strong>Lo que necesitás</strong>
+            <ul>
+              @foreach (auth()->user()->required_features as $need)
+                @if ($experience->features?->contains($need))
+                  <li class="is-ok"><x-icon name="check" :size="16" /> {{ $need->needLabel() }}: {{ Str::lower($need->label()) }}</li>
+                @else
+                  <li class="is-missing">{{ $need->needLabel() }}: el anfitrión no lo indica</li>
+                @endif
+              @endforeach
+            </ul>
+            <span class="hint">Si algo no lo indica, consultale en el mensaje. <a href="{{ route('cuenta.intereses') }}">Cambialo</a></span>
+          </div>
+        @endif
         @if (auth()->user()->hasDietaryNeeds())
           @php($needs = auth()->user()->dietary_needs ?? collect())
           @php($offered = $experience->dietary_options ?? collect())

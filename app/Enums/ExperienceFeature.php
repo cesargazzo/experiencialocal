@@ -19,4 +19,15 @@ enum ExperienceFeature: string
             self::TransportIncluded => 'Incluye traslado',
         };
     }
+
+    /** Cómo lo dice la persona que lo necesita. */
+    public function needLabel(): string
+    {
+        return match ($this) {
+            self::KidFriendly => 'Voy con chicos',
+            self::PetFriendly => 'Viajo con mi mascota',
+            self::WheelchairAccessible => 'Necesito accesibilidad para silla de ruedas',
+            self::TransportIncluded => 'Necesito traslado incluido',
+        };
+    }
 }

@@ -37,6 +37,19 @@
       </section>
 
       <section class="wizard__panel">
+        <h2>Qué necesitás</h2>
+        <p>Te avisamos solo de las experiencias donde el anfitrión indicó que lo cumple.</p>
+        <div class="choice-grid">
+          @foreach ($features as $feature)
+            <label class="choice">
+              <input type="checkbox" name="features[]" value="{{ $feature->value }}" @checked(in_array($feature->value, old('features', $selectedFeatures), true))>
+              <span>{{ $feature->needLabel() }}</span>
+            </label>
+          @endforeach
+        </div>
+      </section>
+
+      <section class="wizard__panel">
         <h2><x-icon name="bell" :size="22" /> Avisos</h2>
         <label class="toggle-row">
           <input type="checkbox" name="interest_alerts" value="1" @checked(old('interest_alerts', $user->interest_alerts))>

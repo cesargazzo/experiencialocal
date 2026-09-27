@@ -52,7 +52,8 @@ class NotifyInterestedUsers implements ShouldQueue
 
     /**
      * Con categorías elegidas, tiene que coincidir la categoría; con provincias
-     * elegidas, la provincia. Quien no eligió nada no recibe avisos.
+     * elegidas, la provincia; y la experiencia tiene que cumplir lo que la
+     * persona necesita. Quien no eligió categorías ni provincias no recibe avisos.
      *
      * @return Builder<User>
      */
@@ -65,6 +66,8 @@ class NotifyInterestedUsers implements ShouldQueue
             ->where(fn ($q) => $q->has('interestedCategories')->orHas('interestedProvinces'))
             ->where(fn ($q) => $q->doesntHave('interestedCategories')->orWhereHas('interestedCategories', fn ($c) => $c->whereKey($experience->category_id)))
             ->where(fn ($q) => $q->doesntHave('interestedProvinces')->orWhereHas('interestedProvinces', fn ($p) => $p->whereKey($experience->province_id)))
+            // Lo que la persona necesita (mascota, chicos, etc.) tiene que estar entre lo que ofrece la experiencia.
+            ->whereRaw("coalesce(users.required_features, '[]'::jsonb) <@ ?::jsonb", [json_encode($experience->features?->map->value->values()->all() ?? [])])
             ->whereNotExists(fn ($q) => $q->selectRaw('1')
                 ->from('interest_notifications')
                 ->whereColumn('interest_notifications.user_id', 'users.id')

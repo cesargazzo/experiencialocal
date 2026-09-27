@@ -49,7 +49,7 @@ class MapsAndAddressesTest extends TestCase
         $this->fakeGeoref();
         $found = app(Georef::class)->normalize('san martin 123', 'Chilecito', 'La Rioja');
         $this->assertSame(['address' => 'SAN MARTIN 123, Chilecito, La Rioja', 'lat' => -29.1631, 'lng' => -67.4981, 'normalized' => true, 'precise' => true], $found);
-        Http::assertSent(fn (Request $request) => str_contains($request->url(), 'direcciones') && $request['localidad'] === 'Chilecito' && $request['provincia'] === 'La Rioja');
+        Http::assertSent(fn (Request $request) => str_contains($request->url(), 'direcciones') && $request['localidad_censal'] === 'Chilecito' && $request['provincia'] === 'La Rioja');
     }
 
     #[Test]

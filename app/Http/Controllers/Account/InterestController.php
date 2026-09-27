@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Account;
 
+use App\Enums\ExperienceFeature;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Category;
@@ -23,6 +24,8 @@ class InterestController extends Controller
             'countries' => Country::active()->with('provinces')->orderBy('name')->get(),
             'selectedCategories' => $user->interestedCategories->pluck('id')->all(),
             'selectedProvinces' => $user->interestedProvinces->pluck('id')->all(),
+            'features' => ExperienceFeature::cases(),
+            'selectedFeatures' => $user->required_features?->map->value->all() ?? [],
         ]);
     }
 
@@ -33,6 +36,8 @@ class InterestController extends Controller
             'categories.*' => ['integer', Rule::exists('categories', 'id')],
             'provinces' => ['array'],
             'provinces.*' => ['integer', Rule::exists('provinces', 'id')],
+            'features' => ['array'],
+            'features.*' => [Rule::enum(ExperienceFeature::class)],
         ]);
 
         $user = $request->user();
@@ -43,7 +48,10 @@ class InterestController extends Controller
         if ($before !== $after) {
             AuditLog::record($user, 'interests.updated', $before, $after);
         }
-        $user->forceFill(['interest_alerts' => $request->boolean('interest_alerts')])->save();
+        $user->forceFill([
+            'interest_alerts' => $request->boolean('interest_alerts'),
+            'required_features' => array_values(array_unique($data['features'] ?? [])) ?: null,
+        ])->save();
 
         return back()->with('status', $user->interest_alerts && $user->hasInterests()
             ? 'Guardamos tus intereses. Te avisamos cuando aparezca algo.'

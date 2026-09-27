@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\BookingStatus;
 use App\Enums\DietaryOption;
+use App\Enums\ExperienceFeature;
 use App\Enums\VerificationLevel;
 use App\Models\Concerns\Auditable;
 use App\Notifications\ResetPasswordNotification;
@@ -31,7 +32,7 @@ use Illuminate\Support\Str;
  * Una sola cuenta con varios roles: todo usuario es participante, es anfitrión
  * si tiene un HostProfile y es administrador si tiene el flag is_admin.
  */
-#[Fillable(['name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'nationality_code', 'locale', 'avatar_path'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'required_features', 'nationality_code', 'locale', 'avatar_path'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -58,6 +59,7 @@ class User extends Authenticatable
             'is_admin' => 'boolean',
             'interest_alerts' => 'boolean',
             'dietary_needs' => AsEnumCollection::of(DietaryOption::class),
+            'required_features' => AsEnumCollection::of(ExperienceFeature::class),
             'last_login_at' => 'datetime',
             'last_seen_at' => 'datetime',
         ];
