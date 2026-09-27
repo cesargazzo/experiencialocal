@@ -637,3 +637,19 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .terms-accept a { color: var(--texto-petroleo); text-decoration: underline; }
 .terms-text { white-space: pre-line; font-size: 16px; line-height: 26px; }
 .terms-scroll { max-height: 420px; overflow-y: auto; padding: 16px; border-radius: var(--radio-sm); box-shadow: inset 0 0 0 1.5px var(--linea); margin: 16px 0; }
+
+/* Cumpleaños */
+.birthday-banner { background: var(--coral); color: var(--tinta); }
+.birthday-banner__inner { display: flex; gap: 12px; align-items: center; padding-top: 12px; padding-bottom: 12px; }
+.birthday-banner__inner p { margin: 0; flex: 1; font-size: 16px; line-height: 22px; }
+.birthday-banner__close { display: inline-grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: transparent; color: var(--tinta); cursor: pointer; }
+.birthday-banner__close:hover { background: rgba(20, 34, 54, .1); }
+.birthdays h2 { display: flex; gap: 8px; align-items: center; }
+.birthdays h2 .icon { color: var(--coral); }
+.birthdays__today { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 0; }
+.birthdays__person { display: inline-flex; gap: 8px; align-items: center; padding: 4px 12px 4px 4px; border-radius: var(--radio-pill); background: var(--superficie-calida); color: var(--tinta); text-decoration: none; font-weight: 600; }
+.birthdays__week { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.birthdays__week li { display: grid; grid-template-columns: 72px 1fr auto; gap: 12px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--linea); }
+.birthdays__week li:first-child { border-top: 0; }
+.birthdays__week li.is-today { font-weight: 700; }
+.birthdays__week li.is-past { opacity: .6; }

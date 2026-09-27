@@ -28,7 +28,11 @@ class UserController extends Controller
             'provincia' => ['nullable', 'integer', 'exists:provinces,id'],
             'alta' => ['nullable', Rule::in(array_keys(self::SIGNUP_PERIODS))],
             'orden' => ['nullable', Rule::in(array_keys(self::SORTS))],
+            'cumple' => ['nullable', Rule::in(['hoy', 'semana'])],
         ]);
+
+        $today = now(config('tinku.timezone'))->startOfDay();
+        $week = [$today->copy()->startOfWeek(), $today->copy()->endOfWeek()];
 
         $users = User::query()
             ->with(['avatar', 'hostProfile', 'province'])
@@ -39,6 +43,8 @@ class UserController extends Controller
             ->when(($filters['rol'] ?? null) === 'anfitrion', fn ($q) => $q->has('hostProfile'))
             ->when(($filters['rol'] ?? null) === 'suspendida', fn ($q) => $q->whereNotNull('suspended_at'))
             ->when($filters['provincia'] ?? null, fn ($q, $provinceId) => $q->where('province_id', $provinceId))
+            ->when(($filters['cumple'] ?? null) === 'hoy', fn ($q) => $q->birthdayBetween($today, $today))
+            ->when(($filters['cumple'] ?? null) === 'semana', fn ($q) => $q->birthdayBetween(...$week))
             ->when($filters['alta'] ?? null, fn ($q, $period) => $q->where('created_at', '>=', now()->subDays(self::SIGNUP_PERIODS[$period]['days'])))
             ->when(
                 ($filters['orden'] ?? 'alta') === 'ingreso',
@@ -56,6 +62,11 @@ class UserController extends Controller
             'provinces' => Province::query()->orderBy('name')->get(['id', 'name']),
             'signupPeriods' => self::SIGNUP_PERIODS,
             'sorts' => self::SORTS,
+            'today' => $today,
+            'weekStart' => $week[0],
+            'birthdaysThisWeek' => User::query()->with('avatar')->birthdayBetween(...$week)->get()
+                ->sortBy(fn (User $user) => $user->birthdayOnOrAfter($week[0])->timestamp)
+                ->values(),
         ]);
     }
 

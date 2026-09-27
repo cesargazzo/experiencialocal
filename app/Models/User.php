@@ -8,9 +8,12 @@ use App\Models\Concerns\Auditable;
 use App\Notifications\ResetPasswordNotification;
 use App\Support\CountryList;
 use App\Support\PasswordPolicy;
+use Carbon\CarbonInterface;
+use Carbon\CarbonPeriod;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -109,6 +113,57 @@ class User extends Authenticatable
     public function hasDietaryNeeds(): bool
     {
         return (bool) $this->dietary_needs?->isNotEmpty() || filled($this->food_allergies);
+    }
+
+    /**
+     * Cuentas que cumplen años entre dos fechas (inclusive), sin importar el año.
+     * Quien nació un 29 de febrero lo festeja el 28 en los años no bisiestos.
+     */
+    public function scopeBirthdayBetween(Builder $query, CarbonInterface $from, CarbonInterface $to): Builder
+    {
+        $days = collect(CarbonPeriod::create($from->copy()->startOfDay(), $to->copy()->startOfDay()))
+            ->flatMap(fn (CarbonInterface $day) => $day->month === 2 && $day->day === 28 && ! $day->isLeapYear()
+                ? [[2, 28], [2, 29]]
+                : [[$day->month, $day->day]])
+            ->unique(fn (array $pair) => implode('-', $pair));
+
+        return $query->whereNotNull('birth_date')->where(function (Builder $query) use ($days): void {
+            foreach ($days as [$month, $day]) {
+                $query->orWhere(fn (Builder $q) => $q->whereMonth('birth_date', $month)->whereDay('birth_date', $day));
+            }
+        });
+    }
+
+    /** El primer cumpleaños desde la fecha dada (inclusive), en la zona horaria de esa fecha. */
+    public function birthdayOnOrAfter(CarbonInterface $from): ?CarbonInterface
+    {
+        if (! $this->birth_date) {
+            return null;
+        }
+
+        $from = $from->copy()->startOfDay();
+        foreach ([$from->year, $from->year + 1] as $year) {
+            $day = $this->birth_date->month === 2 && $this->birth_date->day === 29 && ! Carbon::create($year)->isLeapYear() ? 28 : $this->birth_date->day;
+            $birthday = $from->copy()->setDate($year, $this->birth_date->month, $day);
+            if ($birthday->gte($from)) {
+                return $birthday;
+            }
+        }
+
+        return null;
+    }
+
+    public function isBirthdayToday(): bool
+    {
+        $today = now(config('tinku.timezone'));
+
+        return (bool) $this->birthdayOnOrAfter($today)?->isSameDay($today);
+    }
+
+    /** Años que cumple en la fecha dada. */
+    public function ageTurningOn(CarbonInterface $reference): ?int
+    {
+        return $this->birth_date ? $reference->year - $this->birth_date->year : null;
     }
 
     public function termsAcceptances(): HasMany

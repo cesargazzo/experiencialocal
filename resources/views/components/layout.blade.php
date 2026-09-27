@@ -114,6 +114,18 @@
     </div>
   </header>
 
+  @auth
+    @if (auth()->user()->isBirthdayToday())
+      @php($birthdayKey = 'tinku-cumple-'.auth()->id().'-'.now(config('tinku.timezone'))->year)
+      <div class="birthday-banner" role="status" x-data="{ open: true }" x-init="try { open = localStorage.getItem(@js($birthdayKey)) !== '1' } catch (e) {}" x-show="open" x-cloak>
+        <div class="container birthday-banner__inner">
+          <x-icon name="sparkle" :size="22" />
+          <p><strong>¡Feliz cumpleaños, {{ Str::before(auth()->user()->name.' ', ' ') }}!</strong> Que tengas un gran día. Gracias por ser parte de Tinku.</p>
+          <button type="button" class="birthday-banner__close" aria-label="Cerrar el saludo" x-on:click="open = false; try { localStorage.setItem(@js($birthdayKey), '1') } catch (e) {}"><x-icon name="x" :size="18" /></button>
+        </div>
+      </div>
+    @endif
+  @endauth
   {{ $slot }}
 
   <footer class="footer">

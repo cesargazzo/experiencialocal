@@ -4,6 +4,33 @@
     <h1 class="title">Usuarios.</h1>
     @include('admin.partials.nav')
 
+    @if ($birthdaysThisWeek->isNotEmpty())
+      @php($birthdaysToday = $birthdaysThisWeek->filter(fn ($user) => $user->birthdayOnOrAfter($today)->isSameDay($today)))
+      <section class="wizard__panel birthdays">
+        <h2><x-icon name="sparkle" :size="22" /> Cumpleaños</h2>
+        @if ($birthdaysToday->isNotEmpty())
+          <p class="birthdays__today"><strong>Hoy cumple{{ $birthdaysToday->count() > 1 ? 'n' : '' }}:</strong>
+            @foreach ($birthdaysToday as $user)
+              <a class="birthdays__person" href="{{ route('admin.usuarios.show', $user) }}"><x-avatar :user="$user" :size="28" /> {{ $user->name }} <small>(cumple {{ $user->ageTurningOn($today) }})</small></a>
+            @endforeach
+          </p>
+        @else
+          <p class="hint">Hoy no cumple nadie.</p>
+        @endif
+        <p class="hint" style="margin:12px 0 6px">Esta semana ({{ $today->copy()->startOfWeek()->translatedFormat('j M') }} al {{ $today->copy()->endOfWeek()->translatedFormat('j M') }}):</p>
+        <ul class="birthdays__week">
+          @foreach ($birthdaysThisWeek as $user)
+            @php($birthday = $user->birthdayOnOrAfter($weekStart))
+            <li @class(['is-today' => $birthday->isSameDay($today), 'is-past' => $birthday->lt($today)])>
+              <span>{{ Str::ucfirst($birthday->translatedFormat('D j')) }}</span>
+              <a href="{{ route('admin.usuarios.show', $user) }}">{{ $user->name }}</a>
+              <small class="hint">cumple {{ $user->ageTurningOn($birthday) }}</small>
+            </li>
+          @endforeach
+        </ul>
+      </section>
+    @endif
+
     <section class="wizard__panel">
       <form method="get" action="{{ route('admin.usuarios') }}" class="filters filters--users">
         <div class="field"><label for="q">Buscar</label><input id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nombre o email"></div>
@@ -32,6 +59,13 @@
           <select id="alta" name="alta">
             <option value="">Siempre</option>
             @foreach ($signupPeriods as $key => $period)<option value="{{ $key }}" @selected(($filters['alta'] ?? null) === $key)>{{ $period['label'] }}</option>@endforeach
+          </select>
+        </div>
+        <div class="field"><label for="cumple">Cumpleaños</label>
+          <select id="cumple" name="cumple">
+            <option value="">Todos</option>
+            <option value="hoy" @selected(($filters['cumple'] ?? null) === 'hoy')>Cumplen hoy</option>
+            <option value="semana" @selected(($filters['cumple'] ?? null) === 'semana')>Cumplen esta semana</option>
           </select>
         </div>
         <div class="field"><label for="orden">Orden</label>
