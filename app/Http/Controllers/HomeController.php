@@ -17,7 +17,7 @@ class HomeController extends Controller
         $activeCategory = $categories->firstWhere('slug', $request->query('cat'));
 
         $experiences = Experience::published()
-            ->with(['host.user', 'host.plan', 'category', 'province'])
+            ->with(['host.user.avatar', 'host.plan', 'category', 'province', 'cover'])
             ->when($activeCategory, fn ($q) => $q->where('category_id', $activeCategory->id))
             ->when($request->filled('lugar'), function ($query) use ($request) {
                 $place = '%'.$request->string('lugar')->trim()->toString().'%';
@@ -32,7 +32,7 @@ class HomeController extends Controller
             'activeCategory' => $activeCategory,
             'experiences' => $experiences,
             'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(),
-            'testimonials' => Review::with(['user', 'experience'])->whereNotNull('published_at')->where('rating', '>=', 5)->latest('published_at')->take(3)->get(),
+            'testimonials' => Review::with(['user.avatar', 'experience'])->whereNotNull('published_at')->where('rating', '>=', 5)->latest('published_at')->take(3)->get(),
             'stats' => [
                 'experiences' => Experience::published()->count(),
                 'reviews' => Review::whereNotNull('published_at')->count(),

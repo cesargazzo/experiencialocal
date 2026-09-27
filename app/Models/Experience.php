@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 #[Fillable([
     'host_profile_id', 'category_id', 'title', 'slug', 'type_label', 'summary', 'description', 'city', 'province_id',
@@ -42,6 +43,20 @@ class Experience extends Model
     public function province(): BelongsTo
     {
         return $this->belongsTo(Province::class);
+    }
+
+    public function cover(): MorphOne
+    {
+        return $this->morphOne(Media::class, 'mediable')->where('collection', 'cover')->latestOfMany();
+    }
+
+    /**
+     * Foto subida en la versión pedida (card, hero, og). Si no hay, la URL de
+     * portada cargada a mano (datos demo).
+     */
+    public function coverUrl(string $variant = 'card'): ?string
+    {
+        return $this->cover?->url($variant) ?? $this->cover_image_url;
     }
 
     public function category(): BelongsTo

@@ -30,6 +30,26 @@
         </div>
       </div>
       <div class="field"><label>Dirección donde recibís</label><input wire:model="address" placeholder="Calle y número. Solo la ven quienes tienen reserva confirmada.">@error('address')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+      <div class="field">
+        <label for="avatar">Tu foto</label>
+        <div class="upload">
+          <div class="upload__preview">
+            @if ($avatar && ! $errors->has('avatar'))
+              <img src="{{ $avatar->temporaryUrl() }}" alt="Vista previa de tu foto">
+            @elseif (auth()->user()->avatar)
+              <img src="{{ auth()->user()->avatar->url('md') }}" alt="Tu foto actual">
+            @else
+              <x-icon name="user-circle" :size="40" />
+            @endif
+          </div>
+          <div class="upload__body">
+            <input id="avatar" type="file" wire:model="avatar" accept="image/jpeg,image/png,image/webp">
+            <span class="hint">Una foto tuya, de frente y con buena luz. JPG, PNG o WebP de al menos 200 × 200 px.</span>
+            <span class="hint" wire:loading wire:target="avatar">Subiendo…</span>
+            @error('avatar')<span class="error" style="display:block">{{ $message }}</span>@enderror
+          </div>
+        </div>
+      </div>
       <div class="field"><label>Contanos sobre vos</label><textarea rows="3" wire:model="bio" placeholder="Qué cocinás, qué lugares conocés, por qué querés recibir gente."></textarea>@error('bio')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="wizard__actions"><a class="btn btn--ghost" href="{{ route('home') }}">Cancelar</a><button class="btn btn--secondary" type="button" wire:click="next">Continuá <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
     </section>
@@ -51,6 +71,24 @@
         <div class="field"><label>Primera fecha</label><input type="date" wire:model="first_date">@error('first_date')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
         <div class="field"><label>Hora</label><input type="time" wire:model="first_time"><span class="hint">En la hora del lugar donde recibís.</span></div>
       </div>
+      <div class="field">
+        <label for="cover">Foto de la experiencia</label>
+        <div class="upload upload--cover">
+          <div class="upload__preview">
+            @if ($cover && ! $errors->has('cover'))
+              <img src="{{ $cover->temporaryUrl() }}" alt="Vista previa de la foto">
+            @else
+              <x-icon name="mountains" :size="40" />
+            @endif
+          </div>
+          <div class="upload__body">
+            <input id="cover" type="file" wire:model="cover" accept="image/jpeg,image/png,image/webp">
+            <span class="hint">Mostrá a las personas haciendo algo, con luz natural y en tu lugar. Nada de fotos de stock. Al menos 1200 × 800 px.</span>
+            <span class="hint" wire:loading wire:target="cover">Subiendo…</span>
+            @error('cover')<span class="error" style="display:block">{{ $message }}</span>@enderror
+          </div>
+        </div>
+      </div>
       <div class="field"><label>Resumen (una línea)</label><input wire:model="summary" maxlength="200" placeholder="Empanadas, cabrito y sobremesa con recetas de familia.">@error('summary')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label>Descripción</label><textarea rows="4" wire:model="description" placeholder="Qué van a vivir, qué incluye, qué tienen que traer."></textarea>@error('description')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="wizard__actions"><button class="btn btn--ghost" type="button" wire:click="back">Volver</button><button class="btn btn--secondary" type="button" wire:click="next">Revisá <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
@@ -61,6 +99,9 @@
     <section class="wizard__panel">
       <h2>Revisá y publicá</h2>
       <p>Así va a verse tu experiencia. Podés volver a editar cualquier paso.</p>
+      @if ($cover)
+        <img src="{{ $cover->temporaryUrl() }}" alt="Foto de la experiencia" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--radio-md);margin:16px 0 8px">
+      @endif
       <div class="summary">
         <div><span>Anfitrión</span><strong>{{ $display_name }} · {{ $city }}</strong></div>
         <div><span>Experiencia</span><strong>{{ $title }}</strong></div>

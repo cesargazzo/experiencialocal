@@ -2,7 +2,7 @@
   <main>
     <section class="detail-hero">
       <div class="container">
-        <div class="detail-hero__img" style="background-image:url('{{ $experience->cover_image_url }}')">
+        <div class="detail-hero__img" style="background-image:url('{{ $experience->coverUrl('hero') }}')">
           <div class="detail-hero__content">
             <p class="eyebrow">{{ $experience->type_label }} con {{ $experience->host->display_name }}</p>
             <h1>{{ $experience->title }}</h1>
@@ -25,7 +25,7 @@
           <div class="detail-block"><h2>Qué incluye</h2><ul class="menu-list">@foreach ($experience->includes as $i)<li><strong>{{ $i['label'] }}</strong><span>{{ $i['text'] }}</span></li>@endforeach</ul></div>
         @endif
         <div class="detail-block"><h2>Quién te recibe</h2>
-          <div class="host-card"><span class="avatar">{{ $experience->host->user->initials() }}</span><div><strong>{{ $experience->host->display_name }}</strong> · En Tinku desde {{ $experience->host->hosting_since?->year }}<br><x-verification-badge :level="$experience->host->user->verification_level" full /><p>{{ $experience->host->bio }}</p></div></div>
+          <div class="host-card"><x-avatar :user="$experience->host->user" :size="56" /><div><strong>{{ $experience->host->display_name }}</strong> · En Tinku desde {{ $experience->host->hosting_since?->year }}<br><x-verification-badge :level="$experience->host->user->verification_level" full /><p>{{ $experience->host->bio }}</p></div></div>
         </div>
         <div class="detail-block"><h2>Opiniones</h2>
           <div class="reviews">

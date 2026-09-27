@@ -35,4 +35,39 @@ return [
         'lockout_minutes' => (int) env('TINKU_LOGIN_LOCKOUT_MINUTES', 15),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Imágenes
+    |--------------------------------------------------------------------------
+    |
+    | El original se guarda en el disco privado. Cada versión es un WebP sin
+    | metadatos, recortado al tamaño exacto ("cover") para su uso.
+    |
+    */
+
+    'images' => [
+        'original_disk' => env('TINKU_IMAGES_ORIGINAL_DISK', 'local'),
+        'variants_disk' => env('TINKU_IMAGES_PUBLIC_DISK', 'public'),
+        'quality' => 82,
+        'max_upload_kb' => 12288,
+        'max_megapixels' => 40,
+        'collections' => [
+            'avatar' => [
+                'min' => [200, 200],
+                'variants' => [
+                    'sm' => [96, 96],
+                    'md' => [320, 320],
+                ],
+            ],
+            'cover' => [
+                'min' => [1200, 800],
+                'variants' => [
+                    'card' => [800, 600],
+                    'hero' => [1920, 1080],
+                    'og' => [1200, 630],
+                ],
+            ],
+        ],
+    ],
+
 ];

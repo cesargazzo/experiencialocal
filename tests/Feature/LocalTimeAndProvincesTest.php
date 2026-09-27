@@ -14,7 +14,9 @@ use App\Models\User;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -28,6 +30,8 @@ class LocalTimeAndProvincesTest extends TestCase
     {
         parent::setUp();
         $this->seed([PlanSeeder::class, CategorySeeder::class]);
+        Storage::fake('local');
+        Storage::fake('public');
     }
 
     #[Test]
@@ -59,7 +63,8 @@ class LocalTimeAndProvincesTest extends TestCase
             ->set('max_guests', 6)
             ->set('duration_hours', 3)
             ->set('first_date', '2026-10-10')
-            ->set('first_time', '20:30');
+            ->set('first_time', '20:30')
+            ->set('cover', UploadedFile::fake()->image('patio.jpg', 1600, 1000));
     }
 
     #[Test]
@@ -75,6 +80,7 @@ class LocalTimeAndProvincesTest extends TestCase
         $this->assertSame('La Rioja', $experience->province->name);
         $this->assertSame('2026-10-10 23:30:00', $date->starts_at->utc()->format('Y-m-d H:i:s'));
         $this->assertSame('20:30', $date->localStart()->format('H:i'));
+        $this->assertNotNull($experience->cover, 'La foto de la experiencia se guarda al publicar.');
     }
 
     #[Test]

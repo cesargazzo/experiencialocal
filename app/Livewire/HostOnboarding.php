@@ -11,6 +11,7 @@ use App\Models\Experience;
 use App\Models\HostProfile;
 use App\Models\Plan;
 use App\Models\Province;
+use App\Services\ImageService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,6 +19,8 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 /**
  * Alta de anfitrión en pasos: perfil, plan, primera experiencia, publicación.
@@ -27,6 +30,14 @@ use Livewire\Component;
 #[Title('Registro de anfitrión')]
 class HostOnboarding extends Component
 {
+    use WithFileUploads;
+
+    /** Foto de perfil opcional; si ya tiene una, se conserva. */
+    public ?TemporaryUploadedFile $avatar = null;
+
+    /** Foto de la experiencia: obligatoria, porque la marca pide fotos reales. */
+    public ?TemporaryUploadedFile $cover = null;
+
     public int $step = 1;
 
     // Paso 1: perfil de anfitrión.
@@ -88,6 +99,7 @@ class HostOnboarding extends Component
                 'province_id' => ['required', Rule::exists('provinces', 'id')->whereIn('country_code', Country::active()->pluck('code')->all())],
                 'address' => 'required|string|max:200',
                 'plan' => 'required|exists:plans,slug',
+                'avatar' => ['nullable', ...$this->imageRules('avatar')],
             ],
             2 => [
                 'title' => 'required|string|max:120',
@@ -100,9 +112,25 @@ class HostOnboarding extends Component
                 'max_guests' => 'required|integer|min:1|max:50',
                 'first_date' => 'required|date|after:today',
                 'first_time' => 'required|date_format:H:i',
+                'cover' => ['required', ...$this->imageRules('cover')],
             ],
             default => [],
         };
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function imageRules(string $collection): array
+    {
+        [$minWidth, $minHeight] = config("tinku.images.collections.{$collection}.min");
+
+        return [
+            'image',
+            'mimes:jpg,jpeg,png,webp',
+            'max:'.config('tinku.images.max_upload_kb'),
+            "dimensions:min_width={$minWidth},min_height={$minHeight}",
+        ];
     }
 
     public function next(): void
@@ -185,6 +213,12 @@ class HostOnboarding extends Component
             $this->addError('title', 'Tu plan no permite más experiencias activas. Cambiá de plan para publicar otra.');
 
             return;
+        }
+
+        $images = app(ImageService::class);
+        $images->replace($this->created, 'cover', $this->cover, $this->title);
+        if ($this->avatar) {
+            $images->replace($user, 'avatar', $this->avatar, $user->name);
         }
 
         $this->step = 4;

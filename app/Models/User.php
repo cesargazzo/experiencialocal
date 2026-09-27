@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -43,6 +44,11 @@ class User extends Authenticatable
     public function hostProfile(): HasOne
     {
         return $this->hasOne(HostProfile::class);
+    }
+
+    public function avatar(): MorphOne
+    {
+        return $this->morphOne(Media::class, 'mediable')->where('collection', 'avatar')->latestOfMany();
     }
 
     public function verifications(): HasMany

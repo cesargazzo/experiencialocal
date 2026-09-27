@@ -20,6 +20,8 @@
     @error('code')<p class="error" style="display:block">{{ $message }}</p>@enderror
     @error('document_number')<p class="error" style="display:block">{{ $message }}</p>@enderror
 
+    <livewire:profile-photo />
+
     <section class="wizard__panel">
       <h2>Verificaciones</h2>
       <p>Proveedor según el país del documento: argentinos por RENAPER, el resto por un proveedor internacional. El nivel 3 lo aprueba una persona del equipo.</p>
