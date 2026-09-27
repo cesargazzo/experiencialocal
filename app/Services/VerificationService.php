@@ -39,7 +39,7 @@ class VerificationService
 
         // El sexo del DNI (document_sex) solo viaja al proveedor, que lo pide para validar; no se guarda.
         $documentHash = isset($attributes['document_number'])
-            ? hash('sha256', strtoupper($attributes['document_country'] ?? 'AR').'|'.preg_replace('/\W/', '', $attributes['document_number']))
+            ? self::documentHash($attributes['document_country'] ?? 'AR', $attributes['document_number'])
             : null;
 
         if ($documentHash && $this->documentBelongsToSomeoneElse($user, $documentHash)) {
@@ -257,6 +257,12 @@ class VerificationService
             ->whereNotNull('approved_at')
             ->get()
             ->each(fn ($experience) => $experience->update(['status' => ExperienceStatus::Published, 'published_at' => now()]));
+    }
+
+    /** El número de documento nunca se guarda: solo esta huella, para detectar duplicados y buscar. */
+    public static function documentHash(string $country, string $number): string
+    {
+        return hash('sha256', strtoupper($country).'|'.preg_replace('/\W/', '', $number));
     }
 
     /** País del documento ya enviado; si no hay, la nacionalidad declarada. */

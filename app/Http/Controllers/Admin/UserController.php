@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\VerificationLevel;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Province;
 use App\Models\SecurityEvent;
 use App\Models\User;
 use App\Services\SecurityLog;
 use App\Services\VerificationService;
+use App\Support\CountryList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -20,23 +22,66 @@ class UserController extends Controller
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:120'],
+            'dni' => ['nullable', 'string', 'max:40'],
             'nivel' => ['nullable', Rule::in(['0', '1', '2', '3'])],
             'rol' => ['nullable', Rule::in(['admin', 'anfitrion', 'suspendida'])],
+            'provincia' => ['nullable', 'integer', 'exists:provinces,id'],
+            'alta' => ['nullable', Rule::in(array_keys(self::SIGNUP_PERIODS))],
+            'orden' => ['nullable', Rule::in(array_keys(self::SORTS))],
         ]);
 
         $users = User::query()
-            ->with(['avatar', 'hostProfile'])
-            ->withMax(['securityEvents as last_login_at' => fn ($q) => $q->where('type', 'login.succeeded')], 'created_at')
+            ->with(['avatar', 'hostProfile', 'province'])
             ->when($filters['q'] ?? null, fn ($q, $term) => $q->where(fn ($w) => $w->where('name', 'ilike', "%{$term}%")->orWhere('email', 'ilike', "%{$term}%")))
+            ->when($filters['dni'] ?? null, fn ($q, $number) => $q->whereHas('verifications', fn ($v) => $v->whereIn('document_hash', $this->documentHashesFor($number))))
             ->when(isset($filters['nivel']), fn ($q) => $q->where('verification_level', (int) $filters['nivel']))
             ->when(($filters['rol'] ?? null) === 'admin', fn ($q) => $q->where('is_admin', true))
             ->when(($filters['rol'] ?? null) === 'anfitrion', fn ($q) => $q->has('hostProfile'))
             ->when(($filters['rol'] ?? null) === 'suspendida', fn ($q) => $q->whereNotNull('suspended_at'))
-            ->latest()
+            ->when($filters['provincia'] ?? null, fn ($q, $provinceId) => $q->where('province_id', $provinceId))
+            ->when($filters['alta'] ?? null, fn ($q, $period) => $q->where('created_at', '>=', now()->subDays(self::SIGNUP_PERIODS[$period]['days'])))
+            ->when(
+                ($filters['orden'] ?? 'alta') === 'ingreso',
+                fn ($q) => $q->orderByRaw('last_login_at desc nulls last'),
+                fn ($q) => ($filters['orden'] ?? null) === 'nombre' ? $q->orderBy('name') : $q->latest(),
+            )
+            ->orderByDesc('id')
             ->paginate(30)
             ->withQueryString();
 
-        return view('admin.users.index', ['users' => $users, 'filters' => $filters, 'levels' => VerificationLevel::cases()]);
+        return view('admin.users.index', [
+            'users' => $users,
+            'filters' => $filters,
+            'levels' => VerificationLevel::cases(),
+            'provinces' => Province::query()->orderBy('name')->get(['id', 'name']),
+            'signupPeriods' => self::SIGNUP_PERIODS,
+            'sorts' => self::SORTS,
+        ]);
+    }
+
+    /** @var array<string, array{label: string, days: int}> */
+    private const SIGNUP_PERIODS = [
+        'hoy' => ['label' => 'Últimas 24 horas', 'days' => 1],
+        'semana' => ['label' => 'Últimos 7 días', 'days' => 7],
+        'mes' => ['label' => 'Últimos 30 días', 'days' => 30],
+        'trimestre' => ['label' => 'Últimos 90 días', 'days' => 90],
+    ];
+
+    /** @var array<string, string> */
+    private const SORTS = [
+        'alta' => 'Últimos registrados',
+        'ingreso' => 'Último ingreso',
+        'nombre' => 'Nombre',
+    ];
+
+    /**
+     * El documento se guarda como huella con su país. Sin saber el país, se prueba con todos.
+     *
+     * @return list<string>
+     */
+    private function documentHashesFor(string $number): array
+    {
+        return array_map(fn (string $country): string => VerificationService::documentHash($country, $number), CountryList::codes());
     }
 
     public function show(User $user): View

@@ -4,12 +4,15 @@ namespace Tests\Feature;
 
 use App\Enums\HostStatus;
 use App\Enums\VerificationLevel;
+use App\Enums\VerificationType;
 use App\Models\HostProfile;
+use App\Models\Province;
 use App\Models\SecurityEvent;
 use App\Models\User;
 use App\Services\VerificationService;
 use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -116,5 +119,44 @@ class AdminUsersTest extends TestCase
 
         $this->actingAs($admin)->put(route('admin.configuracion.update'), []);
         $this->assertSame(VerificationLevel::Contact, $user->fresh()->verification_level);
+    }
+
+    #[Test]
+    public function logging_in_records_the_last_login_even_when_coming_back_later(): void
+    {
+        $user = User::factory()->create(['password' => 'Correcta2026']);
+
+        $this->post(route('login'), ['email' => $user->email, 'password' => 'Correcta2026'])->assertRedirect();
+        $this->assertNotNull($user->fresh()->last_login_at);
+        $this->assertNotNull($user->fresh()->last_seen_at);
+
+        $this->travel(10)->minutes();
+        $this->get(route('home'))->assertOk();
+        $this->assertTrue($user->fresh()->last_seen_at->gt($user->fresh()->last_login_at));
+    }
+
+    #[Test]
+    public function admins_filter_by_signup_date_province_and_document_number(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-01 12:00:00'));
+        $admin = User::factory()->admin()->create(['name' => 'Equipo Tinku', 'created_at' => now()->subYear()]);
+        $laRioja = Province::where('code', 'AR-F')->value('id');
+        $recent = User::factory()->create(['name' => 'Recién Llegada', 'province_id' => $laRioja, 'city' => 'Chilecito', 'created_at' => now()->subDays(2)]);
+        $old = User::factory()->create(['name' => 'Cuenta Vieja', 'created_at' => now()->subMonths(3), 'last_login_at' => now()->subHour()]);
+        app(VerificationService::class)->submit($old, VerificationType::Document, ['document_country' => 'AR', 'document_type' => 'dni', 'document_number' => '30.111.222']);
+
+        $this->actingAs($admin)->get(route('admin.usuarios', ['alta' => 'semana']))
+            ->assertOk()->assertSee('Recién Llegada')->assertDontSee('Cuenta Vieja');
+
+        $this->actingAs($admin)->get(route('admin.usuarios', ['provincia' => $laRioja]))
+            ->assertSee('Recién Llegada')->assertSee('Chilecito, La Rioja')->assertDontSee('Cuenta Vieja');
+
+        $this->actingAs($admin)->get(route('admin.usuarios', ['dni' => '30111222']))
+            ->assertSee('Cuenta Vieja')->assertDontSee('Recién Llegada');
+
+        $this->actingAs($admin)->get(route('admin.usuarios', ['orden' => 'ingreso']))
+            ->assertSeeInOrder(['Cuenta Vieja', 'Recién Llegada']);
+        $this->actingAs($admin)->get(route('admin.usuarios'))
+            ->assertSeeInOrder(['Recién Llegada', 'Cuenta Vieja', 'Equipo Tinku']);
     }
 }

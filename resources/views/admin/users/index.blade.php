@@ -5,8 +5,9 @@
     @include('admin.partials.nav')
 
     <section class="wizard__panel">
-      <form method="get" action="{{ route('admin.usuarios') }}" class="filters">
+      <form method="get" action="{{ route('admin.usuarios') }}" class="filters filters--users">
         <div class="field"><label for="q">Buscar</label><input id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nombre o email"></div>
+        <div class="field"><label for="dni">DNI o documento</label><input id="dni" name="dni" value="{{ $filters['dni'] ?? '' }}" inputmode="numeric" autocomplete="off" placeholder="Número exacto"></div>
         <div class="field"><label for="nivel">Nivel</label>
           <select id="nivel" name="nivel">
             <option value="">Todos</option>
@@ -21,8 +22,26 @@
             <option value="suspendida" @selected(($filters['rol'] ?? null) === 'suspendida')>Suspendidas</option>
           </select>
         </div>
+        <div class="field"><label for="provincia">Provincia</label>
+          <select id="provincia" name="provincia">
+            <option value="">Todas</option>
+            @foreach ($provinces as $province)<option value="{{ $province->id }}" @selected((int) ($filters['provincia'] ?? 0) === $province->id)>{{ $province->name }}</option>@endforeach
+          </select>
+        </div>
+        <div class="field"><label for="alta">Registrados</label>
+          <select id="alta" name="alta">
+            <option value="">Siempre</option>
+            @foreach ($signupPeriods as $key => $period)<option value="{{ $key }}" @selected(($filters['alta'] ?? null) === $key)>{{ $period['label'] }}</option>@endforeach
+          </select>
+        </div>
+        <div class="field"><label for="orden">Orden</label>
+          <select id="orden" name="orden">
+            @foreach ($sorts as $key => $label)<option value="{{ $key }}" @selected(($filters['orden'] ?? 'alta') === $key)>{{ $label }}</option>@endforeach
+          </select>
+        </div>
         <div class="filters__actions"><button class="btn btn--secondary btn--sm" type="submit">Filtrá</button><a class="btn btn--ghost btn--sm" href="{{ route('admin.usuarios') }}">Limpiá</a></div>
       </form>
+      <p class="hint" style="margin:4px 0 16px">{{ plural_es($users->total(), 'cuenta', 'cuentas') }}. El DNI no se guarda: se busca por el número exacto.</p>
 
       <form method="post" action="{{ route('admin.usuarios.validar') }}" x-data="{ selected: [], all: @js($users->pluck('id')) }">
         @csrf
@@ -56,7 +75,7 @@
                   <td>
                     <a class="user-cell" href="{{ route('admin.usuarios.show', $user) }}">
                       <x-avatar :user="$user" :size="32" />
-                      <span><strong>{{ $user->name }}</strong><br><small class="hint">{{ $user->email }}</small></span>
+                      <span><strong>{{ $user->name }}</strong><br><small class="hint">{{ $user->email }}@if ($user->province) · {{ $user->city ? $user->city.', ' : '' }}{{ $user->province->name }}@endif</small></span>
                     </a>
                   </td>
                   <td><x-verification-badge :level="$user->verification_level" full /></td>
@@ -66,7 +85,10 @@
                     @if ($user->isSuspended())<span class="badge badge--error">Suspendida</span>@endif
                   </td>
                   <td style="white-space:nowrap">{{ $user->created_at->timezone(config('tinku.timezone'))->format('d/m/Y') }}</td>
-                  <td style="white-space:nowrap">{{ $user->last_login_at ? \Illuminate\Support\Carbon::parse($user->last_login_at)->timezone(config('tinku.timezone'))->format('d/m/Y H:i') : '—' }}</td>
+                  <td style="white-space:nowrap">
+                    {{ $user->last_login_at?->timezone(config('tinku.timezone'))->format('d/m/Y H:i') ?? '—' }}
+                    @if ($user->last_seen_at)<br><small class="hint">Activa {{ $user->last_seen_at->diffForHumans() }}</small>@endif
+                  </td>
                 </tr>
               @empty
                 <tr><td colspan="6" class="hint">No hay cuentas con esos filtros.</td></tr>
