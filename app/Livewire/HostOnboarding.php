@@ -224,6 +224,7 @@ class HostOnboarding extends Component
         $this->created->forceFill(['meeting_address' => $this->address])->save();
         $found = app(Georef::class)->normalize($this->address, $this->city, $province->name);
         if ($found && $found['lat'] !== null) {
+            // Si el punto es solo el centro de la localidad, el anfitrión lo ajusta después.
             $this->created->forceFill([
                 'meeting_address' => $found['normalized'] ? $found['address'] : $this->address,
                 'latitude' => $found['lat'],

@@ -157,22 +157,28 @@ class ManageExperience extends Component
         $this->validate(['meeting_address' => ['required', 'string', 'max:200']], ['meeting_address.required' => 'Escribí la dirección para buscarla.']);
 
         $found = $georef->normalize($this->meeting_address, $this->experience->city, $this->experience->province?->name);
-        if (! $found || $found['lat'] === null) {
+        if (! $found) {
             $this->addError('meeting_address', 'No encontramos esa dirección. Marcá el punto a mano en el mapa.');
 
             return;
         }
 
-        $this->latitude = $found['lat'];
-        $this->longitude = $found['lng'];
+        if ($found['lat'] !== null) {
+            $this->latitude = $found['lat'];
+            $this->longitude = $found['lng'];
+        }
         if ($found['normalized']) {
             $this->meeting_address = $found['address'];
             $this->addressNormalized = true;
-            $this->notice = "Encontramos {$found['address']}. Revisá el punto en el mapa y guardalo.";
-        } else {
-            $this->notice = 'No encontramos la calle: te dejamos en el centro de la localidad. Marcá el punto exacto en el mapa.';
         }
-        $this->dispatch('map-move', lat: $this->latitude, lng: $this->longitude);
+        $this->notice = match (true) {
+            $found['precise'] => "Encontramos {$found['address']}. Revisá el punto en el mapa y guardalo.",
+            $found['normalized'] => "Normalizamos la calle ({$found['address']}), pero Georef no tiene esa altura: te dejamos en el centro de la localidad. Marcá el punto exacto en el mapa.",
+            default => 'No encontramos la calle: te dejamos en el centro de la localidad. Marcá el punto exacto en el mapa.',
+        };
+        if ($this->latitude !== null) {
+            $this->dispatch('map-move', lat: $this->latitude, lng: $this->longitude);
+        }
     }
 
     /** El anfitrión marcó o movió el punto en el mapa. */

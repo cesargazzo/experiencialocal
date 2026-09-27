@@ -48,7 +48,7 @@ class MapsAndAddressesTest extends TestCase
     {
         $this->fakeGeoref();
         $found = app(Georef::class)->normalize('san martin 123', 'Chilecito', 'La Rioja');
-        $this->assertSame(['address' => 'SAN MARTIN 123, Chilecito, La Rioja', 'lat' => -29.1631, 'lng' => -67.4981, 'normalized' => true], $found);
+        $this->assertSame(['address' => 'SAN MARTIN 123, Chilecito, La Rioja', 'lat' => -29.1631, 'lng' => -67.4981, 'normalized' => true, 'precise' => true], $found);
         Http::assertSent(fn (Request $request) => str_contains($request->url(), 'direcciones') && $request['localidad'] === 'Chilecito' && $request['provincia'] === 'La Rioja');
     }
 
@@ -57,9 +57,34 @@ class MapsAndAddressesTest extends TestCase
     {
         Http::fake([
             self::API.'/direcciones*' => Http::response(['cantidad' => 0, 'direcciones' => []]),
+            self::API.'/calles*' => Http::response(['cantidad' => 0, 'calles' => []]),
             self::API.'/localidades*' => Http::response(['localidades' => [['centroide' => ['lat' => -29.16, 'lon' => -67.49]]]]),
         ]);
-        $this->assertSame(['address' => 'Calle Inventada 1', 'lat' => -29.16, 'lng' => -67.49, 'normalized' => false], app(Georef::class)->normalize('Calle Inventada 1', 'Chilecito', 'La Rioja'));
+        $this->assertSame(['address' => 'Calle Inventada 1', 'lat' => -29.16, 'lng' => -67.49, 'normalized' => false, 'precise' => false], app(Georef::class)->normalize('Calle Inventada 1', 'Chilecito', 'La Rioja'));
+    }
+
+    #[Test]
+    public function without_the_street_number_the_street_name_is_still_normalized(): void
+    {
+        // Como pasa en La Rioja: Georef conoce la calle pero no su numeración.
+        Http::fake([
+            self::API.'/direcciones*' => Http::response(['cantidad' => 0, 'direcciones' => []]),
+            self::API.'/calles*' => Http::response(['cantidad' => 1, 'calles' => [['nombre' => 'SAN MARTIN', 'localidad_censal' => ['nombre' => 'Chilecito'], 'provincia' => ['nombre' => 'La Rioja']]]]),
+            self::API.'/localidades*' => Http::response(['localidades' => [['centroide' => ['lat' => -29.16, 'lon' => -67.49]]]]),
+        ]);
+
+        $this->assertSame(
+            ['address' => 'SAN MARTIN 123, Chilecito, La Rioja', 'lat' => -29.16, 'lng' => -67.49, 'normalized' => true, 'precise' => false],
+            app(Georef::class)->normalize('san martin 123', 'Chilecito', 'La Rioja'),
+        );
+        Http::assertSent(fn (Request $request) => str_contains($request->url(), '/calles') && $request['nombre'] === 'san martin');
+
+        $experience = Experience::factory()->create(['city' => 'Chilecito']);
+        Livewire::actingAs($experience->host->user)->test(ManageExperience::class, ['experience' => $experience])
+            ->set('meeting_address', 'san martin 123')
+            ->call('searchAddress')
+            ->assertSet('meeting_address', 'SAN MARTIN 123, Chilecito, La Rioja')
+            ->assertSet('notice', 'Normalizamos la calle (SAN MARTIN 123, Chilecito, La Rioja), pero Georef no tiene esa altura: te dejamos en el centro de la localidad. Marcá el punto exacto en el mapa.');
     }
 
     #[Test]

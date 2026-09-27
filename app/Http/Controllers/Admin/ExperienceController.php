@@ -140,15 +140,17 @@ class ExperienceController extends Controller
     private function normalize(Experience $experience, Georef $georef): string
     {
         $found = $georef->normalize($experience->meeting_address, $experience->city, $experience->province?->name);
-        if (! $found || $found['lat'] === null) {
+        if (! $found) {
             return 'missing';
         }
 
+        // Un punto exacto de Georef reemplaza al anterior; uno aproximado (centro de la localidad)
+        // solo completa si faltaba, así no se pisa lo que el anfitrión marcó a mano.
+        $keepPoint = $found['lat'] === null || ($experience->hasLocation() && ! $found['precise']);
         $experience->update([
             'meeting_address' => $found['normalized'] ? $found['address'] : $experience->meeting_address,
-            // Si la ubicación la marcó el anfitrión a mano, se respeta; solo se completa si falta.
-            'latitude' => $experience->hasLocation() && ! $found['normalized'] ? $experience->latitude : $found['lat'],
-            'longitude' => $experience->hasLocation() && ! $found['normalized'] ? $experience->longitude : $found['lng'],
+            'latitude' => $keepPoint ? $experience->latitude : $found['lat'],
+            'longitude' => $keepPoint ? $experience->longitude : $found['lng'],
             'address_normalized_at' => $found['normalized'] ? now() : null,
         ]);
 
