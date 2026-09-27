@@ -94,7 +94,7 @@
         <img src="{{ asset('brand/tinku-horizontal.svg') }}" alt="Tinku, inicio" width="114" height="40">
       </a>
       <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false"><x-icon name="list" :size="24" /></button>
-      <nav class="nav" aria-label="Principal">
+      <nav @class(['nav', 'nav--auth' => auth()->check()]) aria-label="Principal">
         <a href="{{ route('home') }}#experiencias">Experiencias</a>
         <a href="{{ route('home') }}#como-ganas">Cómo ganás</a>
         <a href="{{ route('home') }}#planes">Planes</a>
@@ -154,7 +154,7 @@
           @endforeach
         </ul></div>
         <div><h4>Anfitriones</h4><ul><li><a href="{{ route('anfitrion.registro') }}">Publicar una experiencia</a></li><li><a href="{{ route('home') }}#planes">Planes</a></li><li><a href="{{ route('home') }}#como-ganas">Cómo ganás</a></li><li><a href="{{ route('terminos') }}">Términos y condiciones</a></li></ul></div>
-        <div><h4>Tinku</h4><ul><li><a href="{{ route('verificacion') }}">Verificación de identidad</a></li><li><a href="#">Seguridad</a></li><li><a href="#">Ayuda</a></li></ul></div>
+        <div><h4>Tinku</h4><ul><li><a href="{{ route('verificacion') }}">Verificación de identidad</a></li><li><a href="{{ route('seguridad') }}">Seguridad</a></li><li><a href="{{ route('ayuda') }}">Ayuda</a></li></ul></div>
       </div>
       <div class="footer__bottom">
         <span>© {{ date('Y') }} Tinku</span>

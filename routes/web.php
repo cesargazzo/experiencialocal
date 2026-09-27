@@ -29,6 +29,7 @@ use App\Http\Controllers\HostBookingController;
 use App\Http\Controllers\HostDashboardController;
 use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TermsController;
@@ -43,6 +44,8 @@ Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/invitacion/{token}', InvitationAcceptController::class)->middleware('throttle:20,1')->name('invitacion.aceptar');
 Route::get('/experiencias/{experience}', [ExperienceController::class, 'show'])->name('experiencias.show');
 Route::get('/terminos', [TermsController::class, 'show'])->name('terminos');
+Route::get('/ayuda', [PageController::class, 'help'])->name('ayuda');
+Route::get('/seguridad', [PageController::class, 'safety'])->name('seguridad');
 Route::get('/terminos/version/{terms:version}', [TermsController::class, 'version'])->name('terminos.version');
 
 Route::middleware('guest')->group(function () {

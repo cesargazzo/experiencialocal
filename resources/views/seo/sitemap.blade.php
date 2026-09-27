@@ -6,6 +6,13 @@
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+@foreach (['ayuda', 'seguridad', 'terminos'] as $page)
+  <url>
+    <loc>{{ route($page) }}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+@endforeach
 @foreach ($categories as $slug)
   <url>
     <loc>{{ route('home', ['cat' => $slug]) }}</loc>

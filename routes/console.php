@@ -13,3 +13,6 @@ Schedule::command('model:prune')->daily()->at('03:15');
 
 // Reservas que ya pasaron: quedan realizadas y se pide la opinión.
 Schedule::command('tinku:complete-bookings')->hourlyAt(20);
+
+// Recordatorio del día anterior a viajeros y anfitriones.
+Schedule::command('tinku:send-reminders')->hourlyAt(5);
