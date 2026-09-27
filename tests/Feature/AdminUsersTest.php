@@ -87,6 +87,7 @@ class AdminUsersTest extends TestCase
         $user = User::factory()->create(['password' => 'Correcta2026']);
 
         $this->actingAs($admin)->get(route('admin.usuarios.show', $user))->assertOk()->assertSee($user->email);
+        $this->assertTrue(SecurityEvent::where('type', 'admin.user_viewed')->where('user_id', $admin->id)->where('metadata->account_id', $user->id)->exists(), 'Ver datos personales queda registrado.');
         $this->actingAs($admin)->post(route('admin.usuarios.suspension', $user), ['reason' => 'Denuncias de otros usuarios'])->assertSessionHasNoErrors();
         $this->assertTrue($user->fresh()->isSuspended());
 

@@ -50,7 +50,8 @@ class ProfileController extends Controller
         $countryHasProvinces = Province::query()->where('country_code', $request->input('country_code'))->exists();
 
         $data = $request->validate([
-            'name' => $locked ? ['prohibited'] : ['required', 'string', 'max:120'],
+            'first_name' => $locked ? ['prohibited'] : ['required', 'string', 'max:60'],
+            'last_name' => $locked ? ['prohibited'] : ['required', 'string', 'max:80'],
             'birth_date' => $birthDateLocked ? ['prohibited'] : ['required', ...User::birthDateRules()],
             'country_code' => ['required', Rule::in(CountryList::codes())],
             'province_id' => $countryHasProvinces
@@ -61,7 +62,8 @@ class ProfileController extends Controller
         ], [
             'birth_date.before_or_equal' => 'Tenés que tener al menos '.config('tinku.min_age').' años para usar Tinku.',
             'birth_date.after' => 'Revisá la fecha de nacimiento.',
-            'name.prohibited' => 'Tu nombre quedó validado con tu documento.',
+            'first_name.prohibited' => 'Tu nombre quedó validado con tu documento.',
+            'last_name.prohibited' => 'Tu apellido quedó validado con tu documento.',
             'birth_date.prohibited' => 'Tu fecha de nacimiento quedó validada con tu documento.',
             'province_id.required' => 'Elegí tu provincia.',
             'province_id.exists' => 'Elegí una provincia de la lista.',

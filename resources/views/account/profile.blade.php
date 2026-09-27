@@ -11,14 +11,22 @@
       <form method="post" action="{{ route('cuenta.perfil.update') }}">
         @csrf
         @method('put')
-        <div class="field">
-          <label for="name">Nombre y apellido</label>
-          <input id="name" @unless ($nameLocked) name="name" @endunless value="{{ old('name', $user->name) }}" autocomplete="name" @disabled($nameLocked) required>
-          @if ($nameLocked)
-            <span class="hint">Tu nombre quedó validado con tu documento, así que no se puede cambiar desde acá.</span>
-          @endif
-          @error('name')<span class="error" style="display:block">{{ $message }}</span>@enderror
+        <div class="grid-2">
+          <div class="field">
+            <label for="first_name">Nombre</label>
+            <input id="first_name" @unless ($nameLocked) name="first_name" @endunless value="{{ old('first_name', $user->first_name) }}" autocomplete="given-name" maxlength="60" @disabled($nameLocked) required>
+            @error('first_name')<span class="error" style="display:block">{{ $message }}</span>@enderror
+          </div>
+          <div class="field">
+            <label for="last_name">Apellido</label>
+            <input id="last_name" @unless ($nameLocked) name="last_name" @endunless value="{{ old('last_name', $user->last_name) }}" autocomplete="family-name" maxlength="80" @disabled($nameLocked) required>
+            @error('last_name')<span class="error" style="display:block">{{ $message }}</span>@enderror
+          </div>
         </div>
+        <span class="hint" style="display:block;margin:-8px 0 16px">
+          {{ $nameLocked ? 'Tu nombre quedó validado con tu documento, así que no se puede cambiar desde acá.' : 'Como figuran en tu documento.' }}
+          Tu apellido solo lo ven personas con la identidad validada; el resto ve solo tu nombre.
+        </span>
         <div class="field">
           <label for="birth_date">Fecha de nacimiento</label>
           <input id="birth_date" name="birth_date" type="date" value="{{ old('birth_date', $user->birth_date?->toDateString()) }}" min="1900-01-01" max="{{ now()->subYears(config('tinku.min_age'))->toDateString() }}" autocomplete="bday" @disabled($birthDateLocked) required>

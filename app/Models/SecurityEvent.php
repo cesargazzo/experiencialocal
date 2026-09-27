@@ -38,6 +38,7 @@ class SecurityEvent extends Model
         'verification.approved' => 'Verificación aprobada',
         'verification.revoked' => 'Verificación revocada',
         'log.downloaded' => 'Descarga del registro de errores',
+        'admin.user_viewed' => 'Consulta de datos personales',
         'user.validation_blocked' => 'Validación manual frenada',
         'verification.rejected' => 'Verificación rechazada',
         'access.forbidden' => 'Acceso denegado',

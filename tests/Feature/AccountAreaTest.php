@@ -44,12 +44,12 @@ class AccountAreaTest extends TestCase
     {
         $user = User::factory()->level(VerificationLevel::Contact)->create();
 
-        $this->actingAs($user)->put(route('cuenta.perfil.update'), ['name' => 'Lucía Paz', 'birth_date' => '1990-01-01', ...$this->location()])->assertSessionHasNoErrors();
+        $this->actingAs($user)->put(route('cuenta.perfil.update'), ['first_name' => 'Lucía', 'last_name' => 'Paz', 'birth_date' => '1990-01-01', ...$this->location()])->assertSessionHasNoErrors();
         $this->assertSame('Lucía Paz', $user->fresh()->name);
 
         $validated = User::factory()->level(VerificationLevel::Document)->create(['name' => 'Ana Molina']);
         $this->actingAs($validated)->get(route('cuenta.perfil'))->assertOk()->assertSee('quedó validado con tu documento');
-        $this->actingAs($validated)->put(route('cuenta.perfil.update'), ['name' => 'Otro Nombre', ...$this->location()])->assertSessionHasErrors('name');
+        $this->actingAs($validated)->put(route('cuenta.perfil.update'), ['first_name' => 'Otro', 'last_name' => 'Nombre', ...$this->location()])->assertSessionHasErrors('first_name');
         $this->assertSame('Ana Molina', $validated->fresh()->name);
     }
 
@@ -77,7 +77,7 @@ class AccountAreaTest extends TestCase
     public function registration_requires_a_birth_date_and_the_minimum_age(): void
     {
         $data = [
-            'name' => 'Ana Paz', 'email' => 'ana@example.com', 'phone' => '+54 380 4000000', 'nationality_code' => 'AR',
+            'first_name' => 'Ana', 'last_name' => 'Paz', 'email' => 'ana@example.com', 'phone' => '+54 380 4000000', 'nationality_code' => 'AR',
             'password' => 'Segura2026x', 'password_confirmation' => 'Segura2026x',
         ];
 

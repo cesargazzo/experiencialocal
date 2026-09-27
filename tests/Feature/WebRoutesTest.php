@@ -33,7 +33,7 @@ class WebRoutesTest extends TestCase
             ->assertDontSee('Todavía no visible')
             ->assertSee('Impulso');
 
-        $this->get('/experiencias/'.$published->slug)->assertOk()->assertSee($published->host->display_name);
+        $this->get('/experiencias/'.$published->slug)->assertOk()->assertSee($published->host->user->first_name);
         $this->get('/experiencias/todavia-no-visible')->assertNotFound();
     }
 
@@ -63,7 +63,7 @@ class WebRoutesTest extends TestCase
     public function registration_creates_the_account_and_sends_contact_codes(): void
     {
         $this->post('/registrarme', [
-            'name' => 'Chiara Rossi', 'email' => 'chiara@example.com', 'phone' => '+39 333 1234567',
+            'first_name' => 'Chiara', 'last_name' => 'Rossi', 'email' => 'chiara@example.com', 'phone' => '+39 333 1234567',
             'birth_date' => '1990-05-20', 'nationality_code' => 'IT', 'password' => 'Secreto2026x', 'password_confirmation' => 'Secreto2026x',
         ])->assertRedirect('/verificacion');
 

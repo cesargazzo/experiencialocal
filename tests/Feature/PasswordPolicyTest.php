@@ -27,7 +27,7 @@ class PasswordPolicyTest extends TestCase
     private function registration(string $password, array $overrides = []): array
     {
         return [
-            'name' => 'Ana Paz', 'email' => 'ana@example.com', 'phone' => '+54 380 4000000',
+            'first_name' => 'Ana', 'last_name' => 'Paz', 'email' => 'ana@example.com', 'phone' => '+54 380 4000000',
             'birth_date' => '1990-05-20', 'nationality_code' => 'AR', 'password' => $password, 'password_confirmation' => $password,
             ...$overrides,
         ];

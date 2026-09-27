@@ -4,13 +4,15 @@
     <h1 class="title">Creá tu <span class="hl">cuenta</span>.</h1>
     <section class="wizard__panel">
       @if ($invitation)
-        <p class="notice"><strong>{{ $invitation->inviter->name }}</strong> te invitó a Tinku.</p>
+        <p class="notice"><strong>{{ $invitation->inviter->first_name }}</strong> te invitó a Tinku.</p>
       @endif
       <p>Una sola cuenta sirve para reservar y para ser anfitrión. Podés venir de cualquier país.</p>
       <form method="post" action="{{ route('register') }}">
         @csrf
+        @php($invitedName = preg_split('/\s+/u', trim($invitation?->name ?? ''), 2) + ['', ''])
         <div class="grid-2">
-          <div class="field"><label for="name">Nombre y apellido</label><input id="name" name="name" value="{{ old('name', $invitation?->name) }}" autocomplete="name" required>@error('name')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+          <div class="field"><label for="first_name">Nombre</label><input id="first_name" name="first_name" value="{{ old('first_name', $invitedName[0]) }}" autocomplete="given-name" maxlength="60" required>@error('first_name')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+          <div class="field"><label for="last_name">Apellido</label><input id="last_name" name="last_name" value="{{ old('last_name', $invitedName[1]) }}" autocomplete="family-name" maxlength="80" required>@error('last_name')<span class="error" style="display:block">{{ $message }}</span>@enderror<span class="hint">Como figuran en tu documento. En Tinku el apellido solo lo ven personas con la identidad validada.</span></div>
           <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" value="{{ old('email', $invitation?->email) }}" autocomplete="email" required>@error('email')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
           <div class="field"><label for="phone">Teléfono</label><input id="phone" name="phone" type="tel" value="{{ old('phone') }}" placeholder="+54 380 …" autocomplete="tel" required>@error('phone')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
           <div class="field"><label for="birth_date">Fecha de nacimiento</label><input id="birth_date" name="birth_date" type="date" value="{{ old('birth_date') }}" min="1900-01-01" max="{{ now()->subYears(config('tinku.min_age'))->toDateString() }}" autocomplete="bday" required>@error('birth_date')<span class="error" style="display:block">{{ $message }}</span>@enderror<span class="hint">Tenés que tener al menos {{ config('tinku.min_age') }} años. No se muestra en tu perfil.</span></div>

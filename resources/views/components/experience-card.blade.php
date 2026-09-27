@@ -21,7 +21,7 @@
       <p class="card__diet">{{ $tags->join(' · ') }}</p>
     @endif
     <div class="card__foot">
-      <div class="card__host"><x-avatar :user="$e->host->user" :size="32" /><span title="{{ $e->host->display_name }}">Con {{ Str::before($e->host->display_name.' ', ' ') }}</span><x-verification-badge :level="$e->host->user->verification_level" /></div>
+      <div class="card__host"><x-avatar :user="$e->host->user" :size="32" /><span title="{{ $e->host->publicName() }}">Con {{ $e->host->user->first_name }}</span><x-verification-badge :level="$e->host->user->verification_level" /></div>
       <div class="price">{{ money($e->price) }} <small>por persona</small></div>
     </div>
   </div>

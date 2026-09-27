@@ -15,7 +15,7 @@
     <h3 class="booking-item__title"><a href="{{ route('experiencias.show', $experience) }}">{{ $experience->title }}</a></h3>
     <p class="booking-item__meta">
       <span class="badge {{ $badge }}">{{ $booking->status->label() }}</span>
-      <span>Con {{ Str::before($experience->host->display_name.' ', ' ') }} · {{ $experience->placeLabel() }}</span>
+      <span>Con {{ $experience->host->user->first_name }} · {{ $experience->placeLabel() }}</span>
     </p>
     <ul class="booking-item__facts">
       <li><x-icon name="calendar-blank" :size="16" /> {{ Str::ucfirst($start->translatedFormat('l j \d\e F \d\e Y')) }}</li>

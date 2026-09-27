@@ -32,7 +32,7 @@ use Illuminate\Support\Str;
  * Una sola cuenta con varios roles: todo usuario es participante, es anfitrión
  * si tiene un HostProfile y es administrador si tiene el flag is_admin.
  */
-#[Fillable(['name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'required_features', 'nationality_code', 'locale', 'avatar_path'])]
+#[Fillable(['name', 'first_name', 'last_name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'required_features', 'nationality_code', 'locale', 'avatar_path'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -43,6 +43,23 @@ class User extends Authenticatable
 
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    protected static function booted(): void
+    {
+        // "name" es siempre el nombre completo. Si llega solo "name" (datos viejos, fábricas),
+        // se separa: la primera palabra es el nombre y el resto el apellido.
+        static::saving(function (User $user): void {
+            if ($user->isDirty(['first_name', 'last_name']) && filled($user->first_name)) {
+                $user->first_name = trim((string) $user->first_name);
+                $user->last_name = trim((string) $user->last_name) ?: null;
+                $user->name = trim($user->first_name.' '.$user->last_name);
+            } elseif ($user->isDirty('name') || blank($user->first_name)) {
+                $parts = preg_split('/\s+/u', trim((string) $user->name), 2) ?: [''];
+                $user->first_name = $parts[0];
+                $user->last_name = $parts[1] ?? null;
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -167,6 +184,25 @@ class User extends Authenticatable
     public function ageTurningOn(CarbonInterface $reference): ?int
     {
         return $this->birth_date ? $reference->year - $this->birth_date->year : null;
+    }
+
+    /**
+     * El apellido solo lo ven quienes tienen la identidad validada (nivel 2),
+     * la propia persona y el equipo. El resto ve solo el nombre de pila.
+     */
+    public static function viewerSeesLastNames(?User $viewer = null): bool
+    {
+        $viewer ??= auth()->user();
+
+        return (bool) $viewer?->hasVerificationLevel(VerificationLevel::Document) || (bool) $viewer?->isAdmin();
+    }
+
+    /** Nombre para mostrar a quien está mirando. */
+    public function publicName(?User $viewer = null): string
+    {
+        $viewer ??= auth()->user();
+
+        return $viewer?->is($this) || self::viewerSeesLastNames($viewer) ? $this->name : ($this->first_name ?: Str::before($this->name.' ', ' '));
     }
 
     public function termsAcceptances(): HasMany

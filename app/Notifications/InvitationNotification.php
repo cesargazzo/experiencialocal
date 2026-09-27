@@ -26,7 +26,8 @@ class InvitationNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $inviter = $this->invitation->inviter->name;
+        // Quien recibe la invitación todavía no validó su identidad: solo ve el nombre de pila.
+        $inviter = $this->invitation->inviter->first_name;
         $greeting = $this->invitation->name ? 'Hola, '.str($this->invitation->name)->before(' ').'.' : 'Hola.';
 
         return (new MailMessage)

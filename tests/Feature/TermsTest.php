@@ -18,7 +18,7 @@ class TermsTest extends TestCase
     private function registration(): array
     {
         return [
-            'name' => 'Ana Paz', 'email' => 'ana@example.com', 'phone' => '+54 380 4000000', 'nationality_code' => 'AR',
+            'first_name' => 'Ana', 'last_name' => 'Paz', 'email' => 'ana@example.com', 'phone' => '+54 380 4000000', 'nationality_code' => 'AR',
             'birth_date' => '1990-05-20', 'password' => 'Segura2026x', 'password_confirmation' => 'Segura2026x',
         ];
     }

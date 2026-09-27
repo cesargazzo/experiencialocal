@@ -55,7 +55,7 @@ class ExperienceMatchNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $host = str($this->experience->host->display_name)->before(' ');
+        $host = $this->experience->host->user->first_name;
         $when = $this->nextDate->localStart()->translatedFormat('l j \d\e F \a \l\a\s H:i');
         $intro = $this->reason === 'new_date'
             ? "Hay fechas nuevas para {$this->experience->title}, con {$host} en {$this->experience->placeLabel()}."

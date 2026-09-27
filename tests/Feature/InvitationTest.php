@@ -29,7 +29,7 @@ class InvitationTest extends TestCase
     private function registration(string $email): array
     {
         return [
-            'name' => 'Nueva Persona', 'email' => $email, 'phone' => '+54 380 4000000', 'birth_date' => '1992-02-02',
+            'first_name' => 'Nueva', 'last_name' => 'Persona', 'email' => $email, 'phone' => '+54 380 4000000', 'birth_date' => '1992-02-02',
             'nationality_code' => 'AR', 'password' => 'Segura2026x', 'password_confirmation' => 'Segura2026x',
         ];
     }
@@ -53,7 +53,7 @@ class InvitationTest extends TestCase
         auth()->logout();
 
         $this->get($url)->assertRedirect(route('register'));
-        $this->get(route('register'))->assertSee('Marta Quiroga')->assertSee('value="Rosa Díaz"', false)->assertSee('value="rosa@example.com"', false);
+        $this->get(route('register'))->assertSee('Marta')->assertDontSee('Quiroga')->assertSee('value="Rosa"', false)->assertSee('value="Díaz"', false)->assertSee('value="rosa@example.com"', false);
 
         $this->post(route('register'), $this->registration('rosa@example.com'))->assertRedirect(route('verificacion'));
 

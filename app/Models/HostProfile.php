@@ -61,6 +61,17 @@ class HostProfile extends Model
         return $this->hasMany(Subscription::class);
     }
 
+    /**
+     * Nombre público del anfitrión. Sin identidad validada se ve solo el nombre de
+     * pila de la persona, aunque el nombre elegido incluya el apellido.
+     */
+    public function publicName(?User $viewer = null): string
+    {
+        $viewer ??= auth()->user();
+
+        return $viewer?->is($this->user) || User::viewerSeesLastNames($viewer) ? $this->display_name : $this->user->publicName($viewer);
+    }
+
     public function isActive(): bool
     {
         return $this->status === HostStatus::Active;

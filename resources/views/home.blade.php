@@ -17,11 +17,11 @@
       </div>
       <div class="collage">
         @foreach ($experiences->take(3) as $i => $e)
-          <div class="collage__img {{ $i === 0 ? 'collage__img--tall' : '' }}" style="background-image:url('{{ $e->coverUrl($i === 0 ? 'hero' : 'card') }}')"><span><x-icon :name="$e->category->icon" :size="14" /> {{ $e->host->display_name }}</span></div>
+          <div class="collage__img {{ $i === 0 ? 'collage__img--tall' : '' }}" style="background-image:url('{{ $e->coverUrl($i === 0 ? 'hero' : 'card') }}')"><span><x-icon :name="$e->category->icon" :size="14" /> {{ $e->host->publicName() }}</span></div>
         @endforeach
         @if ($experiences->isNotEmpty())
           @php $top = $experiences->first(); @endphp
-          <div class="float-card"><x-avatar :user="$top->host->user" :size="44" /><div><div class="float-card__val">{{ money($top->host->plan->hostPayoutFor((float) $top->price * $top->max_guests)) }}</div><div class="float-card__lbl">Lo que recibe {{ Str::before($top->host->display_name, ' ') }} por una fecha completa</div></div></div>
+          <div class="float-card"><x-avatar :user="$top->host->user" :size="44" /><div><div class="float-card__val">{{ money($top->host->plan->hostPayoutFor((float) $top->price * $top->max_guests)) }}</div><div class="float-card__lbl">Lo que recibe {{ $top->host->user->first_name }} por una fecha completa</div></div></div>
         @endif
       </div>
     </div>
@@ -146,7 +146,7 @@
         @foreach ($testimonials as $t)
           <figure class="quote reveal">
             <p>“{{ $t->body }}”</p>
-            <footer><x-avatar :user="$t->user" :size="40" /><span><strong>{{ $t->user->name }}</strong><br>Fue a {{ $t->experience->title }}</span></footer>
+            <footer><x-avatar :user="$t->user" :size="40" /><span><strong>{{ $t->user->publicName() }}</strong><br>Fue a {{ $t->experience->title }}</span></footer>
           </figure>
         @endforeach
       </div>

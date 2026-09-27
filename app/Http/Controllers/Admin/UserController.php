@@ -98,8 +98,11 @@ class UserController extends Controller
         return array_map(fn (string $country): string => VerificationService::documentHash($country, $number), CountryList::codes());
     }
 
-    public function show(User $user): View
+    public function show(Request $request, User $user, SecurityLog $securityLog): View
     {
+        // Ver los datos personales de una cuenta queda registrado: quién, cuándo y de quién.
+        $securityLog->record('admin.user_viewed', $request->user(), ['account' => $user->email, 'account_id' => $user->id]);
+
         $user->load(['avatar', 'hostProfile.plan', 'verifications' => fn ($q) => $q->latest(), 'verifications.reviewer', 'invitedBy', 'province', 'termsAcceptances' => fn ($q) => $q->with('version')->latest('accepted_at')]);
 
         return view('admin.users.show', [
