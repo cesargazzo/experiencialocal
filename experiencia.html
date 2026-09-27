@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <title>Experiencia · El Anfitrión</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23a8402b'/%3E%3Cpath d='M18 40h28M32 20v4M22 40c0-8 4-14 10-16 6 2 10 8 10 16' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+  <div class="proto-banner"><strong>PROTOTIPO</strong> · Las experiencias, precios y registros son demostrativos.</div>
+  <header class="header">
+    <div class="container header__inner">
+      <a class="brand" href="index.html" aria-label="El Anfitrión, inicio">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 22h20"/><path d="M16 8v3"/><path d="M9 22c0-5 3-9 7-11 4 2 7 6 7 11"/><path d="M4 26h24"/>
+          </svg>
+        </span>
+        <span class="brand__name">El Anfitrión</span>
+      </a>
+      <button class="nav-toggle" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+      <nav class="nav">
+        <a href="index.html#experiencias">Experiencias</a>
+        <a href="index.html#como-ganas">Cómo ganás</a>
+        <a href="index.html#planes">Planes</a>
+        <a class="btn btn--primary btn--sm" href="registro.html">Quiero ser anfitrión</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="detalle">
+    <section class="detail-hero" id="d-hero">
+      <div class="container">
+        <p class="eyebrow eyebrow--amber" id="d-tipo"></p>
+        <h1 id="d-titulo"></h1>
+        <div class="meta" id="d-meta"></div>
+      </div>
+    </section>
+
+    <div class="container detail-layout">
+      <div>
+        <div class="detail-block">
+          <h2>La experiencia</h2>
+          <p id="d-desc"></p>
+        </div>
+        <div class="detail-block">
+          <h2>Qué incluye</h2>
+          <ul class="menu-list" id="d-incluye"></ul>
+        </div>
+        <div class="detail-block">
+          <h2>Tu anfitrión</h2>
+          <div class="host-card" id="d-host"></div>
+        </div>
+        <div class="detail-block">
+          <h2>Opiniones</h2>
+          <div class="reviews" id="d-reviews"></div>
+        </div>
+        <div class="detail-block">
+          <h2>Condiciones</h2>
+          <ul>
+            <li>El pago se realiza dentro de la plataforma y se cobra recién cuando el anfitrión confirma.</li>
+            <li>Cancelación gratuita hasta 48 horas antes. Después, se retiene el 50%.</li>
+            <li>Avisá alergias o restricciones alimentarias al reservar.</li>
+          </ul>
+        </div>
+      </div>
+
+      <aside>
+        <form class="book" id="book-form">
+          <div class="book__price" id="b-precio"></div>
+          <div class="field">
+            <label for="b-fecha">Fecha</label>
+            <select id="b-fecha"></select>
+          </div>
+          <div class="field">
+            <label for="b-personas">Personas</label>
+            <select id="b-personas"></select>
+            <span class="hint" id="b-cupos"></span>
+          </div>
+          <div class="field">
+            <label for="b-nota">Mensaje para el anfitrión</label>
+            <textarea id="b-nota" rows="2" placeholder="Alergias, ocasión especial, cómo llegan…"></textarea>
+          </div>
+          <div class="book__rows">
+            <div class="book__row"><span id="b-sub"></span><span id="b-sub-val"></span></div>
+            <div class="book__row"><span>Tarifa de servicio (5%)</span><span id="b-serv"></span></div>
+            <div class="book__row book__row--total"><span>Total</span><span id="b-total"></span></div>
+          </div>
+          <button class="btn btn--primary btn--block" type="submit">Solicitar reserva</button>
+          <p class="hint" style="text-align:center;margin:12px 0 0;font-size:13px;color:var(--muted)">No se cobra hasta que el anfitrión confirme.</p>
+        </form>
+      </aside>
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <span>© El Anfitrión · Prototipo de producto</span>
+      <span>Compartí tu mesa. Descubrí el mundo.</span>
+    </div>
+  </footer>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
