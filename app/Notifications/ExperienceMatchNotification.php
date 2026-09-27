@@ -27,7 +27,30 @@ class ExperienceMatchNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
+    }
+
+    /**
+     * El aviso en Tinku se guarda al momento; el mail sale por la cola.
+     *
+     * @return array<string, string>
+     */
+    public function viaConnections(): array
+    {
+        return ['database' => 'sync'];
+    }
+
+    /**
+     * @return array{title: string, body: string, url: string, icon: string}
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'title' => $this->reason === 'new_date' ? "Fechas nuevas: {$this->experience->title}" : "Nueva en Tinku: {$this->experience->title}",
+            'body' => 'Coincide con tus intereses. Próxima fecha: '.$this->nextDate->localStart()->translatedFormat('D j M · H:i').'.',
+            'url' => route('experiencias.show', $this->experience),
+            'icon' => 'sparkle',
+        ];
     }
 
     public function toMail(object $notifiable): MailMessage

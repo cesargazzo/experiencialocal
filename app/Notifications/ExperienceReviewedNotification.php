@@ -34,7 +34,30 @@ class ExperienceReviewedNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
+    }
+
+    /**
+     * El aviso en Tinku se guarda al momento; el mail sale por la cola.
+     *
+     * @return array<string, string>
+     */
+    public function viaConnections(): array
+    {
+        return ['database' => 'sync'];
+    }
+
+    /**
+     * @return array{title: string, body: string, url: string, icon: string}
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'title' => $this->subject(),
+            'body' => $this->summary(),
+            'url' => route('anfitrion.panel'),
+            'icon' => in_array($this->outcome, [self::REJECTED, self::PAUSED], true) ? 'bell' : 'check-circle',
+        ];
     }
 
     public function toMail(object $notifiable): MailMessage

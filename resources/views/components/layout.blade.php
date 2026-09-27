@@ -100,6 +100,11 @@
         <a href="{{ route('home') }}#planes">Planes</a>
         @auth
           <a class="btn btn--secondary btn--sm" href="{{ route(auth()->user()->isHost() ? 'anfitrion.panel' : 'anfitrion.registro') }}">{{ auth()->user()->isHost() ? 'Mi espacio de anfitrión' : 'Quiero ser anfitrión' }}</a>
+          @php($unreadNotifications = auth()->user()->unreadNotifications()->count())
+          <a class="bell" href="{{ route('cuenta.avisos') }}" aria-label="Avisos{{ $unreadNotifications ? ': '.$unreadNotifications.' sin leer' : '' }}">
+            <x-icon name="bell" :size="22" />
+            @if ($unreadNotifications)<span class="bell__count">{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</span>@endif
+          </a>
           <x-profile-menu />
         @else
           <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">Quiero ser anfitrión</a>

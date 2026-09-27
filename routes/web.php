@@ -3,6 +3,7 @@
 use App\Http\Controllers\Account\BookingController as AccountBookingController;
 use App\Http\Controllers\Account\InterestController;
 use App\Http\Controllers\Account\InvitationController;
+use App\Http\Controllers\Account\NotificationController;
 use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\AuditLogController;
@@ -50,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/cuenta/alimentacion', [ProfileController::class, 'updateDiet'])->name('cuenta.alimentacion.update');
     Route::get('/cuenta/seguridad', [PasswordController::class, 'edit'])->name('cuenta.seguridad');
     Route::put('/cuenta/seguridad', [PasswordController::class, 'update'])->name('cuenta.seguridad.update');
+    Route::get('/cuenta/avisos', [NotificationController::class, 'index'])->name('cuenta.avisos');
     Route::get('/cuenta/reservas', [AccountBookingController::class, 'index'])->name('cuenta.reservas');
     Route::get('/cuenta/intereses', [InterestController::class, 'edit'])->name('cuenta.intereses');
     Route::put('/cuenta/intereses', [InterestController::class, 'update'])->name('cuenta.intereses.update');
