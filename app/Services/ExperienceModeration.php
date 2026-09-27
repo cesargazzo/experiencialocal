@@ -29,7 +29,7 @@ class ExperienceModeration
             'published_at' => $hostIsActive ? now() : null,
         ]);
 
-        $experience->host->user->notify(new ExperienceReviewedNotification($experience, approved: true));
+        $experience->host->user->notify(new ExperienceReviewedNotification($experience, ExperienceReviewedNotification::APPROVED));
     }
 
     /**
@@ -58,6 +58,28 @@ class ExperienceModeration
             'published_at' => null,
         ]);
 
-        $experience->host->user->notify(new ExperienceReviewedNotification($experience, approved: false));
+        $experience->host->user->notify(new ExperienceReviewedNotification($experience, ExperienceReviewedNotification::REJECTED));
+    }
+
+    /** Un administrador la saca de circulación (denuncias, datos falsos, etc.). Las reservas existentes siguen. */
+    public function pause(Experience $experience, string $reason, ?User $reviewer = null): void
+    {
+        $experience->update(['status' => ExperienceStatus::Paused, 'paused_reason' => $reason]);
+
+        $experience->host->user->notify(new ExperienceReviewedNotification($experience, ExperienceReviewedNotification::PAUSED));
+    }
+
+    /** Vuelve a verse si ya estaba aprobada y el anfitrión está activo; si no, vuelve a revisión. */
+    public function resume(Experience $experience, ?User $reviewer = null): void
+    {
+        $publish = $experience->approved_at !== null && $experience->host->isActive();
+
+        $experience->update([
+            'status' => $publish ? ExperienceStatus::Published : ExperienceStatus::InReview,
+            'published_at' => $publish ? ($experience->published_at ?? now()) : null,
+            'paused_reason' => null,
+        ]);
+
+        $experience->host->user->notify(new ExperienceReviewedNotification($experience, ExperienceReviewedNotification::RESUMED));
     }
 }

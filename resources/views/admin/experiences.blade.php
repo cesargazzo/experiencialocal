@@ -1,7 +1,7 @@
-<x-layout title="Experiencias en revisión" :noindex="true">
+<x-layout title="Experiencias" :noindex="true">
   <main class="container wizard" style="max-width:920px">
     <p class="eyebrow">Administración</p>
-    <h1 class="title">Experiencias <span class="hl">en revisión</span>.</h1>
+    <h1 class="title"><span class="hl">Experiencias</span>.</h1>
     @include('admin.partials.nav')
 
     <section class="wizard__panel">
@@ -23,9 +23,9 @@
             </div>
           @endif
           <div>
-            <h3 style="margin:0"><a href="{{ route('experiencias.show', $experience) }}" target="_blank" rel="noopener">{{ $experience->title }}</a></h3>
+            <h3 style="margin:0"><a href="{{ route('admin.experiencias.show', $experience) }}">{{ $experience->title }}</a></h3>
             <p class="hint" style="margin:4px 0 8px">
-              {{ $experience->category->name }} · {{ $experience->placeLabel() }} · {{ money($experience->price) }} · enviada {{ $experience->created_at->diffForHumans() }}<br>
+              {{ $experience->category->name }} · {{ $experience->placeLabel() }} · {{ money($experience->price) }} · enviada {{ $experience->updated_at->diffForHumans() }}<br>
               <a href="{{ route('admin.usuarios.show', $experience->host->user) }}">{{ $experience->host->display_name }}</a>
               <x-verification-badge :level="$experience->host->user->verification_level" />
             </p>
@@ -51,10 +51,44 @@
         <p>El contenido está bien. Se publican solas cuando el anfitrión valide su domicilio (nivel 3).</p>
         <div class="summary">
           @foreach ($awaitingHost as $experience)
-            <div><span><a href="{{ route('experiencias.show', $experience) }}">{{ $experience->title }}</a></span><strong><a href="{{ route('admin.usuarios.show', $experience->host->user) }}">{{ $experience->host->display_name }}</a></strong></div>
+            <div><span><a href="{{ route('admin.experiencias.show', $experience) }}">{{ $experience->title }}</a></span><strong><a href="{{ route('admin.usuarios.show', $experience->host->user) }}">{{ $experience->host->display_name }}</a></strong></div>
           @endforeach
         </div>
       </section>
     @endif
+
+    <section class="wizard__panel" id="todas">
+      <h2>Todas</h2>
+      <form method="get" action="{{ route('admin.experiencias') }}#todas" class="filters">
+        <div class="field"><label for="q">Buscar</label><input id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Título o anfitrión"></div>
+        <div class="field"><label for="estado">Estado</label>
+          <select id="estado" name="estado">
+            <option value="">Todos</option>
+            @foreach ($statuses as $status)<option value="{{ $status->value }}" @selected(($filters['estado'] ?? null) === $status->value)>{{ (new \App\Models\Experience(['status' => $status]))->statusLabel() }}</option>@endforeach
+          </select>
+        </div>
+        <span></span>
+        <div class="filters__actions"><button class="btn btn--secondary btn--sm" type="submit">Filtrá</button><a class="btn btn--ghost btn--sm" href="{{ route('admin.experiencias') }}#todas">Limpiá</a></div>
+      </form>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Experiencia</th><th>Estado</th><th>Opiniones</th><th>Reservas</th><th>Próxima fecha</th></tr></thead>
+          <tbody>
+            @forelse ($all as $experience)
+              <tr>
+                <td><a href="{{ route('admin.experiencias.show', $experience) }}"><strong>{{ $experience->title }}</strong></a><br><small class="hint">{{ $experience->host->display_name }} · {{ $experience->placeLabel() }}</small></td>
+                <td><span class="badge {{ $experience->statusBadgeClass() }}">{{ $experience->statusLabel() }}</span></td>
+                <td style="white-space:nowrap">@if ($experience->reviews_count)<x-stars :rating="$experience->rating_avg" /> {{ number_format($experience->rating_avg, 1, ',', '.') }} ({{ $experience->reviews_count }})@else<span class="hint">Sin opiniones</span>@endif</td>
+                <td style="white-space:nowrap">{{ $experience->upcoming_bookings_count }} próximas<br><small class="hint">{{ $experience->bookings_count }} en total</small></td>
+                <td style="white-space:nowrap">{{ $experience->upcomingDates->first()?->localStart()->translatedFormat('D j M · H:i') ?? '—' }}</td>
+              </tr>
+            @empty
+              <tr><td colspan="5" class="hint">No hay experiencias con esos filtros.</td></tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px">{{ $all->links() }}</div>
+    </section>
   </main>
 </x-layout>

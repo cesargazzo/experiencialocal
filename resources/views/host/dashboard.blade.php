@@ -30,21 +30,13 @@
       @endunless
 
       @forelse ($experiences as $experience)
-        @php
-          $badge = match ($experience->status) {
-              \App\Enums\ExperienceStatus::Published => 'badge--ok',
-              \App\Enums\ExperienceStatus::InReview => 'badge--espera',
-              \App\Enums\ExperienceStatus::Draft => $experience->rejection_reason ? 'badge--error' : 'badge--nivel-1',
-              default => 'badge--nivel-1',
-          };
-          $next = $experience->upcomingDates->first();
-        @endphp
+        @php($next = $experience->upcomingDates->first())
         <article class="booking-item">
           <a class="booking-item__img" href="{{ route('experiencias.show', $experience) }}" style="background-image:url('{{ $experience->coverUrl('card') }}')" aria-hidden="true" tabindex="-1"></a>
           <div>
             <h3 class="booking-item__title"><a href="{{ route('experiencias.show', $experience) }}">{{ $experience->title }}</a></h3>
             <p class="booking-item__meta">
-              <span class="badge {{ $badge }}">{{ $experience->statusLabel() }}</span>
+              <span class="badge {{ $experience->statusBadgeClass() }}">{{ $experience->statusLabel() }}</span>
               <span>{{ $experience->placeLabel() }} · {{ money($experience->price) }} por persona</span>
             </p>
             @switch (true)
@@ -53,6 +45,9 @@
                 @break
               @case ($experience->status === \App\Enums\ExperienceStatus::InReview)
                 <p class="hint" style="margin:0 0 8px">Ya la aprobamos. Se publica cuando valides tu domicilio.</p>
+                @break
+              @case ($experience->status === \App\Enums\ExperienceStatus::Paused)
+                <p class="notice" style="margin:0 0 8px">La pausamos. Motivo: {{ $experience->paused_reason }}. Respondé el mail que te mandamos para conversarlo.</p>
                 @break
               @case ($experience->status === \App\Enums\ExperienceStatus::Draft && $experience->rejection_reason)
                 <p class="notice" style="margin:0 0 8px">No la pudimos publicar. Motivo: {{ $experience->rejection_reason }}</p>

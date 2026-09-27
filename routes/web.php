@@ -72,6 +72,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/verificaciones/{verification}/aprobar', [AdminVerificationController::class, 'approve'])->name('verificaciones.aprobar');
         Route::post('/verificaciones/{verification}/rechazar', [AdminVerificationController::class, 'reject'])->name('verificaciones.rechazar');
         Route::get('/experiencias', [AdminExperienceController::class, 'index'])->name('experiencias');
+        Route::get('/experiencias/{experience}', [AdminExperienceController::class, 'show'])->name('experiencias.show');
+        Route::post('/experiencias/{experience}/pausar', [AdminExperienceController::class, 'pause'])->name('experiencias.pausar');
+        Route::post('/experiencias/{experience}/reactivar', [AdminExperienceController::class, 'resume'])->name('experiencias.reactivar');
         Route::post('/experiencias/{experience}/aprobar', [AdminExperienceController::class, 'approve'])->name('experiencias.aprobar');
         Route::post('/experiencias/{experience}/rechazar', [AdminExperienceController::class, 'reject'])->name('experiencias.rechazar');
         Route::get('/contrasenas', [PasswordPolicyController::class, 'edit'])->name('contrasenas');

@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 #[Fillable([
     'host_profile_id', 'category_id', 'title', 'slug', 'type_label', 'summary', 'description', 'city', 'province_id',
     'country_code', 'price', 'currency', 'duration_minutes', 'max_guests', 'includes', 'cover_image_url', 'status', 'published_at',
-    'dietary_options', 'approved_at', 'approved_by', 'rejection_reason',
+    'dietary_options', 'approved_at', 'approved_by', 'rejection_reason', 'paused_reason',
 ])]
 class Experience extends Model
 {
@@ -124,6 +124,17 @@ class Experience extends Model
             ExperienceStatus::Published => 'Publicada',
             ExperienceStatus::Paused => 'Pausada',
             ExperienceStatus::Archived => 'Archivada',
+        };
+    }
+
+    public function statusBadgeClass(): string
+    {
+        return match ($this->status) {
+            ExperienceStatus::Published => 'badge--ok',
+            ExperienceStatus::InReview => 'badge--espera',
+            ExperienceStatus::Paused => 'badge--error',
+            ExperienceStatus::Draft => $this->rejection_reason ? 'badge--error' : 'badge--nivel-1',
+            ExperienceStatus::Archived => 'badge--nivel-1',
         };
     }
 

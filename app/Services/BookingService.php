@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\BookingStatus;
+use App\Enums\ExperienceStatus;
 use App\Enums\VerificationLevel;
 use App\Exceptions\BookingException;
 use App\Models\Booking;
@@ -36,6 +37,9 @@ class BookingService
             $locked = ExperienceDate::query()->whereKey($date->getKey())->lockForUpdate()->firstOrFail();
             $experience = $locked->experience()->with('host.plan')->firstOrFail();
 
+            if ($experience->status !== ExperienceStatus::Published) {
+                throw new BookingException('Esta experiencia no está recibiendo reservas.');
+            }
             if (! $locked->isOpen()) {
                 throw new BookingException('Esta fecha ya no está disponible.');
             }

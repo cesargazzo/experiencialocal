@@ -5,14 +5,17 @@ namespace Tests\Feature;
 use App\Enums\DietaryOption;
 use App\Enums\ExperienceStatus;
 use App\Enums\VerificationLevel;
+use App\Exceptions\BookingException;
 use App\Livewire\HostOnboarding;
 use App\Models\Category;
 use App\Models\Experience;
+use App\Models\ExperienceDate;
 use App\Models\HostProfile;
 use App\Models\Media;
 use App\Models\Province;
 use App\Models\User;
 use App\Notifications\ExperienceReviewedNotification;
+use App\Services\BookingService;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -95,7 +98,7 @@ class ExperienceModerationTest extends TestCase
         $experience->refresh();
         $this->assertSame(ExperienceStatus::Published, $experience->status);
         $this->assertSame($admin->id, $experience->approved_by);
-        Notification::assertSentTo($experience->host->user, ExperienceReviewedNotification::class, fn ($notification) => $notification->approved);
+        Notification::assertSentTo($experience->host->user, ExperienceReviewedNotification::class, fn ($notification) => $notification->outcome === ExperienceReviewedNotification::APPROVED);
 
         $this->get(route('experiencias.show', $experience))->assertOk()->assertSee('Apto vegetariano')->assertSee('la cocina no es libre de TACC');
     }
@@ -112,7 +115,7 @@ class ExperienceModerationTest extends TestCase
         $experience->refresh();
         $this->assertSame(ExperienceStatus::Draft, $experience->status);
         $this->assertSame('La foto es de stock.', $experience->rejection_reason);
-        Notification::assertSentTo($experience->host->user, ExperienceReviewedNotification::class, fn ($notification) => ! $notification->approved);
+        Notification::assertSentTo($experience->host->user, ExperienceReviewedNotification::class, fn ($notification) => $notification->outcome === ExperienceReviewedNotification::REJECTED);
 
         $this->actingAs($experience->host->user)->get(route('experiencias.show', $experience))->assertSee('Motivo: La foto es de stock.');
     }
@@ -149,6 +152,62 @@ class ExperienceModerationTest extends TestCase
             ->assertOk()
             ->assertSee('La foto se está procesando')
             ->assertDontSee('class="review-item__img" src=""', false);
+    }
+
+    #[Test]
+    public function an_admin_sees_every_experience_with_its_bookings_and_reviews(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $date = ExperienceDate::factory()->create(['starts_at' => now()->addWeek(), 'capacity' => 8]);
+        $experience = $date->experience;
+        $experience->update(['title' => 'Cocina criolla moderna']);
+        $guest = User::factory()->create(['name' => 'Lucía Paz']);
+        $booking = app(BookingService::class)->request($guest, $date, 2);
+        $experience->reviews()->create(['booking_id' => $booking->id, 'user_id' => $guest->id, 'rating' => 5, 'body' => 'Una noche hermosa.', 'published_at' => now()]);
+        $experience->refreshRating();
+        Experience::factory()->inReview()->create(['title' => 'Otra en revisión']);
+
+        $this->actingAs($admin)->get(route('admin.experiencias'))
+            ->assertOk()
+            ->assertSee('Cocina criolla moderna')
+            ->assertSee('1 próximas')
+            ->assertSee('5,0 (1)');
+        $this->actingAs($admin)->get(route('admin.experiencias', ['estado' => 'in_review']))
+            ->assertSee('Otra en revisión')
+            ->assertDontSee('Cocina criolla moderna');
+
+        $this->actingAs($admin)->get(route('admin.experiencias.show', $experience))
+            ->assertOk()
+            ->assertSee($booking->code)
+            ->assertSee('Lucía Paz')
+            ->assertSee('Una noche hermosa.');
+    }
+
+    #[Test]
+    public function a_paused_experience_is_hidden_and_takes_no_bookings_until_it_is_resumed(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $date = ExperienceDate::factory()->create(['starts_at' => now()->addWeek(), 'capacity' => 8]);
+        $experience = $date->experience;
+
+        $this->actingAs($admin)->post(route('admin.experiencias.pausar', $experience))->assertSessionHasErrors('reason');
+        $this->actingAs($admin)->post(route('admin.experiencias.pausar', $experience), ['reason' => 'Denuncias de otros usuarios.'])->assertSessionHasNoErrors();
+
+        $this->assertSame(ExperienceStatus::Paused, $experience->fresh()->status);
+        Notification::assertSentTo($experience->host->user, ExperienceReviewedNotification::class, fn ($notification) => $notification->outcome === ExperienceReviewedNotification::PAUSED);
+        $this->actingAs(User::factory()->create())->get(route('experiencias.show', $experience))->assertNotFound();
+        $this->actingAs($experience->host->user)->get(route('anfitrion.panel'))->assertSee('Motivo: Denuncias de otros usuarios.');
+
+        try {
+            app(BookingService::class)->request(User::factory()->create(), $date, 1);
+            $this->fail('Una experiencia pausada no debería aceptar reservas.');
+        } catch (BookingException $e) {
+            $this->assertSame('Esta experiencia no está recibiendo reservas.', $e->getMessage());
+        }
+
+        $this->actingAs($admin)->post(route('admin.experiencias.reactivar', $experience))->assertSessionHasNoErrors();
+        $this->assertSame(ExperienceStatus::Published, $experience->fresh()->status);
+        $this->assertNull($experience->fresh()->paused_reason);
     }
 
     #[Test]
