@@ -55,7 +55,17 @@ class User extends Authenticatable
 
     public function avatar(): MorphOne
     {
-        return $this->morphOne(Media::class, 'mediable')->where('collection', 'avatar')->latestOfMany();
+        // Los filtros van dentro de ofMany: elige la última foto *lista*, no la última subida.
+        return $this->morphOne(Media::class, 'mediable')->ofMany(
+            ['id' => 'max'],
+            fn ($query) => $query->where('collection', 'avatar')->whereIn('status', Media::VISIBLE_STATUSES),
+        );
+    }
+
+    /** La última foto subida, esté lista o no: sirve para mostrar "procesando" o un error. */
+    public function latestAvatarUpload(): MorphOne
+    {
+        return $this->morphOne(Media::class, 'mediable')->ofMany(['id' => 'max'], fn ($query) => $query->where('collection', 'avatar'));
     }
 
     public function verifications(): HasMany

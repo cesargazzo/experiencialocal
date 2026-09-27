@@ -56,6 +56,7 @@
             "@php artisan migrate --force",
             "@php artisan storage:link --force",
             "@php artisan optimize",
+            "@php artisan queue:restart",
             "@php artisan up"
         ],
         "dev": [

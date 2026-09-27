@@ -85,6 +85,7 @@ return [
         'max_megapixels' => 40,
         'collections' => [
             'avatar' => [
+                'single' => true,
                 'min' => [200, 200],
                 'variants' => [
                     'sm' => [96, 96],
@@ -92,6 +93,7 @@ return [
                 ],
             ],
             'cover' => [
+                'single' => true,
                 'min' => [1200, 800],
                 'variants' => [
                     'card' => [800, 600],

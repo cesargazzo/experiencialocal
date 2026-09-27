@@ -47,7 +47,10 @@ class Experience extends Model
 
     public function cover(): MorphOne
     {
-        return $this->morphOne(Media::class, 'mediable')->where('collection', 'cover')->latestOfMany();
+        return $this->morphOne(Media::class, 'mediable')->ofMany(
+            ['id' => 'max'],
+            fn ($query) => $query->where('collection', 'cover')->whereIn('status', Media::VISIBLE_STATUSES),
+        );
     }
 
     /**

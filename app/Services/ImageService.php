@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\ProcessMediaVariants;
 use App\Models\Media;
 use GdImage;
 use Illuminate\Database\Eloquent\Model;
@@ -12,33 +13,25 @@ use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * Guarda una imagen subida: el original en un disco privado y versiones
- * WebP recortadas a medida en el disco público. Las versiones se generan
- * con GD, que no copia metadatos: la ubicación GPS y los datos de la
- * cámara del original nunca quedan públicos.
+ * Fotos subidas: el original se guarda al instante en un disco privado y las
+ * versiones WebP (o JPEG para compartir en redes) se generan en segundo
+ * plano. GD no copia metadatos: la ubicación GPS y los datos de la cámara
+ * del original nunca quedan públicos.
  */
 class ImageService
 {
     /**
-     * Reemplaza la imagen de una colección de un solo elemento (avatar, portada).
+     * Sube una foto nueva para una colección de un solo elemento (avatar,
+     * portada). La foto anterior sigue visible hasta que la nueva está lista.
      */
     public function replace(Model $owner, string $collection, UploadedFile $file, ?string $alt = null): Media
     {
-        $media = $this->store($owner, $collection, $file, $alt);
-
-        $owner->morphMany(Media::class, 'mediable')
-            ->where('collection', $collection)
-            ->whereKeyNot($media->getKey())
-            ->get()
-            ->each->delete();
-
-        return $media;
+        return $this->store($owner, $collection, $file, $alt);
     }
 
     public function store(Model $owner, string $collection, UploadedFile $file, ?string $alt = null): Media
     {
-        $settings = config("tinku.images.collections.{$collection}")
-            ?? throw new InvalidArgumentException("Colección de imágenes desconocida: {$collection}");
+        $this->settings($collection);
 
         [$width, $height, $type] = @getimagesize($file->getRealPath()) ?: [0, 0, 0];
         if (! in_array($type, [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP], true)) {
@@ -50,29 +43,14 @@ class ImageService
 
         $uuid = (string) Str::uuid();
         $originalDisk = config('tinku.images.original_disk');
-        $variantsDisk = config('tinku.images.variants_disk');
-        $extension = image_type_to_extension($type, false) === 'jpeg' ? 'jpg' : image_type_to_extension($type, false);
+        $extension = $type === IMAGETYPE_JPEG ? 'jpg' : image_type_to_extension($type, false);
         $originalPath = $file->storeAs("originales/{$collection}/".now()->format('Y/m'), "{$uuid}.{$extension}", $originalDisk);
 
-        $source = $this->load($file->getRealPath(), $type);
-        $variants = [];
-
-        try {
-            foreach ($settings['variants'] as $name => $variant) {
-                [$targetWidth, $targetHeight] = $variant;
-                $format = $variant[2] ?? 'webp';
-                $path = "media/{$collection}/{$uuid}/{$name}.{$format}";
-                $binary = $this->encodeCover($source, $targetWidth, $targetHeight, $format);
-                Storage::disk($variantsDisk)->put($path, $binary, 'public');
-                $variants[$name] = ['path' => $path, 'width' => $targetWidth, 'height' => $targetHeight, 'size' => strlen($binary)];
-            }
-        } finally {
-            imagedestroy($source);
-        }
-
-        return $owner->morphMany(Media::class, 'mediable')->create([
+        $media = $owner->morphMany(Media::class, 'mediable')->create([
             'uuid' => $uuid,
             'collection' => $collection,
+            'status' => 'processing',
+            'rotation' => 0,
             'original_disk' => $originalDisk,
             'original_path' => $originalPath,
             'original_name' => Str::limit($file->getClientOriginalName(), 250, ''),
@@ -80,10 +58,122 @@ class ImageService
             'size' => $file->getSize(),
             'width' => $width,
             'height' => $height,
-            'variants_disk' => $variantsDisk,
-            'variants' => $variants,
+            'variants_disk' => config('tinku.images.variants_disk'),
+            'variants' => null,
             'alt' => $alt,
         ]);
+
+        ProcessMediaVariants::dispatch($media);
+
+        return $media;
+    }
+
+    /** Gira 90° a la derecha. Las versiones se regeneran desde el original. */
+    public function rotate(Media $media): Media
+    {
+        $media->forceFill([
+            'rotation' => ($media->rotation + 90) % 360,
+            'status' => $media->variants ? 'reprocessing' : 'processing',
+            'error' => null,
+        ])->save();
+
+        ProcessMediaVariants::dispatch($media);
+
+        return $media;
+    }
+
+    /** Genera las versiones. Lo llama el trabajo en cola. */
+    public function generateVariants(Media $media): void
+    {
+        $media->refresh();
+        $settings = $this->settings($media->collection);
+        $previous = $media->variants ?? [];
+
+        [$localPath, $isTemporary] = $this->localCopyOfOriginal($media);
+
+        try {
+            [, , $type] = getimagesize($localPath) ?: [0, 0, 0];
+            $source = $this->load($localPath, $type);
+
+            if ($media->rotation) {
+                $rotated = imagerotate($source, -$media->rotation, 0);
+                if (! $rotated instanceof GdImage) {
+                    throw new RuntimeException('No pudimos girar la imagen.');
+                }
+                imagedestroy($source);
+                $source = $rotated;
+            }
+
+            $variants = [];
+            try {
+                foreach ($settings['variants'] as $name => $variant) {
+                    [$targetWidth, $targetHeight] = $variant;
+                    $format = $variant[2] ?? 'webp';
+                    // La rotación va en el nombre: al girar cambia la URL y el navegador no muestra la vieja.
+                    $path = "media/{$media->collection}/{$media->uuid}/{$name}-r{$media->rotation}.{$format}";
+                    $binary = $this->encodeCover($source, $targetWidth, $targetHeight, $format);
+                    Storage::disk($media->variants_disk)->put($path, $binary, 'public');
+                    $variants[$name] = ['path' => $path, 'width' => $targetWidth, 'height' => $targetHeight, 'size' => strlen($binary)];
+                }
+            } finally {
+                imagedestroy($source);
+            }
+        } finally {
+            if ($isTemporary) {
+                @unlink($localPath);
+            }
+        }
+
+        $media->forceFill(['variants' => $variants, 'status' => 'ready', 'error' => null])->save();
+
+        // Borra las versiones anteriores que ya no se usan.
+        $stale = collect($previous)->pluck('path')->diff(collect($variants)->pluck('path'))->all();
+        if ($stale) {
+            Storage::disk($media->variants_disk)->delete($stale);
+        }
+
+        // Recién ahora que la nueva está lista, se borra la foto anterior de la colección.
+        if ($media->mediable_type && ($settings['single'] ?? true)) {
+            Media::query()
+                ->where('mediable_type', $media->mediable_type)
+                ->where('mediable_id', $media->mediable_id)
+                ->where('collection', $media->collection)
+                ->whereKeyNot($media->getKey())
+                ->where('id', '<', $media->getKey())
+                ->get()
+                ->each->delete();
+        }
+    }
+
+    /**
+     * @return array{min: array{0: int, 1: int}, variants: array<string, array{0: int, 1: int, 2?: string}>, single?: bool}
+     */
+    private function settings(string $collection): array
+    {
+        return config("tinku.images.collections.{$collection}")
+            ?? throw new InvalidArgumentException("Colección de imágenes desconocida: {$collection}");
+    }
+
+    /**
+     * @return array{0: string, 1: bool} Ruta local y si hay que borrarla al terminar.
+     */
+    private function localCopyOfOriginal(Media $media): array
+    {
+        $disk = Storage::disk($media->original_disk);
+
+        if (! $disk->exists($media->original_path)) {
+            throw new RuntimeException('No encontramos el original de la foto.');
+        }
+
+        try {
+            return [$disk->path($media->original_path), false];
+        } catch (RuntimeException) {
+            // Discos remotos (por ejemplo S3): se baja a un archivo temporal.
+            $temporary = tempnam(sys_get_temp_dir(), 'tinku-img-');
+            file_put_contents($temporary, $disk->get($media->original_path));
+
+            return [$temporary, true];
+        }
     }
 
     private function load(string $path, int $type): GdImage
@@ -92,6 +182,7 @@ class ImageService
             IMAGETYPE_JPEG => @imagecreatefromjpeg($path),
             IMAGETYPE_PNG => @imagecreatefrompng($path),
             IMAGETYPE_WEBP => @imagecreatefromwebp($path),
+            default => false,
         };
 
         if (! $image instanceof GdImage) {
@@ -134,16 +225,15 @@ class ImageService
         $cropY = (int) floor(($sourceHeight - $cropHeight) / 2);
 
         $canvas = imagecreatetruecolor($targetWidth, $targetHeight);
-        imagealphablending($canvas, false);
-        imagesavealpha($canvas, true);
-        imagecopyresampled($canvas, $source, 0, 0, $cropX, $cropY, $targetWidth, $targetHeight, $cropWidth, $cropHeight);
 
         if ($format === 'jpg') {
             // JPEG no tiene transparencia: fondo blanco antes de copiar.
-            imagealphablending($canvas, true);
             imagefill($canvas, 0, 0, imagecolorallocate($canvas, 255, 255, 255));
-            imagecopyresampled($canvas, $source, 0, 0, $cropX, $cropY, $targetWidth, $targetHeight, $cropWidth, $cropHeight);
+        } else {
+            imagealphablending($canvas, false);
+            imagesavealpha($canvas, true);
         }
+        imagecopyresampled($canvas, $source, 0, 0, $cropX, $cropY, $targetWidth, $targetHeight, $cropWidth, $cropHeight);
 
         ob_start();
         $format === 'jpg'

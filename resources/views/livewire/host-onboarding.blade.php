@@ -32,7 +32,7 @@
       <div class="field"><label>Dirección donde recibís</label><input wire:model="address" placeholder="Calle y número. Solo la ven quienes tienen reserva confirmada.">@error('address')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field">
         <label for="avatar">Tu foto</label>
-        <div class="upload">
+        <div class="upload" x-data="{ uploading: false, progress: 0 }" x-on:livewire-upload-start="uploading = true; progress = 0" x-on:livewire-upload-progress="progress = $event.detail.progress" x-on:livewire-upload-finish="uploading = false" x-on:livewire-upload-error="uploading = false">
           <div class="upload__preview">
             @if ($avatar && ! $errors->has('avatar'))
               <img src="{{ $avatar->temporaryUrl() }}" alt="Vista previa de tu foto">
@@ -46,7 +46,7 @@
             <input id="avatar" class="sr-only" type="file" wire:model="avatar" accept="image/jpeg,image/png,image/webp">
             <label for="avatar" class="btn btn--tertiary btn--sm upload__pick">{{ $avatar || auth()->user()->avatar ? 'Cambiá tu foto' : 'Elegí una foto' }}</label>
             <span class="hint">Una foto tuya, de frente y con buena luz. JPG, PNG o WebP de al menos 200 × 200 px.</span>
-            <span class="hint" wire:loading wire:target="avatar">Subiendo…</span>
+            <x-upload-progress />
             @error('avatar')<span class="error" style="display:block">{{ $message }}</span>@enderror
           </div>
         </div>
@@ -74,7 +74,7 @@
       </div>
       <div class="field">
         <label for="cover">Foto de la experiencia</label>
-        <div class="upload upload--cover">
+        <div class="upload upload--cover" x-data="{ uploading: false, progress: 0 }" x-on:livewire-upload-start="uploading = true; progress = 0" x-on:livewire-upload-progress="progress = $event.detail.progress" x-on:livewire-upload-finish="uploading = false" x-on:livewire-upload-error="uploading = false">
           <div class="upload__preview">
             @if ($cover && ! $errors->has('cover'))
               <img src="{{ $cover->temporaryUrl() }}" alt="Vista previa de la foto">
@@ -86,7 +86,7 @@
             <input id="cover" class="sr-only" type="file" wire:model="cover" accept="image/jpeg,image/png,image/webp">
             <label for="cover" class="btn btn--tertiary btn--sm upload__pick">{{ $cover ? 'Cambiá la foto' : 'Elegí una foto' }}</label>
             <span class="hint">Mostrá a las personas haciendo algo, con luz natural y en tu lugar. Nada de fotos de stock. Al menos 1200 × 800 px.</span>
-            <span class="hint" wire:loading wire:target="cover">Subiendo…</span>
+            <x-upload-progress />
             @error('cover')<span class="error" style="display:block">{{ $message }}</span>@enderror
           </div>
         </div>

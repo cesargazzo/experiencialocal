@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Storage;
  * Una imagen subida: el original privado y sus versiones optimizadas.
  */
 #[Fillable([
-    'uuid', 'collection', 'original_disk', 'original_path', 'original_name', 'mime_type', 'size',
-    'width', 'height', 'variants_disk', 'variants', 'alt',
+    'uuid', 'collection', 'status', 'rotation', 'original_disk', 'original_path', 'original_name', 'mime_type', 'size',
+    'width', 'height', 'variants_disk', 'variants', 'alt', 'error',
 ])]
 class Media extends Model
 {
@@ -34,6 +34,19 @@ class Media extends Model
         });
     }
 
+    /** Estados en los que la foto ya tiene versiones para mostrar. */
+    public const VISIBLE_STATUSES = ['ready', 'reprocessing'];
+
+    public function isVisible(): bool
+    {
+        return in_array($this->status, self::VISIBLE_STATUSES, true) && ! empty($this->variants);
+    }
+
+    public function isProcessing(): bool
+    {
+        return in_array($this->status, ['processing', 'reprocessing'], true);
+    }
+
     public function mediable(): MorphTo
     {
         return $this->morphTo();
@@ -49,7 +62,7 @@ class Media extends Model
     /** srcset con todas las versiones de la colección, de menor a mayor. */
     public function srcset(): string
     {
-        return collect($this->variants)
+        return collect($this->variants ?? [])
             ->sortBy('width')
             ->map(fn (array $variant): string => Storage::disk($this->variants_disk)->url($variant['path']).' '.$variant['width'].'w')
             ->implode(', ');
