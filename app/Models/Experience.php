@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\ExperienceStatus;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+#[Fillable([
+    'host_profile_id', 'category_id', 'title', 'slug', 'type_label', 'summary', 'description', 'city', 'province',
+    'country_code', 'price', 'currency', 'duration_minutes', 'max_guests', 'includes', 'cover_image_url', 'status', 'published_at',
+])]
+class Experience extends Model
+{
+    use HasFactory;
+
+    protected function casts(): array
+    {
+        return [
+            'status' => ExperienceStatus::class,
+            'price' => 'decimal:2',
+            'includes' => 'array',
+            'rating_avg' => 'decimal:2',
+            'published_at' => 'datetime',
+        ];
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    public function host(): BelongsTo
+    {
+        return $this->belongsTo(HostProfile::class, 'host_profile_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function dates(): HasMany
+    {
+        return $this->hasMany(ExperienceDate::class)->orderBy('starts_at');
+    }
+
+    public function upcomingDates(): HasMany
+    {
+        return $this->dates()->where('status', 'open')->where('starts_at', '>', now());
+    }
+
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class)->whereNotNull('published_at')->latest('published_at');
+    }
+
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('status', ExperienceStatus::Published);
+    }
+
+    public function durationLabel(): string
+    {
+        $h = intdiv($this->duration_minutes, 60);
+        $m = $this->duration_minutes % 60;
+
+        return $m ? sprintf('%d h %02d', $h, $m) : sprintf('%d h', $h);
+    }
+
+    /** Recalcula el promedio a partir de las opiniones publicadas. */
+    public function refreshRating(): void
+    {
+        $stats = $this->reviews()->reorder()->selectRaw('count(*) as c, coalesce(avg(rating), 0) as a')->first();
+        $this->forceFill(['reviews_count' => (int) $stats->c, 'rating_avg' => round((float) $stats->a, 2)])->save();
+    }
+}

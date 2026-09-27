@@ -1,10 +1,47 @@
-# Tinku · Prototipo
+# Tinku
 
 Tinku significa encuentro en quechua. Plataforma para vivir experiencias con personas locales: una cena en su casa, una clase de cocina, un paseo por su pueblo, un taller.
 
-Este repositorio contiene un **prototipo navegable** en HTML, CSS y JavaScript puro, sin dependencias ni build. Los datos (experiencias, planes, opiniones) son demostrativos y viven en `js/data.js`.
+Este repositorio contiene la aplicación **Laravel 13 + PostgreSQL** (en la raíz) y el **prototipo estático** original en `prototipo/`, que sirve como referencia visual.
 
-## Páginas
+## Puesta en marcha
+
+Requisitos: PHP 8.3 o superior con `pdo_pgsql`, Composer, Node 22, PostgreSQL 16.
+
+```bash
+composer install
+npm install
+cp .env.example .env            # ajustá DB_HOST, DB_PORT, DB_USERNAME y DB_PASSWORD
+php artisan key:generate
+createdb tinku                  # o creala desde psql
+php artisan migrate --seed      # carga planes, categorías y datos demo (no en producción)
+npm run build                   # o npm run dev mientras desarrollás
+php artisan serve
+```
+
+Cuentas demo (contraseña `password`): `admin@tinku.test` (administradora), `marta@tinku.test` (anfitriona nivel 3), `lucia@tinku.test` (participante nivel 2).
+
+Tests: `php artisan test` (usa la base `tinku_test` en PostgreSQL, configurada en `phpunit.xml`). Formato: `vendor/bin/pint`.
+
+## Qué hay implementado
+
+| Área | Dónde | Qué hace |
+| --- | --- | --- |
+| Modelo de datos | `database/migrations` | Usuarios con roles y nivel de verificación, verificaciones de identidad, perfiles de anfitrión, planes y suscripciones, categorías, experiencias con fechas y cupos, reservas con desglose congelado, opiniones. Restricción en base para que un cupo nunca se sobrevenda. |
+| Verificación de identidad | `app/Services/VerificationService.php` | Niveles acumulativos, proveedor según el país del documento (RENAPER para Argentina, Metamap para el resto), códigos de seis dígitos para email y teléfono, hash del documento para evitar duplicados, aprobación manual del nivel 3 que activa al anfitrión y publica sus experiencias. |
+| Reservas | `app/Services/BookingService.php` | Solicitud con bloqueo de fila, cálculo de tarifa de servicio y comisión del plan, confirmar, rechazar, cancelar y completar liberando cupos. Exige nivel 2. |
+| Web pública | `app/Http/Controllers`, `resources/views` | Landing con filtros, detalle de experiencia, login y registro con nacionalidad. |
+| Livewire | `app/Livewire` | Panel de reserva en el detalle y alta de anfitrión en cuatro pasos. |
+| Centro de verificación | `/verificacion` | El usuario ve su nivel y envía cada verificación. Fuera de producción los proveedores externos se simulan. |
+| Administración | `/admin/verificaciones` | Cola de verificaciones pendientes con aprobar y rechazar. Solo administradores. |
+
+Los proveedores reales (RENAPER, Metamap, email transaccional, SMS, Mercado Pago) todavía no están conectados: los puntos de integración están marcados en los servicios.
+
+## Prototipo estático
+
+Está en `prototipo/` y se abre directamente en el navegador.
+
+### Páginas
 
 | Archivo | Qué muestra |
 | --- | --- |
@@ -12,18 +49,9 @@ Este repositorio contiene un **prototipo navegable** en HTML, CSS y JavaScript p
 | `experiencia.html?id=…` | Detalle de una experiencia: descripción, qué incluye, anfitrión, opiniones, condiciones y panel de reserva con cálculo de total y solicitud simulada. |
 | `registro.html?plan=…` | Alta de anfitrión en 4 pasos (Registrate, Verificá, Publicá, Recibí) con validación y resumen previo a publicar. |
 
-## Cómo verlo
-
-Abrí `index.html` directamente en el navegador, o serví la carpeta:
-
-```bash
-python3 -m http.server 8000
-# http://localhost:8000
-```
-
 Las fotos se cargan desde Unsplash y las tipografías desde Google Fonts, así que hace falta conexión para verlas.
 
-## Modelo de negocio representado
+## Modelo de negocio
 
 - El anfitrión define precio y cupos. El participante paga dentro de la plataforma.
 - La plataforma descuenta una comisión por reserva según el plan: Free 18 %, Impulso 12 %, Pro 8 %.
@@ -62,19 +90,20 @@ Reglas complementarias:
 - Las opiniones solo las dejan participantes que asistieron a una reserva pagada.
 - Los datos sensibles (documento, selfie, domicilio) se guardan cifrados y con acceso auditado; el prototipo no los recolecta.
 
-En el prototipo, cada anfitrión muestra su insignia de nivel en las tarjetas y en el detalle de la experiencia.
+Cada anfitrión muestra su insignia de nivel en las tarjetas y en el detalle de la experiencia.
 
-## Stack propuesto para la versión real
+## Stack
 
-- PHP 8.3 con Laravel 12, vistas Blade con Livewire y Tailwind.
+- PHP 8.4 con Laravel 13, vistas Blade con Livewire y Tailwind.
 - PostgreSQL 16.
 - Panel de administración y del anfitrión hechos a medida con Blade y Livewire.
 - Laravel Cashier para las suscripciones de los planes y SDK de Mercado Pago para los cobros por reserva.
 
-## Próximos pasos sugeridos
+## Próximos pasos
 
-1. Backend y base de datos para anfitriones, experiencias, fechas y reservas.
-2. Autenticación con roles y verificación de identidad por niveles (RENAPER para argentinos, proveedor de KYC internacional para extranjeros, prueba de vida, domicilio).
-3. Pasarela de pagos (Mercado Pago) con retención hasta la confirmación del anfitrión.
-4. Búsqueda por ciudad y fecha con disponibilidad real.
-5. Panel del anfitrión: calendario, reservas, liquidaciones y estadísticas.
+1. Conectar RENAPER y un proveedor de KYC internacional, más email transaccional y SMS para los códigos.
+2. Pasarela de pagos (Mercado Pago) con autorización al solicitar y captura al confirmar.
+3. Panel del anfitrión: reservas pendientes, calendario de fechas, liquidaciones y estadísticas.
+4. Panel del participante: mis reservas, cancelación y opiniones.
+5. Búsqueda por fecha con disponibilidad real y subida de fotos propias.
+6. Aplicar el manual de marca cuando esté: colores y tipografía viven en `resources/css/tinku.css`.
