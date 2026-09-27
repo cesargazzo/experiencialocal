@@ -55,4 +55,20 @@ class HostDashboardTest extends TestCase
     {
         $this->actingAs(User::factory()->create())->get(route('anfitrion.panel'))->assertRedirect(route('anfitrion.registro'));
     }
+
+    #[Test]
+    public function the_owner_sees_an_edit_bar_on_their_experience_page_and_visitors_do_not(): void
+    {
+        $experience = Experience::factory()->inReview()->create();
+
+        $this->actingAs($experience->host->user)->get(route('experiencias.show', $experience))
+            ->assertOk()
+            ->assertSee('La estamos revisando. Mientras tanto la podés editar.')
+            ->assertSee(route('anfitrion.experiencias.editar', $experience), false);
+
+        $published = Experience::factory()->create();
+        $this->actingAs(User::factory()->create())->get(route('experiencias.show', $published))
+            ->assertOk()
+            ->assertDontSee('owner-bar', false);
+    }
 }

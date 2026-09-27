@@ -53,11 +53,47 @@
       </div>
     </section>
 
+    @auth
+      @php($canEdit = auth()->user()->can('update', $experience))
+      @if ($canEdit || auth()->user()->isAdmin())
+        <div class="container">
+          <div class="owner-bar">
+            <span class="badge {{ $experience->statusBadgeClass() }}">{{ $experience->statusLabel() }}</span>
+            <span class="owner-bar__text">
+              @if ($canEdit)
+                @switch ($experience->status)
+                  @case (\App\Enums\ExperienceStatus::InReview)
+                    {{ $experience->approved_at ? 'Ya la aprobamos: se publica cuando valides tu domicilio.' : 'La estamos revisando. Mientras tanto la podés editar.' }}
+                    @break
+                  @case (\App\Enums\ExperienceStatus::Draft)
+                    {{ $experience->rejection_reason ? 'No la pudimos publicar. Motivo: '.$experience->rejection_reason : 'Es un borrador.' }}
+                    @break
+                  @case (\App\Enums\ExperienceStatus::Paused)
+                    La pausamos. Motivo: {{ $experience->paused_reason }}
+                    @break
+                  @default
+                    Así la ve la gente.
+                @endswitch
+              @else
+                Estás viendo esta experiencia como administrador.
+              @endif
+            </span>
+            <span class="owner-bar__actions">
+              @if ($canEdit)
+                <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.experiencias.editar', $experience) }}">Editala</a>
+                <a class="btn btn--ghost btn--sm" href="{{ route('anfitrion.experiencias.editar', $experience) }}#fechas"><x-icon name="calendar-blank" :size="16" /> Fechas</a>
+              @endif
+              @if (auth()->user()->isAdmin())
+                <a class="btn btn--tertiary btn--sm" href="{{ route('admin.experiencias.show', $experience) }}">Ver en admin</a>
+              @endif
+            </span>
+          </div>
+        </div>
+      @endif
+    @endauth
+
     <div class="container detail-layout">
       <div>
-        @if ($experience->rejection_reason && $experience->status === \App\Enums\ExperienceStatus::Draft && auth()->id() === $experience->host->user_id)
-          <p class="notice">No la pudimos publicar todavía. Motivo: {{ $experience->rejection_reason }}</p>
-        @endif
         <div class="detail-block"><h2>La experiencia</h2><p>{{ $experience->description }}</p></div>
         @if ($experience->difficulty || $experience->what_to_bring || $experience->min_age || $experience->features?->isNotEmpty())
           <div class="detail-block"><h2>Bueno saber</h2>

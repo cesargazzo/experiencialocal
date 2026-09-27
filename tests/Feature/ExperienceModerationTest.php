@@ -117,7 +117,8 @@ class ExperienceModerationTest extends TestCase
         $this->assertSame('La foto es de stock.', $experience->rejection_reason);
         Notification::assertSentTo($experience->host->user, ExperienceReviewedNotification::class, fn ($notification) => $notification->outcome === ExperienceReviewedNotification::REJECTED);
 
-        $this->actingAs($experience->host->user)->get(route('experiencias.show', $experience))->assertSee('Motivo: La foto es de stock.');
+        $this->actingAs($experience->host->user)->get(route('experiencias.show', $experience))->assertSee('Motivo: La foto es de stock.')
+            ->assertSee(route('anfitrion.experiencias.editar', $experience), false);
     }
 
     #[Test]
