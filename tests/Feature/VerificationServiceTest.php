@@ -108,7 +108,7 @@ class VerificationServiceTest extends TestCase
     }
 
     #[Test]
-    public function reaching_level_three_activates_a_host_in_review_and_publishes_their_experiences(): void
+    public function reaching_level_three_activates_a_host_in_review_and_publishes_their_approved_experiences(): void
     {
         $user = User::factory()->level(VerificationLevel::Document)->create();
         foreach ([VerificationType::Email, VerificationType::Phone, VerificationType::Liveness] as $type) {
@@ -116,7 +116,7 @@ class VerificationServiceTest extends TestCase
         }
         $this->service->approve($this->service->submit($user, VerificationType::Document, ['document_country' => 'AR', 'document_number' => '9']));
         $profile = HostProfile::factory()->inReview()->for($user)->create();
-        $experience = Experience::factory()->inReview()->for($profile, 'host')->create();
+        $experience = Experience::factory()->inReview()->for($profile, 'host')->create(['approved_at' => now()]);
 
         $address = $this->service->submit($user, VerificationType::Address);
         $this->service->approve($address, User::factory()->admin()->create());

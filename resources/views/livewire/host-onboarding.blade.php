@@ -93,14 +93,27 @@
       </div>
       <div class="field"><label>Resumen (una línea)</label><input wire:model="summary" maxlength="200" placeholder="Empanadas, cabrito y sobremesa con recetas de familia.">@error('summary')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label>Descripción</label><textarea rows="4" wire:model="description" placeholder="Qué van a vivir, qué incluye, qué tienen que traer."></textarea>@error('description')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+      <fieldset class="field" style="border:0;padding:0">
+        <legend style="font-weight:600">Opciones de comida</legend>
+        <span class="hint">Marcá solo lo que puedas garantizar. Si no hay comida, dejalo vacío.</span>
+        <div class="choice-grid">
+          @foreach ($dietaryOptions as $option)
+            <label class="choice">
+              <input type="checkbox" wire:model="dietary_options" value="{{ $option->value }}">
+              <span style="flex-direction:column;align-items:flex-start;gap:2px"><strong>{{ $option->label() }}</strong><small class="hint" style="margin:0">{{ $option->hint() }}</small></span>
+            </label>
+          @endforeach
+        </div>
+        @error('dietary_options.*')<span class="error" style="display:block">{{ $message }}</span>@enderror
+      </fieldset>
       <div class="wizard__actions"><button class="btn btn--ghost" type="button" wire:click="back">Volver</button><button class="btn btn--secondary" type="button" wire:click="next">Revisá <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
     </section>
 
   @elseif ($step === 3)
     @php $p = $plans->firstWhere('slug', $plan); $cat = $categories->firstWhere('id', $category_id); @endphp
     <section class="wizard__panel">
-      <h2>Revisá y publicá</h2>
-      <p>Así va a verse tu experiencia. Podés volver a editar cualquier paso.</p>
+      <h2>Revisá y enviá</h2>
+      <p>Así va a verse tu experiencia. Podés volver a editar cualquier paso. Antes de publicarla, la revisamos para cuidar a todos.</p>
       @if ($cover)
         <img src="{{ $cover->temporaryUrl() }}" alt="Foto de la experiencia" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--radio-md);margin:16px 0 8px">
       @endif
@@ -110,28 +123,31 @@
         <div><span>Categoría</span><strong>{{ $cat?->name }}</strong></div>
         <div><span>Precio por persona</span><strong>{{ money($price ?? 0) }}</strong></div>
         <div><span>Cupos</span><strong>{{ $max_guests }} personas</strong></div>
+        @if ($dietary_options)
+          <div><span>Opciones de comida</span><strong>{{ collect($dietary_options)->map(fn ($value) => \App\Enums\DietaryOption::tryFrom($value)?->label())->filter()->join(' · ') }}</strong></div>
+        @endif
         <div><span>Primera fecha</span><strong>{{ \Carbon\Carbon::parse($first_date.' '.$first_time)->translatedFormat('D j M · H:i') }}</strong></div>
         <div><span>Plan</span><strong>{{ $p->name }} · {{ $p->commissionPercent() }}% por reserva</strong></div>
         <div><span>Recibís por persona*</span><strong>{{ money($p->hostPayoutFor($price ?? 0)) }}</strong></div>
       </div>
       <p class="hint">*Antes de impuestos, retenciones, costos de cobro y gastos propios.</p>
       @unless (auth()->user()->hasVerificationLevel(\App\Enums\VerificationLevel::Residence))
-        <p class="notice">Tu perfil queda <strong>en revisión</strong> hasta que valides tu domicilio (nivel 3). Podés hacerlo desde <a href="{{ route('verificacion') }}">tu centro de verificación</a>.</p>
+        <p class="notice">Además, se publica recién cuando valides tu domicilio (nivel 3). Podés hacerlo desde <a href="{{ route('verificacion') }}">tu centro de verificación</a>.</p>
       @endunless
       @error('title')<span class="error" style="display:block">{{ $message }}</span>@enderror
-      <div class="wizard__actions"><button class="btn btn--ghost" type="button" wire:click="back">Volver</button><button class="btn btn--primary" type="button" wire:click="publish" wire:loading.attr="disabled">Publicá tu experiencia</button></div>
+      <div class="wizard__actions"><button class="btn btn--ghost" type="button" wire:click="back">Volver</button><button class="btn btn--primary" type="button" wire:click="publish" wire:loading.attr="disabled">Enviá tu experiencia</button></div>
     </section>
 
   @else
     <section class="wizard__panel">
       <div class="success">
         <div class="success__icon"><x-icon name="check" :size="32" /></div>
-        <h2>{{ $created?->status === \App\Enums\ExperienceStatus::Published ? 'Tu experiencia está publicada' : 'Tu experiencia quedó en revisión' }}</h2>
+        <h2>Tu experiencia quedó en revisión</h2>
         <p style="max-width:44ch;margin:8px auto 24px;color:var(--tinta-suave)">
-          @if ($created?->status === \App\Enums\ExperienceStatus::Published)
-            Cuando alguien reserve, te avisamos. Confirmás la reserva, recibís a tus invitados y el saldo se liquida después de la experiencia.
+          @if (auth()->user()->hasVerificationLevel(\App\Enums\VerificationLevel::Residence))
+            La revisamos y te avisamos por mail. Cuando esté aprobada, se publica sola.
           @else
-            Un administrador la revisa junto con tu verificación de domicilio. Cuando esté aprobada, se publica sola.
+            La revisamos junto con tu verificación de domicilio y te avisamos por mail. Cuando esté todo aprobado, se publica sola.
           @endif
         </p>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">

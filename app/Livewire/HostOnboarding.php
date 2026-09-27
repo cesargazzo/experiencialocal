@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\DietaryOption;
 use App\Enums\ExperienceStatus;
 use App\Enums\HostStatus;
 use App\Enums\VerificationLevel;
@@ -24,7 +25,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 /**
- * Alta de anfitrión en pasos: perfil, plan, primera experiencia, publicación.
+ * Alta de anfitrión en pasos: perfil, plan, primera experiencia, envío a revisión.
  * La verificación de identidad ya se exigió por middleware para llegar acá.
  */
 #[Layout('components.layout', ['noindex' => true])]
@@ -75,6 +76,9 @@ class HostOnboarding extends Component
 
     public string $first_time = '20:30';
 
+    /** @var list<string> Valores de DietaryOption que el anfitrión garantiza. */
+    public array $dietary_options = [];
+
     public ?Experience $created = null;
 
     public function mount(): void
@@ -117,6 +121,8 @@ class HostOnboarding extends Component
                 'first_date' => 'required|date|after:today',
                 'first_time' => 'required|date_format:H:i',
                 'cover' => ['required', ...$this->imageRules('cover')],
+                'dietary_options' => ['array'],
+                'dietary_options.*' => [Rule::enum(DietaryOption::class)],
             ],
             default => [],
         };
@@ -191,8 +197,10 @@ class HostOnboarding extends Component
                 'duration_minutes' => $this->duration_hours * 60,
                 'max_guests' => $this->max_guests,
                 'includes' => [],
-                'status' => $profile->isActive() ? ExperienceStatus::Published : ExperienceStatus::InReview,
-                'published_at' => $profile->isActive() ? now() : null,
+                'dietary_options' => array_values(array_unique($this->dietary_options)),
+                // Toda experiencia nueva pasa por la revisión de contenido antes de publicarse.
+                'status' => ExperienceStatus::InReview,
+                'published_at' => null,
             ]);
 
             // La fecha se carga en la hora del lugar y se guarda en UTC.
@@ -227,6 +235,7 @@ class HostOnboarding extends Component
             'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(),
             'categories' => Category::orderBy('sort_order')->get(),
             'countries' => Country::active()->with('provinces')->orderBy('name')->get(),
+            'dietaryOptions' => DietaryOption::cases(),
         ]);
     }
 }

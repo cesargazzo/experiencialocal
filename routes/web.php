@@ -5,6 +5,7 @@ use App\Http\Controllers\Account\InvitationController;
 use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\ExperienceController as AdminExperienceController;
 use App\Http\Controllers\Admin\PasswordPolicyController;
 use App\Http\Controllers\Admin\PlatformSettingsController;
 use App\Http\Controllers\Admin\SecurityLogController;
@@ -63,6 +64,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/verificaciones', [AdminVerificationController::class, 'index'])->name('verificaciones');
         Route::post('/verificaciones/{verification}/aprobar', [AdminVerificationController::class, 'approve'])->name('verificaciones.aprobar');
         Route::post('/verificaciones/{verification}/rechazar', [AdminVerificationController::class, 'reject'])->name('verificaciones.rechazar');
+        Route::get('/experiencias', [AdminExperienceController::class, 'index'])->name('experiencias');
+        Route::post('/experiencias/{experience}/aprobar', [AdminExperienceController::class, 'approve'])->name('experiencias.aprobar');
+        Route::post('/experiencias/{experience}/rechazar', [AdminExperienceController::class, 'reject'])->name('experiencias.rechazar');
         Route::get('/contrasenas', [PasswordPolicyController::class, 'edit'])->name('contrasenas');
         Route::get('/seguridad', [SecurityLogController::class, 'index'])->name('seguridad');
         Route::get('/auditoria', [AuditLogController::class, 'index'])->name('auditoria');

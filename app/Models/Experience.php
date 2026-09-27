@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\DietaryOption;
 use App\Enums\ExperienceStatus;
 use App\Jobs\NotifyInterestedUsers;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 #[Fillable([
     'host_profile_id', 'category_id', 'title', 'slug', 'type_label', 'summary', 'description', 'city', 'province_id',
     'country_code', 'price', 'currency', 'duration_minutes', 'max_guests', 'includes', 'cover_image_url', 'status', 'published_at',
+    'dietary_options', 'approved_at', 'approved_by', 'rejection_reason',
 ])]
 class Experience extends Model
 {
@@ -30,6 +33,8 @@ class Experience extends Model
             'includes' => 'array',
             'rating_avg' => 'decimal:2',
             'published_at' => 'datetime',
+            'dietary_options' => AsEnumCollection::of(DietaryOption::class),
+            'approved_at' => 'datetime',
         ];
     }
 
@@ -51,6 +56,11 @@ class Experience extends Model
     public function host(): BelongsTo
     {
         return $this->belongsTo(HostProfile::class, 'host_profile_id');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function province(): BelongsTo
@@ -98,6 +108,17 @@ class Experience extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class)->whereNotNull('published_at')->latest('published_at');
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            ExperienceStatus::Draft => $this->rejection_reason ? 'Para corregir' : 'Borrador',
+            ExperienceStatus::InReview => $this->approved_at ? 'Aprobada, falta el domicilio' : 'En revisión',
+            ExperienceStatus::Published => 'Publicada',
+            ExperienceStatus::Paused => 'Pausada',
+            ExperienceStatus::Archived => 'Archivada',
+        };
     }
 
     public function scopePublished(Builder $query): Builder

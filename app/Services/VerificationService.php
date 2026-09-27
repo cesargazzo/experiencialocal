@@ -241,7 +241,7 @@ class VerificationService
 
     /**
      * Al alcanzar el nivel 3, el perfil de anfitrión que estaba en revisión se
-     * activa y sus experiencias en revisión se publican solas.
+     * activa y sus experiencias con el contenido ya aprobado se publican solas.
      */
     private function activateHostIfEligible(User $user): void
     {
@@ -254,6 +254,7 @@ class VerificationService
         // Uno por uno para que se disparen los avisos a interesados.
         $profile->experiences()
             ->where('status', ExperienceStatus::InReview)
+            ->whereNotNull('approved_at')
             ->get()
             ->each(fn ($experience) => $experience->update(['status' => ExperienceStatus::Published, 'published_at' => now()]));
     }

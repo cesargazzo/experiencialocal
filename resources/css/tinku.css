@@ -230,6 +230,7 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--font-titulos); font-weight: 700; 
 .rating { color: var(--tinta); font-weight: 600; }
 .card__title { font: 600 22px/28px var(--font-titulos); letter-spacing: -0.005em; }
 .card__text { color: var(--tinta-suave); margin: 0; font-size: 15px; line-height: 22px; }
+.card__diet { margin: 8px 0 0; font: 600 13px/18px var(--font-texto); color: var(--texto-petroleo); }
 .card__foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; padding-top: var(--esp-3); border-top: 1px solid var(--linea); }
 .card__host { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; min-width: 0; }
 .card__host > span:not(.avatar):not(.badge) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -570,3 +571,10 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .spinner { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--linea); border-top-color: var(--petroleo); animation: spin 0.8s linear infinite; vertical-align: -1px; margin-right: 4px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 720px) { .upload { flex-direction: column; align-items: flex-start; } }
+
+/* Revisión de experiencias (admin) */
+.review-item { display: grid; grid-template-columns: 160px 1fr; gap: 20px; padding: 20px 0; border-top: 1px solid var(--linea); }
+.review-item:first-of-type { border-top: 0; }
+.review-item__img { width: 160px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radio-sm); background: var(--superficie-calida); }
+.review-item details summary { cursor: pointer; color: var(--texto-petroleo); font: 600 15px/22px var(--font-texto); }
+@media (max-width: 720px) { .review-item { grid-template-columns: 1fr; } .review-item__img { width: 100%; } }

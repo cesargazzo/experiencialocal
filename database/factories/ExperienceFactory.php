@@ -35,11 +35,12 @@ class ExperienceFactory extends Factory
             'includes' => [],
             'status' => ExperienceStatus::Published,
             'published_at' => now(),
+            'approved_at' => now(),
         ];
     }
 
     public function inReview(): static
     {
-        return $this->state(fn () => ['status' => ExperienceStatus::InReview, 'published_at' => null]);
+        return $this->state(fn () => ['status' => ExperienceStatus::InReview, 'published_at' => null, 'approved_at' => null]);
     }
 }

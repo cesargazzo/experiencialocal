@@ -70,6 +70,6 @@ class HostProfile extends Model
     {
         $max = $this->plan->max_experiences;
 
-        return $max === null || $this->experiences()->whereNotIn('status', ['archived'])->count() < $max;
+        return $max === null || $this->experiences()->whereNotIn('status', ['archived', 'draft'])->count() < $max;
     }
 }

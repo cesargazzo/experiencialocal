@@ -46,7 +46,7 @@
               <span><x-icon name="clock" :size="16" /> {{ $experience->durationLabel() }}</span>
               <span><x-icon name="users" :size="16" /> Hasta {{ $experience->max_guests }} personas</span>
               <span><x-icon name="map-pin" :size="16" /> {{ $experience->placeLabel() }}</span>
-              @if ($experience->status !== \App\Enums\ExperienceStatus::Published)<span class="meta--status">{{ $experience->status->value === 'in_review' ? 'En revisión' : ucfirst($experience->status->value) }}</span>@endif
+              @if ($experience->status !== \App\Enums\ExperienceStatus::Published)<span class="meta--status">{{ $experience->statusLabel() }}</span>@endif
             </div>
           </div>
         </div>
@@ -55,7 +55,15 @@
 
     <div class="container detail-layout">
       <div>
+        @if ($experience->rejection_reason && $experience->status === \App\Enums\ExperienceStatus::Draft && auth()->id() === $experience->host->user_id)
+          <p class="notice">No la pudimos publicar todavía. Motivo: {{ $experience->rejection_reason }}</p>
+        @endif
         <div class="detail-block"><h2>La experiencia</h2><p>{{ $experience->description }}</p></div>
+        @if ($experience->dietary_options?->isNotEmpty())
+          <div class="detail-block"><h2>Opciones de comida</h2>
+            <ul class="menu-list">@foreach ($experience->dietary_options as $option)<li><strong>{{ $option->label() }}</strong><span>{{ $option->hint() }}</span></li>@endforeach</ul>
+          </div>
+        @endif
         @if ($experience->includes)
           <div class="detail-block"><h2>Qué incluye</h2><ul class="menu-list">@foreach ($experience->includes as $i)<li><strong>{{ $i['label'] }}</strong><span>{{ $i['text'] }}</span></li>@endforeach</ul></div>
         @endif
