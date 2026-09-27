@@ -71,7 +71,10 @@
         <div class="book__row book__row--total"><span>Total</span><span>{{ money($this->subtotal + $this->serviceFee) }}</span></div>
       </div>
 
-      <button class="btn btn--primary btn--block" type="submit" wire:loading.attr="disabled">
+      @if ($this->existingBooking)
+        <p class="notice" style="margin-bottom:12px">Ya reservaste esta fecha ({{ Str::lower($this->existingBooking->status->label()) }}, código {{ $this->existingBooking->code }}). <a href="{{ route('cuenta.reservas') }}">Mirá tus reservas</a>.</p>
+      @endif
+      <button class="btn btn--primary btn--block" type="submit" wire:loading.attr="disabled" @disabled($this->existingBooking)>
         <span wire:loading.remove>{{ auth()->check() ? 'Reservá tu lugar' : 'Ingresá para reservar' }}</span>
         <span wire:loading>Enviando…</span>
       </button>

@@ -26,5 +26,11 @@
     @if ($booking->status === \App\Enums\BookingStatus::Requested)
       <p class="hint" style="margin:8px 0 0">El anfitrión confirma dentro de las 24 h. Recién ahí se cobra.</p>
     @endif
+    @if (in_array($booking->status, [\App\Enums\BookingStatus::Requested, \App\Enums\BookingStatus::Confirmed], true) && $booking->date->starts_at->isFuture())
+      <form method="post" action="{{ route('cuenta.reservas.cancelar', $booking) }}" style="margin-top:10px" onsubmit="return confirm('¿Cancelás tu reserva de {{ $experience->title }}? Le avisamos al anfitrión.')">
+        @csrf
+        <button class="btn btn--ghost btn--sm" type="submit">Cancelá la reserva</button>
+      </form>
+    @endif
   </div>
 </article>

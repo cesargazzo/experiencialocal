@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/cuenta/seguridad', [PasswordController::class, 'update'])->name('cuenta.seguridad.update');
     Route::get('/cuenta/avisos', [NotificationController::class, 'index'])->name('cuenta.avisos');
     Route::get('/cuenta/reservas', [AccountBookingController::class, 'index'])->name('cuenta.reservas');
+    Route::post('/cuenta/reservas/{booking}/cancelar', [AccountBookingController::class, 'cancel'])->name('cuenta.reservas.cancelar');
     Route::get('/cuenta/intereses', [InterestController::class, 'edit'])->name('cuenta.intereses');
     Route::put('/cuenta/intereses', [InterestController::class, 'update'])->name('cuenta.intereses.update');
     Route::middleware('verified.level:1')->group(function () {

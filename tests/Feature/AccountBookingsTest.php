@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\BookingStatus;
+use App\Exceptions\BookingException;
 use App\Models\Experience;
 use App\Models\ExperienceDate;
 use App\Models\User;
@@ -49,5 +50,40 @@ class AccountBookingsTest extends TestCase
     public function the_bookings_page_requires_login(): void
     {
         $this->get(route('cuenta.reservas'))->assertRedirect(route('login'));
+    }
+
+    #[Test]
+    public function a_person_cannot_book_the_same_date_twice_but_can_cancel_and_book_again(): void
+    {
+        $date = ExperienceDate::factory()->create(['starts_at' => now()->addWeek(), 'capacity' => 10]);
+        $guest = User::factory()->create();
+        $bookings = app(BookingService::class);
+        $first = $bookings->request($guest, $date, 2);
+
+        try {
+            $bookings->request($guest, $date, 1);
+            $this->fail('No debería permitir una segunda reserva para la misma fecha.');
+        } catch (BookingException $e) {
+            $this->assertStringContainsString("Ya tenés una reserva para esta fecha (código {$first->code})", $e->getMessage());
+        }
+        $this->assertSame(2, $date->fresh()->booked_count);
+
+        $this->actingAs($guest)->get(route('experiencias.show', $date->experience))->assertSee('Ya reservaste esta fecha');
+
+        $this->actingAs($guest)->post(route('cuenta.reservas.cancelar', $first))->assertSessionHasNoErrors();
+        $this->assertSame(BookingStatus::Cancelled, $first->fresh()->status);
+        $this->assertSame(0, $date->fresh()->booked_count);
+
+        $this->assertSame(4, $bookings->request($guest, $date, 4)->guests);
+    }
+
+    #[Test]
+    public function nobody_can_cancel_someone_elses_booking(): void
+    {
+        $date = ExperienceDate::factory()->create(['starts_at' => now()->addWeek(), 'capacity' => 10]);
+        $booking = app(BookingService::class)->request(User::factory()->create(), $date, 1);
+
+        $this->actingAs(User::factory()->create())->post(route('cuenta.reservas.cancelar', $booking))->assertNotFound();
+        $this->assertSame(BookingStatus::Requested, $booking->fresh()->status);
     }
 }

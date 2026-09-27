@@ -3,6 +3,7 @@
     <p class="eyebrow">Tu cuenta</p>
     <h1 class="title">Tus <span class="hl">reservas</span>.</h1>
     @include('account.partials.nav')
+    @error('booking')<p class="notice" role="alert">{{ $message }}</p>@enderror
 
     <section class="wizard__panel">
       <h2>Próximas</h2>

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\BookingStatus;
 use App\Enums\VerificationLevel;
 use App\Exceptions\BookingException;
 use App\Models\Booking;
@@ -35,6 +36,18 @@ class BookExperience extends Component
     public function getSelectedDateProperty(): ?ExperienceDate
     {
         return $this->experience->upcomingDates->firstWhere('id', $this->dateId);
+    }
+
+    /** La reserva activa que la persona ya tiene para la fecha elegida, si hay. */
+    public function getExistingBookingProperty(): ?Booking
+    {
+        return auth()->check() && $this->dateId
+            ? Booking::query()
+                ->where('experience_date_id', $this->dateId)
+                ->where('user_id', auth()->id())
+                ->whereIn('status', [BookingStatus::Requested, BookingStatus::Confirmed])
+                ->first()
+            : null;
     }
 
     public function getSubtotalProperty(): float

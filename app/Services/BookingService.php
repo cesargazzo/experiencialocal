@@ -47,6 +47,16 @@ class BookingService
             if ($experience->host->user_id === $user->getKey()) {
                 throw new BookingException('No podés reservar tu propia experiencia.');
             }
+            // Una reserva activa por fecha: para cambiar la cantidad de personas se cancela y se pide de nuevo.
+            // Se controla después del bloqueo de la fecha, así dos pedidos simultáneos no pasan los dos.
+            $existing = Booking::query()
+                ->where('experience_date_id', $locked->getKey())
+                ->where('user_id', $user->getKey())
+                ->whereIn('status', [BookingStatus::Requested, BookingStatus::Confirmed])
+                ->first();
+            if ($existing) {
+                throw new BookingException("Ya tenés una reserva para esta fecha (código {$existing->code}). Si querés cambiar la cantidad de personas, cancelala desde Tus reservas y pedí de nuevo.");
+            }
             if ($locked->seatsLeft() < $guests) {
                 throw new BookingException(sprintf('Quedan %d lugares en esta fecha.', $locked->seatsLeft()));
             }
