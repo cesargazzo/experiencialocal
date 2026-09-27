@@ -136,4 +136,26 @@ class VerificationServiceTest extends TestCase
 
         $this->assertSame(VerificationLevel::Contact, $user->fresh()->verification_level);
     }
+
+    #[Test]
+    public function an_argentine_dni_requires_the_sex_shown_on_the_document(): void
+    {
+        $user = User::factory()->level(VerificationLevel::Contact)->create(['nationality_code' => 'AR']);
+        $form = ['type' => 'document', 'document_country' => 'AR', 'document_type' => 'dni', 'document_number' => '27635186'];
+
+        $this->actingAs($user)->post(route('verificacion.store'), $form)
+            ->assertSessionHasErrors(['document_sex' => 'Elegí el sexo tal como figura en tu DNI.']);
+
+        $this->actingAs($user)->post(route('verificacion.store'), [...$form, 'document_sex' => 'Z'])->assertSessionHasErrors('document_sex');
+
+        $this->actingAs($user)->post(route('verificacion.store'), [...$form, 'document_sex' => 'X'])->assertSessionHasNoErrors();
+        $verification = $user->verifications()->where('type', 'document')->firstOrFail();
+        $this->assertStringNotContainsString('X', json_encode($verification->result ?? []), 'El sexo no se guarda.');
+        $this->assertStringNotContainsString('27635186', json_encode($verification->toArray()));
+
+        // Un pasaporte extranjero no lo pide.
+        $foreign = User::factory()->level(VerificationLevel::Contact)->create(['nationality_code' => 'IT']);
+        $this->actingAs($foreign)->post(route('verificacion.store'), ['type' => 'document', 'document_country' => 'IT', 'document_type' => 'passport', 'document_number' => 'YA123'])
+            ->assertSessionHasNoErrors();
+    }
 }

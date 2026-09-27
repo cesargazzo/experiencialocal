@@ -16,7 +16,7 @@
           <div class="field"><label for="birth_date">Fecha de nacimiento</label><input id="birth_date" name="birth_date" type="date" value="{{ old('birth_date') }}" min="1900-01-01" max="{{ now()->subYears(config('tinku.min_age'))->toDateString() }}" autocomplete="bday" required>@error('birth_date')<span class="error" style="display:block">{{ $message }}</span>@enderror<span class="hint">Tenés que tener al menos {{ config('tinku.min_age') }} años. No se muestra en tu perfil.</span></div>
           <div class="field"><label for="nationality_code">Nacionalidad</label>
             <select id="nationality_code" name="nationality_code" required>
-              @foreach (['AR' => 'Argentina', 'BO' => 'Bolivia', 'BR' => 'Brasil', 'CL' => 'Chile', 'CO' => 'Colombia', 'ES' => 'España', 'US' => 'Estados Unidos', 'FR' => 'Francia', 'DE' => 'Alemania', 'IT' => 'Italia', 'MX' => 'México', 'PY' => 'Paraguay', 'PE' => 'Perú', 'GB' => 'Reino Unido', 'UY' => 'Uruguay', 'XX' => 'Otro'] as $code => $name)
+              @foreach (\App\Support\CountryList::all() as $code => $name)
                 <option value="{{ $code }}" @selected(old('nationality_code', 'AR') === $code)>{{ $name }}</option>
               @endforeach
             </select>

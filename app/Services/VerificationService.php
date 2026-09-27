@@ -37,6 +37,7 @@ class VerificationService
             VerificationType::Address, VerificationType::Interview => VerificationProvider::Manual,
         };
 
+        // El sexo del DNI (document_sex) solo viaja al proveedor, que lo pide para validar; no se guarda.
         $documentHash = isset($attributes['document_number'])
             ? hash('sha256', strtoupper($attributes['document_country'] ?? 'AR').'|'.preg_replace('/\W/', '', $attributes['document_number']))
             : null;

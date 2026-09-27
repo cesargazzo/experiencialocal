@@ -8,10 +8,12 @@ use App\Models\Invitation;
 use App\Models\User;
 use App\Services\SecurityLog;
 use App\Services\VerificationService;
+use App\Support\CountryList;
 use App\Support\PlatformSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
@@ -31,7 +33,7 @@ class RegisterController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['required', 'string', 'max:32'],
             'birth_date' => ['required', ...User::birthDateRules()],
-            'nationality_code' => ['required', 'string', 'size:2'],
+            'nationality_code' => ['required', Rule::in(CountryList::codes())],
             'password' => ['required', 'confirmed', Password::defaults()],
         ], [
             'birth_date.before_or_equal' => 'Tenés que tener al menos '.config('tinku.min_age').' años para usar Tinku.',

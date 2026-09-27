@@ -437,6 +437,15 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .user-head { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; }
 .table input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--petroleo); }
 
+/* ---------- Formulario del documento ---------- */
+.summary > div:has(details[open]) { flex-direction: column; align-items: stretch; }
+.summary > div:has(details[open]) > span:last-child { width: 100%; }
+.summary > div:has(details[open]) > span:first-child { text-align: left; align-self: flex-start; }
+.doc-form > summary { list-style: none; cursor: pointer; }
+.doc-form > summary::-webkit-details-marker { display: none; }
+.doc-form[open] > summary { margin-bottom: 4px; }
+.doc-form form { text-align: left; }
+
 /* ---------- Asistente de pasos ---------- */
 .wizard { max-width: 760px; margin: 0 auto; padding: 48px 0 104px; }
 .wizard__progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 28px 0 36px; }

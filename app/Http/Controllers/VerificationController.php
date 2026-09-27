@@ -7,6 +7,7 @@ use App\Enums\VerificationType;
 use App\Exceptions\VerificationException;
 use App\Models\IdentityVerification;
 use App\Services\VerificationService;
+use App\Support\CountryList;
 use App\Support\PlatformSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -56,9 +57,16 @@ class VerificationController extends Controller
     {
         $data = $request->validate([
             'type' => ['required', Rule::enum(VerificationType::class)],
-            'document_country' => ['required_if:type,document', 'nullable', 'string', 'size:2'],
+            'document_country' => ['required_if:type,document', 'nullable', Rule::in(CountryList::codes())],
             'document_type' => ['required_if:type,document', 'nullable', Rule::in(['dni', 'passport', 'national_id'])],
             'document_number' => ['required_if:type,document', 'nullable', 'string', 'max:40'],
+            // RENAPER valida el DNI con el sexo que figura en el documento (F, M o X, Ley 27.636).
+            'document_sex' => [
+                Rule::requiredIf(fn () => $request->input('type') === 'document' && $request->input('document_country') === 'AR' && $request->input('document_type') === 'dni'),
+                'nullable', Rule::in(['F', 'M', 'X']),
+            ],
+        ], [
+            'document_sex.required' => 'Elegí el sexo tal como figura en tu DNI.',
         ]);
 
         $type = VerificationType::from($data['type']);

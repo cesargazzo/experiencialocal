@@ -44,13 +44,39 @@
               @endif
               @if (! $v?->isApproved() && $v?->status !== \App\Enums\VerificationStatus::Pending && $type !== \App\Enums\VerificationType::Interview)
                 @if ($type === \App\Enums\VerificationType::Document)
-                  <details style="display:inline-block"><summary class="btn btn--tertiary btn--sm" style="list-style:none;cursor:pointer">Validá tu documento</summary>
-                    <form method="post" action="{{ route('verificacion.store') }}" style="margin-top:12px;text-align:left">@csrf<input type="hidden" name="type" value="document">
-                      <div class="field"><label for="doc-country">País que lo emitió</label><input id="doc-country" name="document_country" value="{{ old('document_country', $user->nationality_code ?? 'AR') }}" maxlength="2" required></div>
-                      <div class="field"><label for="doc-type">Tipo</label><select id="doc-type" name="document_type"><option value="dni">DNI</option><option value="passport">Pasaporte</option><option value="national_id">Documento nacional</option></select></div>
-                      <div class="field"><label for="doc-number">Número</label><input id="doc-number" name="document_number" required><span class="hint">No se guarda en claro; solo un hash para evitar duplicados.</span></div>
+                  <details class="doc-form" @if ($errors->hasAny(['document_number', 'document_sex', 'document_country'])) open @endif>
+                    <summary class="btn btn--tertiary btn--sm">Validá tu documento</summary>
+                    <form method="post" action="{{ route('verificacion.store') }}" x-data="{ country: @js(old('document_country', $user->nationality_code ?? 'AR')), type: @js(old('document_type', 'dni')) }">
+                      @csrf
+                      <input type="hidden" name="type" value="document">
+                      <div class="grid-2">
+                        <div class="field"><label for="doc-country">País que lo emitió</label>
+                          <select id="doc-country" name="document_country" x-model="country" required>
+                            @foreach (\App\Support\CountryList::all() as $code => $name)<option value="{{ $code }}">{{ $name }}</option>@endforeach
+                          </select>
+                        </div>
+                        <div class="field"><label for="doc-type">Tipo</label>
+                          <select id="doc-type" name="document_type" x-model="type">
+                            <option value="dni">DNI</option><option value="passport">Pasaporte</option><option value="national_id">Documento nacional</option>
+                          </select>
+                        </div>
+                        <div class="field"><label for="doc-number">Número</label><input id="doc-number" name="document_number" inputmode="numeric" autocomplete="off" required>@error('document_number')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+                        <div class="field" x-show="country === 'AR' && type === 'dni'" x-cloak>
+                          <label for="doc-sex">Sexo según tu DNI</label>
+                          <select id="doc-sex" name="document_sex" x-bind:required="country === 'AR' && type === 'dni'" x-bind:disabled="!(country === 'AR' && type === 'dni')">
+                            <option value="">Elegí una opción</option>
+                            <option value="F" @selected(old('document_sex') === 'F')>F · Femenino</option>
+                            <option value="M" @selected(old('document_sex') === 'M')>M · Masculino</option>
+                            <option value="X" @selected(old('document_sex') === 'X')>X · No binario</option>
+                          </select>
+                          <span class="hint">RENAPER lo pide para validar tu DNI. Tiene que coincidir con el documento.</span>
+                          @error('document_sex')<span class="error" style="display:block">{{ $message }}</span>@enderror
+                        </div>
+                      </div>
+                      <p class="hint" style="margin:12px 0 0">No guardamos el número ni el sexo en claro: se usan para validar y, del número, solo guardamos una huella para evitar cuentas duplicadas.</p>
                       <button class="btn btn--secondary btn--sm" type="submit" style="margin-top:12px">Enviá</button>
-                    </form></details>
+                    </form>
+                  </details>
                 @else
                   <form method="post" action="{{ route('verificacion.store') }}" style="display:inline">@csrf<input type="hidden" name="type" value="{{ $type->value }}"><button class="btn btn--tertiary btn--sm" type="submit">{{ $type->level()->value === 3 ? 'Enviá el comprobante' : ($type === \App\Enums\VerificationType::Liveness ? 'Sacate la selfie' : 'Pedí el código') }}</button></form>
                 @endif
