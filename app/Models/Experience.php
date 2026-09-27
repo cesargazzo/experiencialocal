@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ExperienceStatus;
+use App\Jobs\NotifyInterestedUsers;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,6 +29,16 @@ class Experience extends Model
             'rating_avg' => 'decimal:2',
             'published_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // Al publicarse, se avisa a quienes tienen intereses que coinciden.
+        static::saved(function (Experience $experience): void {
+            if ($experience->status === ExperienceStatus::Published && ($experience->wasRecentlyCreated || $experience->wasChanged('status'))) {
+                NotifyInterestedUsers::dispatch($experience, 'published')->afterCommit()->delay(now()->addMinute());
+            }
+        });
     }
 
     public function getRouteKeyName(): string

@@ -251,9 +251,11 @@ class VerificationService
         }
 
         $profile->forceFill(['status' => HostStatus::Active])->save();
+        // Uno por uno para que se disparen los avisos a interesados.
         $profile->experiences()
             ->where('status', ExperienceStatus::InReview)
-            ->update(['status' => ExperienceStatus::Published->value, 'published_at' => now()]);
+            ->get()
+            ->each(fn ($experience) => $experience->update(['status' => ExperienceStatus::Published, 'published_at' => now()]));
     }
 
     /** País del documento ya enviado; si no hay, la nacionalidad declarada. */

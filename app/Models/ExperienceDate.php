@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ExperienceStatus;
+use App\Jobs\NotifyInterestedUsers;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +22,17 @@ class ExperienceDate extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // Una fecha nueva en una experiencia ya publicada también es una disponibilidad.
+        static::created(function (ExperienceDate $date): void {
+            $experience = $date->experience;
+            if ($experience && $experience->status === ExperienceStatus::Published && ! $experience->wasRecentlyCreated && $experience->published_at?->lt(now()->subMinutes(5))) {
+                NotifyInterestedUsers::dispatch($experience, 'new_date')->afterCommit()->delay(now()->addMinute());
+            }
+        });
     }
 
     public function experience(): BelongsTo

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Account\InterestController;
 use App\Http\Controllers\Account\InvitationController;
 use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Account\ProfileController;
@@ -43,6 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/cuenta', [ProfileController::class, 'update'])->name('cuenta.perfil.update');
     Route::get('/cuenta/seguridad', [PasswordController::class, 'edit'])->name('cuenta.seguridad');
     Route::put('/cuenta/seguridad', [PasswordController::class, 'update'])->name('cuenta.seguridad.update');
+    Route::get('/cuenta/intereses', [InterestController::class, 'edit'])->name('cuenta.intereses');
+    Route::put('/cuenta/intereses', [InterestController::class, 'update'])->name('cuenta.intereses.update');
     Route::middleware('verified.level:1')->group(function () {
         Route::get('/cuenta/invitaciones', [InvitationController::class, 'index'])->name('cuenta.invitaciones');
         Route::post('/cuenta/invitaciones/email', [InvitationController::class, 'sendEmail'])->middleware('throttle:10,1')->name('cuenta.invitaciones.email');

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -41,12 +42,28 @@ class User extends Authenticatable
             'password_changed_at' => 'datetime',
             'verification_level' => VerificationLevel::class,
             'is_admin' => 'boolean',
+            'interest_alerts' => 'boolean',
         ];
     }
 
     public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
     {
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    public function interestedCategories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class);
+    }
+
+    public function interestedProvinces(): BelongsToMany
+    {
+        return $this->belongsToMany(Province::class);
+    }
+
+    public function hasInterests(): bool
+    {
+        return $this->interestedCategories()->exists() || $this->interestedProvinces()->exists();
     }
 
     public function securityEvents(): HasMany
