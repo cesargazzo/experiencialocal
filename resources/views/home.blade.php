@@ -1,4 +1,4 @@
-<x-layout>
+<x-layout :canonical="$activeCategory ? route('home', ['cat' => $activeCategory->slug]) : route('home')" :title="$activeCategory ? $activeCategory->name.' con gente local' : null">
   <section class="hero" id="inicio">
     <div class="container hero__grid">
       <div>

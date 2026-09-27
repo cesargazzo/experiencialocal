@@ -1,4 +1,4 @@
-<x-layout title="Verificaciones pendientes">
+<x-layout title="Verificaciones pendientes" :noindex="true">
   <main class="container wizard" style="max-width:920px">
     <p class="eyebrow">Administración</p>
     <h1 class="title">Verificaciones <span class="hl">pendientes</span>.</h1>

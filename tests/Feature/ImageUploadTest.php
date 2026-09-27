@@ -38,11 +38,13 @@ class ImageUploadTest extends TestCase
         Storage::disk('public')->assertMissing($media->original_path);
         $this->assertSame([3000, 2000], [$media->width, $media->height]);
 
-        foreach (['card' => [800, 600], 'hero' => [1920, 1080], 'og' => [1200, 630]] as $name => [$width, $height]) {
+        foreach (['card' => [800, 600, 'webp'], 'hero' => [1920, 1080, 'webp'], 'og' => [1200, 630, 'jpg']] as $name => [$width, $height, $format]) {
             $path = $media->variants[$name]['path'];
             Storage::disk('public')->assertExists($path);
             $binary = Storage::disk('public')->get($path);
-            $this->assertSame('WEBP', substr($binary, 8, 4));
+            $format === 'webp'
+                ? $this->assertSame('WEBP', substr($binary, 8, 4))
+                : $this->assertSame("\xFF\xD8", substr($binary, 0, 2));
             $this->assertStringNotContainsString('EXIF', $binary, 'Las versiones públicas no llevan metadatos.');
             [$actualWidth, $actualHeight] = getimagesizefromstring($binary);
             $this->assertSame([$width, $height], [$actualWidth, $actualHeight]);

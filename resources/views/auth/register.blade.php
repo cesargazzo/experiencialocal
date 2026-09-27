@@ -1,4 +1,4 @@
-<x-layout title="Crear cuenta">
+<x-layout title="Creá tu cuenta" :noindex="true">
   <main class="container wizard" style="max-width:640px">
     <p class="eyebrow">Tu cuenta</p>
     <h1 class="title">Creá tu <span class="hl">cuenta</span>.</h1>

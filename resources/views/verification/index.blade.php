@@ -1,4 +1,4 @@
-<x-layout title="Verificación de identidad">
+<x-layout title="Verificación de identidad" :noindex="true">
   <main class="container wizard" style="max-width:820px">
     <p class="eyebrow">Tu identidad</p>
     <h1 class="title">Nivel <span class="hl">{{ $user->verification_level->value }}</span> · {{ $user->verification_level->label() }}</h1>

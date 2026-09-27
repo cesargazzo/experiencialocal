@@ -21,6 +21,8 @@ php artisan serve
 
 Cuentas demo (contraseña `password`): `admin@tinku.test` (administradora), `marta@tinku.test` (anfitriona nivel 3), `lucia@tinku.test` (participante nivel 2).
 
+Administradores: `php artisan tinku:admin email@dominio.com --name="Nombre"` crea o promueve la cuenta y muestra una contraseña de única vez, que vence en 24 horas y hay que cambiar al ingresar. Con `--revoke` quita el permiso.
+
 Tests: `php artisan test` (usa la base `tinku_test` en PostgreSQL, configurada en `phpunit.xml`). Formato: `vendor/bin/pint`.
 
 ## Qué hay implementado
@@ -35,7 +37,14 @@ Tests: `php artisan test` (usa la base `tinku_test` en PostgreSQL, configurada e
 | Centro de verificación | `/verificacion` | El usuario ve su nivel y envía cada verificación. Fuera de producción los proveedores externos se simulan. |
 | Administración | `/admin/verificaciones` | Cola de verificaciones pendientes con aprobar y rechazar. Solo administradores. |
 
-Los proveedores reales (RENAPER, Metamap, email transaccional, SMS, Mercado Pago) todavía no están conectados: los puntos de integración están marcados en los servicios.
+| Contraseñas | `/admin/contrasenas` | Política configurable (largo, mayúsculas, números, símbolos, filtraciones) y bloqueo por intentos fallidos. Contraseña de única vez con cambio obligatorio. |
+| Geografía y hora | `database/seeders/GeographySeeder.php` | Países y las 24 provincias argentinas con su zona horaria. Las fechas se guardan en UTC y se muestran en la hora del lugar. |
+| Fotos | `app/Services/ImageService.php` | Original privado y versiones WebP optimizadas, sin metadatos. Avatares y foto de cada experiencia. |
+| SEO | `resources/views/components/layout.blade.php` | Metadatos, Open Graph, tarjetas de X, canonical, JSON-LD, `robots.txt` y `sitemap.xml`. Solo producción se indexa, salvo `TINKU_INDEXABLE=true`. |
+| Mails | Mandrill por SMTP | Código de verificación de email con la marca. Configuración en `.env.example`. |
+| Analytics | `GOOGLE_ANALYTICS_ID` | Google Analytics 4, solo si el ID está cargado. |
+
+Los proveedores de identidad (RENAPER, Metamap), SMS y Mercado Pago todavía no están conectados: los puntos de integración están marcados en los servicios.
 
 ## Prototipo estático
 

@@ -26,7 +26,7 @@ use Livewire\WithFileUploads;
  * Alta de anfitrión en pasos: perfil, plan, primera experiencia, publicación.
  * La verificación de identidad ya se exigió por middleware para llegar acá.
  */
-#[Layout('components.layout')]
+#[Layout('components.layout', ['noindex' => true])]
 #[Title('Registro de anfitrión')]
 class HostOnboarding extends Component
 {

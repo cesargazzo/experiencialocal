@@ -1,24 +1,85 @@
-@props(['title' => null, 'description' => 'Tinku: viví el lugar con su gente. Comidas en casa, clases de cocina, paseos y talleres con personas locales.'])
+@props([
+    'title' => null,
+    'description' => 'Comidas en casa, clases de cocina, paseos y talleres con personas locales. En Tinku reservás con la gente que vive ahí.',
+    'image' => null,
+    'imageAlt' => null,
+    'type' => 'website',
+    'canonical' => null,
+    'noindex' => false,
+    'jsonLd' => null,
+])
 @php
     $environmentLabel = match (app()->environment()) {
         'staging' => 'Entorno de prueba',
         'local' => 'Entorno local',
         default => 'Entorno '.app()->environment(),
     };
+    $fullTitle = $title ? $title.' · Tinku' : 'Tinku · Viví el lugar con su gente';
+    $description = Str::limit(trim(preg_replace('/\s+/', ' ', $description)), 158);
+    $canonical ??= url()->current();
+    $image ??= asset('brand/tinku-og.png');
+    $imageAlt ??= 'Tinku. Viví el lugar con su gente.';
+    $indexable = config('tinku.indexable') && ! $noindex;
+    $analyticsId = config('services.google_analytics.id');
 @endphp
 <!doctype html>
 <html lang="es-AR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ $fullTitle }}</title>
   <meta name="description" content="{{ $description }}">
+  <meta name="robots" content="{{ $indexable ? 'index, follow, max-image-preview:large' : 'noindex, nofollow' }}">
+  <link rel="canonical" href="{{ $canonical }}">
   <meta name="theme-color" content="#FFF6EE">
-  <title>{{ $title ? $title.' · Tinku' : 'Tinku · Viví el lugar con su gente' }}</title>
+
+  {{-- Open Graph: LinkedIn, Facebook, WhatsApp --}}
+  <meta property="og:site_name" content="Tinku">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:type" content="{{ $type }}">
+  <meta property="og:title" content="{{ $title ?? 'Tinku · Viví el lugar con su gente' }}">
+  <meta property="og:description" content="{{ $description }}">
+  <meta property="og:url" content="{{ $canonical }}">
+  <meta property="og:image" content="{{ $image }}">
+  <meta property="og:image:secure_url" content="{{ $image }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ $imageAlt }}">
+
+  {{-- X / Twitter --}}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ $title ?? 'Tinku · Viví el lugar con su gente' }}">
+  <meta name="twitter:description" content="{{ $description }}">
+  <meta name="twitter:image" content="{{ $image }}">
+  <meta name="twitter:image:alt" content="{{ $imageAlt }}">
+
+  <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="32x32 48x48">
   <link rel="icon" type="image/svg+xml" href="{{ asset('brand/tinku-avatar.svg') }}">
-  <link rel="apple-touch-icon" href="{{ asset('brand/tinku-avatar.svg') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('brand/tinku-icon-192.png') }}">
+  <link rel="apple-touch-icon" href="{{ asset('brand/tinku-icon-180.png') }}">
+  <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">{!! json_encode($jsonLd ?? [
+      '@context' => 'https://schema.org',
+      '@graph' => [
+          ['@type' => 'Organization', '@id' => url('/').'#organizacion', 'name' => 'Tinku', 'url' => url('/'), 'logo' => asset('brand/tinku-icon-512.png'), 'slogan' => 'Viví el lugar con su gente'],
+          ['@type' => 'WebSite', '@id' => url('/').'#sitio', 'name' => 'Tinku', 'url' => url('/'), 'inLanguage' => 'es-AR', 'publisher' => ['@id' => url('/').'#organizacion']],
+      ],
+  ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
+
+  @if ($analyticsId)
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ urlencode($analyticsId) }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', @json($analyticsId));
+    </script>
+  @endif
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   @livewireStyles
 </head>

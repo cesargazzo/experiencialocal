@@ -1,4 +1,39 @@
-<x-layout :title="$experience->title" :description="$experience->summary">
+@php
+  $nextDate = $experience->upcomingDates->first(fn ($d) => $d->seatsLeft() > 0) ?? $experience->upcomingDates->first();
+  $shareImage = $experience->coverUrl('og');
+  $metaDescription = $experience->summary.' Con '.$experience->host->display_name.' en '.$experience->placeLabel().'. Desde '.money($experience->price).' por persona.';
+  $jsonLd = ['@context' => 'https://schema.org', '@graph' => array_values(array_filter([
+      $nextDate ? [
+          '@type' => 'Event',
+          'name' => $experience->title,
+          'description' => $experience->description,
+          'url' => route('experiencias.show', $experience),
+          'image' => [$shareImage],
+          'startDate' => $nextDate->localStart()->toIso8601String(),
+          'endDate' => $nextDate->ends_at?->copy()->timezone($experience->timezone())->toIso8601String(),
+          'eventStatus' => 'https://schema.org/EventScheduled',
+          'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
+          'location' => ['@type' => 'Place', 'name' => $experience->placeLabel(), 'address' => ['@type' => 'PostalAddress', 'addressLocality' => $experience->city, 'addressRegion' => $experience->province?->name, 'addressCountry' => $experience->country_code]],
+          'organizer' => ['@type' => 'Person', 'name' => $experience->host->display_name],
+          'maximumAttendeeCapacity' => $experience->max_guests,
+          'offers' => ['@type' => 'Offer', 'url' => route('experiencias.show', $experience), 'price' => (string) $experience->price, 'priceCurrency' => $experience->currency, 'availability' => $nextDate->seatsLeft() > 0 ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut', 'validFrom' => $experience->published_at?->toIso8601String()],
+      ] : null,
+      ['@type' => 'BreadcrumbList', 'itemListElement' => [
+          ['@type' => 'ListItem', 'position' => 1, 'name' => 'Tinku', 'item' => route('home')],
+          ['@type' => 'ListItem', 'position' => 2, 'name' => $experience->category->name, 'item' => route('home', ['cat' => $experience->category->slug])],
+          ['@type' => 'ListItem', 'position' => 3, 'name' => $experience->title],
+      ]],
+  ]))];
+@endphp
+<x-layout
+  :title="$experience->title.' en '.$experience->city"
+  :description="$metaDescription"
+  :image="$shareImage"
+  :image-alt="$experience->title"
+  :canonical="route('experiencias.show', $experience)"
+  :noindex="$experience->status !== \App\Enums\ExperienceStatus::Published"
+  :json-ld="$jsonLd"
+>
   <main>
     <section class="detail-hero">
       <div class="container">

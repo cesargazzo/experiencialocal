@@ -16,6 +16,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Indexación en buscadores
+    |--------------------------------------------------------------------------
+    |
+    | Solo producción se indexa por defecto, para que un entorno de prueba no
+    | compita en Google con el sitio real. TINKU_INDEXABLE=true lo fuerza.
+    |
+    */
+
+    'indexable' => (bool) env('TINKU_INDEXABLE', env('APP_ENV') === 'production'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Política de contraseñas
     |--------------------------------------------------------------------------
     |
@@ -64,7 +76,8 @@ return [
                 'variants' => [
                     'card' => [800, 600],
                     'hero' => [1920, 1080],
-                    'og' => [1200, 630],
+                    // Redes sociales: LinkedIn y otras no siempre aceptan WebP.
+                    'og' => [1200, 630, 'jpg'],
                 ],
             ],
         ],

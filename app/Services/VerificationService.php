@@ -11,6 +11,7 @@ use App\Enums\VerificationType;
 use App\Exceptions\VerificationException;
 use App\Models\IdentityVerification;
 use App\Models\User;
+use App\Notifications\VerificationCodeNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -99,12 +100,18 @@ class VerificationService
     }
 
     /**
-     * Envío del código. Pendiente: integrar email transaccional y SMS/WhatsApp.
-     * Mientras tanto queda en el log para no bloquear el desarrollo.
+     * El código de email sale por mail (Mandrill). El de teléfono queda en el
+     * log hasta integrar un proveedor de SMS o WhatsApp.
      */
     private function deliverCode(User $user, VerificationType $type, string $code): void
     {
-        Log::info('Código de verificación generado', ['user' => $user->id, 'type' => $type->value, 'code' => app()->isProduction() ? '***' : $code]);
+        if ($type === VerificationType::Email) {
+            $user->notify(new VerificationCodeNotification($code));
+
+            return;
+        }
+
+        Log::info('Código de verificación de teléfono generado', ['user' => $user->id, 'code' => app()->isProduction() ? '***' : $code]);
     }
 
     /** Aprueba una verificación (webhook del proveedor o decisión de un administrador). */

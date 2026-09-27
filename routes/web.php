@@ -7,11 +7,14 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SeoController;
 use App\Http\Controllers\VerificationController;
 use App\Livewire\HostOnboarding;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/experiencias/{experience}', [ExperienceController::class, 'show'])->name('experiencias.show');
 
 Route::middleware('guest')->group(function () {

@@ -1,4 +1,4 @@
-<x-layout title="Cambiá tu contraseña">
+<x-layout title="Cambiá tu contraseña" :noindex="true">
   <main class="container wizard" style="max-width:560px">
     <p class="eyebrow">Tu cuenta</p>
     <h1 class="title">Cambiá tu <span class="hl">contraseña</span>.</h1>

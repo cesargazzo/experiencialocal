@@ -1,4 +1,4 @@
-<x-layout title="Política de contraseñas">
+<x-layout title="Política de contraseñas" :noindex="true">
   <main class="container wizard" style="max-width:820px">
     <p class="eyebrow">Administración</p>
     <h1 class="title">Política de <span class="hl">contraseñas</span>.</h1>

@@ -58,9 +58,11 @@ class ImageService
         $variants = [];
 
         try {
-            foreach ($settings['variants'] as $name => [$targetWidth, $targetHeight]) {
-                $path = "media/{$collection}/{$uuid}/{$name}.webp";
-                $binary = $this->encodeCover($source, $targetWidth, $targetHeight);
+            foreach ($settings['variants'] as $name => $variant) {
+                [$targetWidth, $targetHeight] = $variant;
+                $format = $variant[2] ?? 'webp';
+                $path = "media/{$collection}/{$uuid}/{$name}.{$format}";
+                $binary = $this->encodeCover($source, $targetWidth, $targetHeight, $format);
                 Storage::disk($variantsDisk)->put($path, $binary, 'public');
                 $variants[$name] = ['path' => $path, 'width' => $targetWidth, 'height' => $targetHeight, 'size' => strlen($binary)];
             }
@@ -120,8 +122,8 @@ class ImageService
         return $image;
     }
 
-    /** Recorta al centro para cubrir exactamente el tamaño pedido y lo codifica en WebP. */
-    private function encodeCover(GdImage $source, int $targetWidth, int $targetHeight): string
+    /** Recorta al centro para cubrir exactamente el tamaño pedido y lo codifica en WebP o JPEG. */
+    private function encodeCover(GdImage $source, int $targetWidth, int $targetHeight, string $format = 'webp'): string
     {
         $sourceWidth = imagesx($source);
         $sourceHeight = imagesy($source);
@@ -136,8 +138,17 @@ class ImageService
         imagesavealpha($canvas, true);
         imagecopyresampled($canvas, $source, 0, 0, $cropX, $cropY, $targetWidth, $targetHeight, $cropWidth, $cropHeight);
 
+        if ($format === 'jpg') {
+            // JPEG no tiene transparencia: fondo blanco antes de copiar.
+            imagealphablending($canvas, true);
+            imagefill($canvas, 0, 0, imagecolorallocate($canvas, 255, 255, 255));
+            imagecopyresampled($canvas, $source, 0, 0, $cropX, $cropY, $targetWidth, $targetHeight, $cropWidth, $cropHeight);
+        }
+
         ob_start();
-        imagewebp($canvas, null, (int) config('tinku.images.quality'));
+        $format === 'jpg'
+            ? imagejpeg($canvas, null, 85)
+            : imagewebp($canvas, null, (int) config('tinku.images.quality'));
         $binary = (string) ob_get_clean();
         imagedestroy($canvas);
 

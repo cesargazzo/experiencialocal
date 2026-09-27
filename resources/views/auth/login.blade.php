@@ -1,4 +1,4 @@
-<x-layout title="Ingresar">
+<x-layout title="Ingresar" :noindex="true">
   <main class="container wizard" style="max-width:520px">
     <p class="eyebrow">Tu cuenta</p>
     <h1 class="title">Hola de <span class="hl">nuevo</span>.</h1>

@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'google_analytics' => [
+        // ID de medición de Google Analytics 4, por ejemplo G-XXXXXXXXXX. Vacío: no se carga.
+        'id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
 ];

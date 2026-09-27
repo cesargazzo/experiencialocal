@@ -1,0 +1,14 @@
+{
+  "name": "Tinku",
+  "short_name": "Tinku",
+  "description": "Viví el lugar con su gente.",
+  "lang": "es-AR",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#FFF6EE",
+  "theme_color": "#FFF6EE",
+  "icons": [
+    { "src": "/brand/tinku-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/brand/tinku-icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
