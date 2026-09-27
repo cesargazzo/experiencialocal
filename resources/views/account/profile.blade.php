@@ -23,7 +23,7 @@
             @error('last_name')<span class="error" style="display:block">{{ $message }}</span>@enderror
           </div>
         </div>
-        <span class="hint" style="display:block;margin:-8px 0 16px">
+        <span class="hint" style="display:block;margin:8px 0 0">
           {{ $nameLocked ? 'Tu nombre quedó validado con tu documento, así que no se puede cambiar desde acá.' : 'Como figuran en tu documento.' }}
           Tu apellido solo lo ven personas con la identidad validada; el resto ve solo tu nombre.
         </span>
@@ -38,8 +38,9 @@
           @error('birth_date')<span class="error" style="display:block">{{ $message }}</span>@enderror
         </div>
         @php($selectedCountry = old('country_code', $user->country_code ?? 'AR'))
-        <fieldset class="field-group" x-data="{ country: @js($selectedCountry) }" style="border:0;padding:0;margin:0">
-          <legend class="hint" style="margin-bottom:8px">Dónde vivís. Lo podés cambiar cuando te mudes.</legend>
+        <fieldset class="field-group" x-data="{ country: @js($selectedCountry) }">
+          <legend>Dónde vivís</legend>
+          <span class="hint">Lo podés cambiar cuando te mudes.</span>
           <div class="grid-2">
             <div class="field">
               <label for="country_code">País de residencia</label>
@@ -74,6 +75,8 @@
             </div>
           </div>
         </fieldset>
+        <fieldset class="field-group">
+          <legend>Contacto</legend>
         <div class="grid-2">
           <div class="field">
             <label for="email">Email</label>
@@ -84,7 +87,8 @@
             <input id="phone" value="{{ $user->phone }}" disabled>
           </div>
         </div>
-        <p class="hint" style="margin-top:12px">El email y el teléfono están validados. Para cambiarlos, escribinos y lo hacemos verificando tu identidad.</p>
+        <p class="hint" style="margin:12px 0 0">El email y el teléfono están validados. Para cambiarlos, escribinos y lo hacemos verificando tu identidad.</p>
+        </fieldset>
         <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit">Guardá tus datos</button></div>
       </form>
     </section>

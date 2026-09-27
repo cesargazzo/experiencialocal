@@ -691,3 +691,9 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .map--picker { height: 380px; cursor: crosshair; }
 .map-pin { width: 26px; height: 26px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 4px #FFFFFF, 0 2px 8px rgba(20, 34, 54, .35); cursor: grab; }
 .leaflet-container { font-family: var(--font-texto); }
+
+/* Grupos de campos dentro de un formulario (por ejemplo, "Dónde vivís" en el perfil) */
+.field-group { border: 0; padding: 24px 0 0; margin: 24px 0 0; border-top: 1px solid var(--linea); min-width: 0; }
+.field-group > legend { float: left; width: 100%; padding: 0; margin: 0 0 4px; font: 700 18px/24px var(--font-titulos); color: var(--tinta); }
+.field-group > legend + .hint { display: block; clear: both; }
+.field label .hint { font-size: 13px; line-height: 18px; font-weight: 600; }
