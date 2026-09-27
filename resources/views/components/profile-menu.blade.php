@@ -23,6 +23,7 @@
       </div>
     </div>
     <a href="{{ route('cuenta.perfil') }}"><x-icon name="user-circle" :size="18" /> Perfil y foto</a>
+    <a href="{{ route('cuenta.reservas') }}"><x-icon name="calendar-blank" :size="18" /> Mis reservas</a>
     <a href="{{ route('cuenta.intereses') }}"><x-icon name="heart" :size="18" /> Intereses y avisos</a>
     <a href="{{ route('cuenta.seguridad') }}"><x-icon name="shield-check" :size="18" /> Seguridad y contraseña</a>
     <a href="{{ route('verificacion') }}"><x-icon name="seal-check" :size="18" /> Verificación de identidad</a>

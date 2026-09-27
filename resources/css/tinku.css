@@ -587,3 +587,16 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .diet-check .is-ok { color: var(--texto-petroleo); font-weight: 600; }
 .diet-check .is-missing { color: var(--tinta); }
 .diet-check .is-missing::before { content: "!"; display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--coral); color: var(--tinta); font: 700 11px/1 var(--font-texto); }
+
+/* Reservas de la persona */
+.booking-item { display: grid; grid-template-columns: 120px 1fr; gap: 20px; padding: 20px 0; border-top: 1px solid var(--linea); }
+.booking-item:first-of-type { border-top: 0; }
+.booking-item__img { display: block; aspect-ratio: 1; border-radius: var(--radio-sm); background: var(--superficie-calida) center / cover no-repeat; }
+.booking-item__title { margin: 0; font-size: 20px; line-height: 26px; }
+.booking-item__title a { color: inherit; text-decoration: none; }
+.booking-item__meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0 10px; color: var(--tinta-suave); font-size: 14px; }
+.booking-item__facts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; font-size: 15px; }
+.booking-item__facts li { display: flex; gap: 8px; align-items: center; }
+.booking-item__facts .icon { color: var(--texto-petroleo); flex-shrink: 0; }
+.booking-item__facts small { color: var(--tinta-suave); }
+@media (max-width: 720px) { .booking-item { grid-template-columns: 80px 1fr; gap: 14px; } .booking-item__facts { grid-template-columns: 1fr; } }
