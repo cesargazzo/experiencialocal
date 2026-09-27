@@ -9,6 +9,7 @@ use App\Livewire\HostOnboarding;
 use App\Models\Category;
 use App\Models\Experience;
 use App\Models\HostProfile;
+use App\Models\Media;
 use App\Models\Province;
 use App\Models\User;
 use App\Notifications\ExperienceReviewedNotification;
@@ -133,6 +134,21 @@ class ExperienceModerationTest extends TestCase
 
         $this->assertSame(ExperienceStatus::Published, $approved->fresh()->status);
         $this->assertSame(ExperienceStatus::InReview, $notReviewed->fresh()->status);
+    }
+
+    #[Test]
+    public function the_review_list_says_when_the_photo_is_still_processing_instead_of_a_broken_image(): void
+    {
+        $experience = Experience::factory()->inReview()->create();
+        $experience->morphMany(Media::class, 'mediable')->create([
+            'uuid' => fake()->uuid(), 'collection' => 'cover', 'status' => 'processing', 'original_disk' => 'local', 'original_path' => 'media/cover.jpg',
+            'mime_type' => 'image/jpeg', 'size' => 1000, 'width' => 1600, 'height' => 1000, 'variants_disk' => 'public',
+        ]);
+
+        $this->actingAs(User::factory()->admin()->create())->get(route('admin.experiencias'))
+            ->assertOk()
+            ->assertSee('La foto se está procesando')
+            ->assertDontSee('class="review-item__img" src=""', false);
     }
 
     #[Test]

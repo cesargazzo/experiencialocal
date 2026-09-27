@@ -15,7 +15,7 @@ class ExperienceController extends Controller
     public function index(): View
     {
         $inReview = Experience::query()
-            ->with(['host.user', 'category', 'province', 'cover'])
+            ->with(['host.user', 'category', 'province', 'cover', 'latestCoverUpload'])
             ->where('status', ExperienceStatus::InReview)
             ->oldest()
             ->get();

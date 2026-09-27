@@ -76,6 +76,12 @@ class Experience extends Model
         );
     }
 
+    /** Última foto subida, esté lista o no: sirve para mostrar si se está procesando o falló. */
+    public function latestCoverUpload(): MorphOne
+    {
+        return $this->morphOne(Media::class, 'mediable')->ofMany(['id' => 'max'], fn ($query) => $query->where('collection', 'cover'));
+    }
+
     /**
      * Foto subida en la versión pedida (card, hero, og). Si no hay, la URL de
      * portada cargada a mano (datos demo).

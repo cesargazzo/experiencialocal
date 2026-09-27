@@ -9,7 +9,19 @@
       <p>Revisá que el texto y la foto sean reales y respetuosos: nada de insultos, datos de contacto ni fotos de stock. Si la rechazás, el motivo le llega al anfitrión por mail.</p>
       @forelse ($pending as $experience)
         <article class="review-item">
-          <img class="review-item__img" src="{{ $experience->coverUrl('card') }}" alt="" loading="lazy">
+          @if ($coverUrl = $experience->coverUrl('card'))
+            <img class="review-item__img" src="{{ $coverUrl }}" alt="Foto de {{ $experience->title }}" loading="lazy">
+          @else
+            <div class="review-item__img review-item__img--empty">
+              @if ($experience->latestCoverUpload?->isProcessing())
+                La foto se está procesando. Si en unos minutos sigue así, revisá que la cola esté corriendo.
+              @elseif ($experience->latestCoverUpload?->status === 'failed')
+                No se pudo procesar la foto. Pedile al anfitrión que suba otra.
+              @else
+                Sin foto.
+              @endif
+            </div>
+          @endif
           <div>
             <h3 style="margin:0"><a href="{{ route('experiencias.show', $experience) }}" target="_blank" rel="noopener">{{ $experience->title }}</a></h3>
             <p class="hint" style="margin:4px 0 8px">
