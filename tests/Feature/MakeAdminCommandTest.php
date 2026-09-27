@@ -35,14 +35,14 @@ class MakeAdminCommandTest extends TestCase
         $this->assertAuthenticatedAs($user);
 
         // Hasta cambiarla, cualquier página lleva al cambio de contraseña.
-        $this->get(route('admin.verificaciones'))->assertRedirect(route('cuenta.contrasena'));
-        $this->get(route('home'))->assertRedirect(route('cuenta.contrasena'));
+        $this->get(route('admin.verificaciones'))->assertRedirect(route('cuenta.seguridad'));
+        $this->get(route('home'))->assertRedirect(route('cuenta.seguridad'));
 
-        $this->put(route('cuenta.contrasena.update'), [
+        $this->put(route('cuenta.seguridad.update'), [
             'current_password' => $temporary, 'password' => $temporary, 'password_confirmation' => $temporary,
         ])->assertSessionHasErrors('password');
 
-        $this->put(route('cuenta.contrasena.update'), [
+        $this->put(route('cuenta.seguridad.update'), [
             'current_password' => $temporary, 'password' => 'NuevaClave2026', 'password_confirmation' => 'NuevaClave2026',
         ])->assertSessionHasNoErrors();
 

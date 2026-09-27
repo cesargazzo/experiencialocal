@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\Account\PasswordController;
+use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\PasswordPolicyController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SeoController;
@@ -22,12 +25,18 @@ Route::middleware('guest')->group(function () {
     Route::post('/ingresar', [LoginController::class, 'store']);
     Route::get('/registrarme', [RegisterController::class, 'create'])->name('register');
     Route::post('/registrarme', [RegisterController::class, 'store']);
+    Route::get('/olvide-mi-contrasena', [ForgotPasswordController::class, 'create'])->name('password.request');
+    Route::post('/olvide-mi-contrasena', [ForgotPasswordController::class, 'store'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/restablecer-contrasena/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/restablecer-contrasena', [ResetPasswordController::class, 'store'])->middleware('throttle:10,1')->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {
     Route::post('/salir', [LoginController::class, 'destroy'])->name('logout');
-    Route::get('/cuenta/contrasena', [PasswordController::class, 'edit'])->name('cuenta.contrasena');
-    Route::put('/cuenta/contrasena', [PasswordController::class, 'update'])->name('cuenta.contrasena.update');
+    Route::get('/cuenta', [ProfileController::class, 'edit'])->name('cuenta.perfil');
+    Route::put('/cuenta', [ProfileController::class, 'update'])->name('cuenta.perfil.update');
+    Route::get('/cuenta/seguridad', [PasswordController::class, 'edit'])->name('cuenta.seguridad');
+    Route::put('/cuenta/seguridad', [PasswordController::class, 'update'])->name('cuenta.seguridad.update');
     Route::get('/verificacion', [VerificationController::class, 'index'])->name('verificacion');
     Route::post('/verificacion', [VerificationController::class, 'store'])->name('verificacion.store');
     Route::post('/verificacion/codigo', [VerificationController::class, 'confirm'])->name('verificacion.confirmar');

@@ -28,9 +28,9 @@ class ProfilePhoto extends Component
         $user = auth()->user();
         $images->replace($user, 'avatar', $this->photo, $user->name);
 
-        $this->reset('photo');
-        $user->unsetRelation('avatar');
-        session()->flash('photo-status', 'Actualizamos tu foto.');
+        // Recarga la página para que la foto nueva se vea también en el encabezado.
+        session()->flash('status', 'Actualizamos tu foto.');
+        $this->redirectRoute('cuenta.perfil');
     }
 
     public function render()

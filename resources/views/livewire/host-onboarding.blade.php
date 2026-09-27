@@ -43,7 +43,8 @@
             @endif
           </div>
           <div class="upload__body">
-            <input id="avatar" type="file" wire:model="avatar" accept="image/jpeg,image/png,image/webp">
+            <input id="avatar" class="sr-only" type="file" wire:model="avatar" accept="image/jpeg,image/png,image/webp">
+            <label for="avatar" class="btn btn--tertiary btn--sm upload__pick">{{ $avatar || auth()->user()->avatar ? 'Cambiá tu foto' : 'Elegí una foto' }}</label>
             <span class="hint">Una foto tuya, de frente y con buena luz. JPG, PNG o WebP de al menos 200 × 200 px.</span>
             <span class="hint" wire:loading wire:target="avatar">Subiendo…</span>
             @error('avatar')<span class="error" style="display:block">{{ $message }}</span>@enderror
@@ -82,7 +83,8 @@
             @endif
           </div>
           <div class="upload__body">
-            <input id="cover" type="file" wire:model="cover" accept="image/jpeg,image/png,image/webp">
+            <input id="cover" class="sr-only" type="file" wire:model="cover" accept="image/jpeg,image/png,image/webp">
+            <label for="cover" class="btn btn--tertiary btn--sm upload__pick">{{ $cover ? 'Cambiá la foto' : 'Elegí una foto' }}</label>
             <span class="hint">Mostrá a las personas haciendo algo, con luz natural y en tu lugar. Nada de fotos de stock. Al menos 1200 × 800 px.</span>
             <span class="hint" wire:loading wire:target="cover">Subiendo…</span>
             @error('cover')<span class="error" style="display:block">{{ $message }}</span>@enderror

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\VerificationLevel;
+use App\Notifications\ResetPasswordNotification;
 use App\Support\PasswordPolicy;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -39,6 +40,11 @@ class User extends Authenticatable
             'verification_level' => VerificationLevel::class,
             'is_admin' => 'boolean',
         ];
+    }
+
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 
     public function hostProfile(): HasOne

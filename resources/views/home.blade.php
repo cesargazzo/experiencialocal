@@ -82,6 +82,7 @@
     </div>
   </section>
 
+  @if ($plans->isNotEmpty())
   <section class="section section--dark" id="como-ganas">
     <div class="container split" x-data="{ price: 40000, rate: {{ (float) $plans->first()->commission_rate }}, plan: '{{ $plans->first()->name }}', fmt(n) { return '$ ' + Math.round(n).toLocaleString('es-AR'); } }">
       <div>
@@ -127,6 +128,7 @@
       </div>
     </div>
   </section>
+  @endif
 
   @if ($testimonials->isNotEmpty())
   <section class="section section--alt">

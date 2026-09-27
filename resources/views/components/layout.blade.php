@@ -99,15 +99,11 @@
         <a href="{{ route('home') }}#como-ganas">Cómo ganás</a>
         <a href="{{ route('home') }}#planes">Planes</a>
         @auth
-          <a href="{{ route('verificacion') }}" title="Tu verificación de identidad">{{ Str::before(auth()->user()->name, ' ') }} <x-verification-badge :level="auth()->user()->verification_level" /></a>
-          @if (auth()->user()->isAdmin())
-            <a href="{{ route('admin.verificaciones') }}">Administración</a>
-          @endif
-          <form method="post" action="{{ route('logout') }}" style="display:inline">@csrf<button class="btn btn--ghost btn--sm" type="submit">Salir</button></form>
           <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">{{ auth()->user()->isHost() ? 'Mi perfil de anfitrión' : 'Quiero ser anfitrión' }}</a>
+          <x-profile-menu />
         @else
-          <a href="{{ route('login') }}">Ingresar</a>
           <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">Quiero ser anfitrión</a>
+          <a href="{{ route('login') }}">Ingresar</a>
         @endauth
       </nav>
     </div>

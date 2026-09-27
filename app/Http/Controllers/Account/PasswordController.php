@@ -12,7 +12,7 @@ class PasswordController extends Controller
 {
     public function edit(Request $request): View
     {
-        return view('account.password', ['forced' => $request->user()->must_change_password]);
+        return view('account.security', ['forced' => $request->user()->must_change_password]);
     }
 
     public function update(Request $request): RedirectResponse

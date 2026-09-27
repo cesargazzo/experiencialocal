@@ -15,8 +15,8 @@ class EnsurePasswordIsChanged
     {
         $user = $request->user();
 
-        if ($user?->must_change_password && ! $request->routeIs('cuenta.contrasena', 'cuenta.contrasena.update', 'logout')) {
-            return redirect()->route('cuenta.contrasena')->with('status', 'Elegí una contraseña nueva para seguir.');
+        if ($user?->must_change_password && ! $request->routeIs('cuenta.seguridad', 'cuenta.seguridad.update', 'logout')) {
+            return redirect()->route('cuenta.seguridad')->with('status', 'Elegí una contraseña nueva para seguir.');
         }
 
         return $next($request);

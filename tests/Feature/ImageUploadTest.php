@@ -76,13 +76,14 @@ class ImageUploadTest extends TestCase
 
         Livewire::actingAs($user)->test(ProfilePhoto::class)
             ->set('photo', UploadedFile::fake()->image('yo.jpg', 600, 800))
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertRedirect(route('cuenta.perfil'));
 
         $avatar = $user->fresh()->avatar;
         $this->assertNotNull($avatar);
         Storage::disk('public')->assertExists($avatar->variants['sm']['path']);
 
-        $this->actingAs($user)->get(route('verificacion'))->assertSee($avatar->url('md'), false);
+        $this->actingAs($user)->get(route('cuenta.perfil'))->assertSee($avatar->url('md'), false);
     }
 
     #[Test]
