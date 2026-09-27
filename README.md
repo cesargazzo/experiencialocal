@@ -45,8 +45,15 @@ Las fotos se cargan desde Unsplash y las tipografías desde Google Fonts, así q
 | Nivel | Cómo se obtiene | Habilita |
 | --- | --- | --- |
 | 1 · Contacto | Email y teléfono confirmados con código | Navegar y guardar favoritas. |
-| 2 · Documento | DNI o pasaporte validado contra RENAPER, más selfie con prueba de vida | Reservar y pagar. Publicar como anfitrión en modo revisión. |
+| 2 · Documento | Documento de identidad validado más selfie con prueba de vida. Argentinos: DNI contra RENAPER. Extranjeros: pasaporte o documento nacional validado por un proveedor internacional (lectura de la zona MRZ, chip NFC cuando lo tiene, detección de fraude) | Reservar y pagar. Publicar como anfitrión en modo revisión. |
 | 3 · Identidad y domicilio | Nivel 2 más comprobante de domicilio del lugar donde recibe, y videollamada o visita si el administrador lo pide | Publicar y cobrar sin restricciones. Insignia en el perfil. |
+
+**Nacionalidades.** Los participantes serán en gran parte turistas, así que la verificación no puede depender de un registro nacional. La regla es: un solo flujo de verificación para el usuario, con el validador elegido según el país del documento.
+
+- Argentina: RENAPER, que devuelve coincidencia de datos y foto.
+- Resto del mundo: un proveedor de KYC con cobertura global (por ejemplo Metamap, Sumsub, Veriff u Onfido). Validan más de 200 países, hacen prueba de vida y detectan documentos adulterados.
+- Se guarda el país emisor y el tipo de documento, y el nivel alcanzado es el mismo sin importar la nacionalidad.
+- Para anfitriones extranjeros residentes, el nivel 3 exige además comprobante de residencia en el país donde reciben.
 
 Reglas complementarias:
 
@@ -67,7 +74,7 @@ En el prototipo, cada anfitrión muestra su insignia de nivel en las tarjetas y 
 ## Próximos pasos sugeridos
 
 1. Backend y base de datos para anfitriones, experiencias, fechas y reservas.
-2. Autenticación con roles y verificación de identidad por niveles (RENAPER, prueba de vida, domicilio).
+2. Autenticación con roles y verificación de identidad por niveles (RENAPER para argentinos, proveedor de KYC internacional para extranjeros, prueba de vida, domicilio).
 3. Pasarela de pagos (Mercado Pago) con retención hasta la confirmación del anfitrión.
 4. Búsqueda por ciudad y fecha con disponibilidad real.
 5. Panel del anfitrión: calendario, reservas, liquidaciones y estadísticas.
