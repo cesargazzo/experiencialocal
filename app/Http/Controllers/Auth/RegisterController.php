@@ -26,7 +26,7 @@ class RegisterController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['required', 'string', 'max:32'],
             'nationality_code' => ['required', 'string', 'size:2'],
-            'password' => ['required', 'confirmed', Password::min(8)],
+            'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
         $user = User::create([...$data, 'country_code' => $data['nationality_code']]);

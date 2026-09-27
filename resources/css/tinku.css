@@ -348,7 +348,20 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .review p { margin: 0; color: var(--tinta); font-size: 16px; line-height: 24px; }
 
 /* ---------- Formularios ---------- */
-.field { display: grid; gap: 6px; margin-top: var(--esp-3); }
+.field { display: grid; gap: 6px; margin-top: var(--esp-3); align-content: start; }
+[x-cloak] { display: none !important; }
+.password-field { position: relative; }
+.password-field .password-field__input { padding-right: 52px; }
+.password-field__toggle { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); width: 40px; height: 40px; border: 0; border-radius: var(--radio-sm); background: transparent; color: var(--tinta-suave); display: grid; place-items: center; }
+.password-field__toggle:hover { color: var(--tinta); background: var(--superficie-calida); }
+.password-field__toggle span { display: grid; }
+.requirements { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 2px; font-size: 14px; line-height: 20px; color: var(--tinta-suave); }
+.requirements li { display: flex; gap: 6px; align-items: center; }
+.requirements .icon { color: var(--texto-petroleo); }
+.admin-nav { display: flex; gap: var(--esp-2); flex-wrap: wrap; margin-bottom: var(--esp-4); }
+.toggle-row { display: flex; gap: 12px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--linea); cursor: pointer; }
+.toggle-row input { margin-top: 5px; width: 18px; height: 18px; accent-color: var(--petroleo); }
+.toggle-row small { display: block; color: var(--tinta-suave); font-size: 14px; line-height: 20px; }
 .field label { font: 600 14px/18px var(--font-texto); color: var(--tinta); }
 .field select, .field input, .field textarea { border: 1.5px solid var(--linea); border-radius: var(--radio-sm); padding: 12px 14px; font: 400 16px/22px var(--font-texto); background: var(--superficie); color: var(--tinta); width: 100%; }
 .field select:focus, .field input:focus, .field textarea:focus { outline: 3px solid var(--foco); outline-offset: 2px; border-color: var(--petroleo); }

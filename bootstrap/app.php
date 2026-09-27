@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureIsAdmin;
+use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Middleware\EnsureVerificationLevel;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            EnsurePasswordIsChanged::class,
+        ]);
+
         $middleware->alias([
             'admin' => EnsureIsAdmin::class,
             'verified.level' => EnsureVerificationLevel::class,

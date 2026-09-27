@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Account\PasswordController;
+use App\Http\Controllers\Admin\PasswordPolicyController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -21,6 +23,8 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/salir', [LoginController::class, 'destroy'])->name('logout');
+    Route::get('/cuenta/contrasena', [PasswordController::class, 'edit'])->name('cuenta.contrasena');
+    Route::put('/cuenta/contrasena', [PasswordController::class, 'update'])->name('cuenta.contrasena.update');
     Route::get('/verificacion', [VerificationController::class, 'index'])->name('verificacion');
     Route::post('/verificacion', [VerificationController::class, 'store'])->name('verificacion.store');
     Route::post('/verificacion/codigo', [VerificationController::class, 'confirm'])->name('verificacion.confirmar');
@@ -32,5 +36,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/verificaciones', [AdminVerificationController::class, 'index'])->name('verificaciones');
         Route::post('/verificaciones/{verification}/aprobar', [AdminVerificationController::class, 'approve'])->name('verificaciones.aprobar');
         Route::post('/verificaciones/{verification}/rechazar', [AdminVerificationController::class, 'reject'])->name('verificaciones.rechazar');
+        Route::get('/contrasenas', [PasswordPolicyController::class, 'edit'])->name('contrasenas');
+        Route::put('/contrasenas', [PasswordPolicyController::class, 'update'])->name('contrasenas.update');
     });
 });

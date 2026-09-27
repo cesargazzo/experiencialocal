@@ -3,6 +3,7 @@
     <p class="eyebrow">Tu identidad</p>
     <h1 class="title">Nivel <span class="hl">{{ $user->verification_level->value }}</span> · {{ $user->verification_level->label() }}</h1>
     <p class="lead">La identidad es el eje de Tinku. Cada nivel habilita más acciones y es el mismo para cualquier nacionalidad.</p>
+    <p style="margin:-16px 0 32px"><a class="btn btn--tertiary btn--sm" href="{{ route('cuenta.contrasena') }}"><x-icon name="key" :size="16" /> Cambiá tu contraseña</a></p>
 
     <div class="steps" style="grid-template-columns:repeat(3,1fr)">
       @foreach ([1 => ['Navegar y guardar favoritas', 'Email y teléfono confirmados con código.'], 2 => ['Reservar, pagar y publicar en revisión', 'Documento validado más selfie con prueba de vida.'], 3 => ['Publicar y cobrar sin restricciones', 'Domicilio validado y revisión de un administrador.']] as $lvl => [$enables, $how])

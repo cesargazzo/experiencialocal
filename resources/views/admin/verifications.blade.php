@@ -2,6 +2,7 @@
   <main class="container wizard" style="max-width:920px">
     <p class="eyebrow">Administración</p>
     <h1 class="title">Verificaciones <span class="hl">pendientes</span>.</h1>
+    @include('admin.partials.nav')
     <section class="wizard__panel">
       @forelse ($pending as $v)
         <div class="summary"><div style="align-items:center;gap:20px">
