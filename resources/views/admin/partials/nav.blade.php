@@ -6,6 +6,7 @@
   <a @class(['chip', 'is-active' => request()->routeIs('admin.terminos*')]) href="{{ route('admin.terminos') }}">Términos</a>
   <a @class(['chip', 'is-active' => request()->routeIs('admin.contrasenas')]) href="{{ route('admin.contrasenas') }}">Contraseñas</a>
   <a @class(['chip', 'is-active' => request()->routeIs('admin.seguridad')]) href="{{ route('admin.seguridad') }}">Seguridad</a>
+  <a @class(['chip', 'is-active' => request()->routeIs('admin.registro')]) href="{{ route('admin.registro') }}">Errores</a>
   <a @class(['chip', 'is-active' => request()->routeIs('admin.auditoria')]) href="{{ route('admin.auditoria') }}">Auditoría</a>
   <a @class(['chip', 'is-active' => request()->routeIs('admin.configuracion')]) href="{{ route('admin.configuracion') }}">Configuración</a>
 </nav>

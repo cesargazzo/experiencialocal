@@ -18,6 +18,7 @@
 <div class="field">
   <label for="what_to_bring">{{ $category?->has_difficulty ? 'Qué llevar y cómo vestirse' : 'Qué llevar' }} <span class="hint">(opcional)</span></label>
   <textarea id="what_to_bring" rows="2" maxlength="500" wire:model="what_to_bring" placeholder="{{ $category?->has_difficulty ? 'Zapatillas cómodas, abrigo liviano, protector solar y agua.' : 'Nada: está todo incluido. O, por ejemplo, un delantal.' }}"></textarea>
+  <x-char-count :max="500" />
   @error('what_to_bring')<span class="error" style="display:block">{{ $message }}</span>@enderror
 </div>
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ExperienceController as AdminExperienceController;
+use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\Admin\PasswordPolicyController;
 use App\Http\Controllers\Admin\PlatformSettingsController;
 use App\Http\Controllers\Admin\SecurityLogController;
@@ -97,6 +98,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/terminos/{terms}/aceptaciones', [AdminTermsController::class, 'acceptances'])->name('terminos.aceptaciones');
         Route::get('/contrasenas', [PasswordPolicyController::class, 'edit'])->name('contrasenas');
         Route::get('/seguridad', [SecurityLogController::class, 'index'])->name('seguridad');
+        Route::get('/registro', [LogController::class, 'index'])->name('registro');
+        Route::get('/registro/{file}/descargar', [LogController::class, 'download'])->where('file', '[\w.-]+\.log')->name('registro.descargar');
         Route::get('/auditoria', [AuditLogController::class, 'index'])->name('auditoria');
         Route::get('/configuracion', [PlatformSettingsController::class, 'edit'])->name('configuracion');
         Route::put('/configuracion', [PlatformSettingsController::class, 'update'])->name('configuracion.update');

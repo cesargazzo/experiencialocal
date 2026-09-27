@@ -101,8 +101,8 @@
         </div>
       </div>
     </div>
-    <div class="field"><label for="summary">Resumen (una línea)</label><input id="summary" wire:model="summary" maxlength="200">@error('summary')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
-    <div class="field"><label for="description">Descripción</label><textarea id="description" rows="6" wire:model="description"></textarea>@error('description')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+    <div class="field"><label for="summary">Resumen (una línea)</label><input id="summary" wire:model="summary" maxlength="200"><x-char-count :max="200" />@error('summary')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+    <div class="field"><label for="description">Descripción</label><textarea id="description" rows="6" wire:model="description"></textarea><x-char-count :min="80" />@error('description')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
     <div class="wizard__actions"><a class="btn btn--ghost" href="{{ route('anfitrion.panel') }}">Volver</a><button class="btn btn--primary" type="button" wire:click="save" wire:loading.attr="disabled">Guardá los cambios</button></div>
   </section>
 </main>

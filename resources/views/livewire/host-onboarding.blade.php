@@ -51,7 +51,7 @@
           </div>
         </div>
       </div>
-      <div class="field"><label>Contanos sobre vos</label><textarea rows="3" wire:model="bio" placeholder="Qué cocinás, qué lugares conocés, por qué querés recibir gente."></textarea>@error('bio')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+      <div class="field"><label>Contanos sobre vos</label><textarea rows="3" wire:model="bio" maxlength="1000" placeholder="Qué cocinás, qué lugares conocés, por qué querés recibir gente."></textarea><x-char-count :min="40" :max="1000" />@error('bio')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="wizard__actions"><a class="btn btn--ghost" href="{{ route('home') }}">Cancelar</a><button class="btn btn--secondary" type="button" wire:click="next">Continuá <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
     </section>
 
@@ -91,8 +91,8 @@
           </div>
         </div>
       </div>
-      <div class="field"><label>Resumen (una línea)</label><input wire:model="summary" maxlength="200" placeholder="Empanadas, cabrito y sobremesa con recetas de familia.">@error('summary')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
-      <div class="field"><label>Descripción</label><textarea rows="4" wire:model="description" placeholder="Qué van a vivir, qué incluye, qué tienen que traer."></textarea>@error('description')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+      <div class="field"><label>Resumen (una línea)</label><input wire:model="summary" maxlength="200" placeholder="Empanadas, cabrito y sobremesa con recetas de familia."><x-char-count :max="200" />@error('summary')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+      <div class="field"><label>Descripción</label><textarea rows="4" wire:model="description" placeholder="Qué van a vivir, qué incluye, qué tienen que traer."></textarea><x-char-count :min="80" />@error('description')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       @include('livewire.partials.experience-details')
       <div class="wizard__actions"><button class="btn btn--ghost" type="button" wire:click="back">Volver</button><button class="btn btn--secondary" type="button" wire:click="next">Revisá <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
     </section>

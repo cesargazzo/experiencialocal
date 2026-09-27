@@ -37,6 +37,7 @@ class SecurityEvent extends Model
         'policy.updated' => 'Política de contraseñas',
         'verification.approved' => 'Verificación aprobada',
         'verification.revoked' => 'Verificación revocada',
+        'log.downloaded' => 'Descarga del registro de errores',
         'user.validation_blocked' => 'Validación manual frenada',
         'verification.rejected' => 'Verificación rechazada',
         'access.forbidden' => 'Acceso denegado',
