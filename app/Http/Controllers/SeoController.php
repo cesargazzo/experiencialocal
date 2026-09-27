@@ -31,6 +31,9 @@ class SeoController extends Controller
 
     public function sitemap(): Response
     {
+        // Sin indexación no se ofrece mapa del sitio.
+        abort_unless(config('tinku.indexable'), 404);
+
         $experiences = Experience::published()->select(['slug', 'updated_at'])->orderByDesc('updated_at')->get();
 
         return response()

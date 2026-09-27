@@ -67,12 +67,14 @@ return [
     | Indexación en buscadores
     |--------------------------------------------------------------------------
     |
-    | Solo producción se indexa por defecto, para que un entorno de prueba no
-    | compita en Google con el sitio real. TINKU_INDEXABLE=true lo fuerza.
+    | Apagado por defecto: el sitio no se indexa hasta que se prenda a mano con
+    | TINKU_INDEXABLE=true. Apagado, robots.txt bloquea todo, cada respuesta lleva
+    | noindex (meta y X-Robots-Tag) y no hay sitemap.
     |
     */
 
-    'indexable' => (bool) env('TINKU_INDEXABLE', env('APP_ENV') === 'production'),
+    // Apagado hasta que se decida abrir el sitio a los buscadores: se prende con TINKU_INDEXABLE=true.
+    'indexable' => (bool) env('TINKU_INDEXABLE', false),
 
     /*
     |--------------------------------------------------------------------------

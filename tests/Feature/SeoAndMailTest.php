@@ -51,8 +51,9 @@ class SeoAndMailTest extends TestCase
         $this->get(route('login'))->assertSee('<meta name="robots" content="noindex, nofollow">', false);
 
         config(['tinku.indexable' => false]);
-        $this->get(route('home'))->assertSee('<meta name="robots" content="noindex, nofollow">', false);
+        $this->get(route('home'))->assertSee('<meta name="robots" content="noindex, nofollow">', false)->assertHeader('X-Robots-Tag', 'noindex, nofollow');
         $this->get('/robots.txt')->assertOk()->assertSee("Disallow: /\n", false);
+        $this->get(route('sitemap'))->assertNotFound();
     }
 
     #[Test]

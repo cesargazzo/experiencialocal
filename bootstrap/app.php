@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\BlockIndexingWhenDisabled;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureIsAdmin;
 use App\Http\Middleware\EnsurePasswordIsChanged;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
+            BlockIndexingWhenDisabled::class,
             EnsureAccountIsActive::class,
             EnsurePasswordIsChanged::class,
             EnsureTermsAccepted::class,
