@@ -23,6 +23,7 @@
         <div class="field">
           <label for="password_confirmation">Repetí la contraseña nueva</label>
           <x-password-input name="password_confirmation" autocomplete="new-password" />
+          <x-password-match />
         </div>
         <div class="wizard__actions">
           @if ($forced)

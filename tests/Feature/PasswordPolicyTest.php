@@ -86,11 +86,28 @@ class PasswordPolicyTest extends TestCase
     }
 
     #[Test]
-    public function password_fields_offer_show_and_hide(): void
+    public function password_fields_offer_show_and_hide_and_live_feedback(): void
     {
         $this->get(route('register'))
             ->assertOk()
             ->assertSee('aria-label="Mostrar contraseña"', false)
-            ->assertSee('Al menos 10 caracteres');
+            ->assertSee('Al menos 10 caracteres')
+            ->assertSee('Las contraseñas no coinciden.');
+    }
+
+    #[Test]
+    public function the_live_checks_mirror_the_configured_policy(): void
+    {
+        $checks = PasswordPolicy::fromArray(['min_length' => 12, 'require_mixed_case' => true, 'require_symbols' => true])->clientChecks();
+
+        $this->assertSame(12, $checks[0]['minLength']);
+        $this->assertSame(['\\p{Lu}', '\\p{Ll}'], $checks[1]['patterns']);
+        $this->assertSame('Al menos un símbolo, como ! o #', $checks[2]['label']);
+    }
+
+    #[Test]
+    public function the_login_page_does_not_list_demo_accounts(): void
+    {
+        $this->get(route('login'))->assertOk()->assertDontSee('tinku.test');
     }
 }

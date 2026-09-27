@@ -358,7 +358,18 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .password-field__toggle span { display: grid; }
 .requirements { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 2px; font-size: 14px; line-height: 20px; color: var(--tinta-suave); }
 .requirements li { display: flex; gap: 6px; align-items: center; }
-.requirements .icon { color: var(--texto-petroleo); }
+.requirement__icon { display: none; width: 16px; justify-content: center; }
+.requirement[data-state="ok"] { color: var(--texto-petroleo); }
+.requirement[data-state="ok"] .requirement__icon--ok { display: inline-flex; }
+.requirement[data-state="missing"] { color: var(--texto-coral); }
+.requirement[data-state="missing"] .requirement__icon--missing { display: inline-flex; }
+.requirement[data-state="empty"] .requirement__icon--empty,
+.requirement[data-state="pending"] .requirement__icon--empty,
+.requirement:not([data-state]) .requirement__icon--empty { display: inline-flex; color: var(--linea); }
+.match { margin: 4px 0 0; font-size: 14px; line-height: 20px; font-weight: 600; min-height: 20px; }
+.match span { display: inline-flex; gap: 6px; align-items: center; }
+.match__bad { color: var(--texto-coral); }
+.match__ok { color: var(--texto-petroleo); }
 .admin-nav { display: flex; gap: var(--esp-2); flex-wrap: wrap; margin-bottom: var(--esp-4); }
 .toggle-row { display: flex; gap: 12px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--linea); cursor: pointer; }
 .toggle-row input { margin-top: 5px; width: 18px; height: 18px; accent-color: var(--petroleo); }

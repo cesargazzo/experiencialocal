@@ -19,7 +19,7 @@
             <span class="hint">Define cómo validamos tu documento. Argentinos por RENAPER; el resto por un proveedor internacional.</span>
           </div>
           <div class="field"><label for="password">Contraseña</label><x-password-input name="password" autocomplete="new-password" aria-describedby="password-requirements" />@error('password')<span class="error" style="display:block">{{ $message }}</span>@enderror<x-password-requirements id="password-requirements" /></div>
-          <div class="field"><label for="password_confirmation">Repetí la contraseña</label><x-password-input name="password_confirmation" autocomplete="new-password" /></div>
+          <div class="field"><label for="password_confirmation">Repetí la contraseña</label><x-password-input name="password_confirmation" autocomplete="new-password" /><x-password-match /></div>
         </div>
         <div class="wizard__actions"><a class="btn btn--ghost" href="{{ route('login') }}">Ya tengo cuenta</a><button class="btn btn--secondary" type="submit">Creá tu cuenta <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
       </form>

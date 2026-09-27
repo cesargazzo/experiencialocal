@@ -84,6 +84,25 @@ class PasswordPolicy
     }
 
     /**
+     * Los mismos requisitos que valida el servidor, para chequearlos en vivo en
+     * el navegador. Las expresiones son las que usa la regla Password de Laravel.
+     *
+     * @return list<array{label: string, minLength?: int, patterns?: list<string>, serverOnly?: bool}>
+     */
+    public function clientChecks(): array
+    {
+        return array_values(array_filter([
+            ['label' => "Al menos {$this->minLength} caracteres", 'minLength' => $this->minLength],
+            $this->requireMixedCase
+                ? ['label' => 'Mayúsculas y minúsculas', 'patterns' => ['\\p{Lu}', '\\p{Ll}']]
+                : ['label' => 'Al menos una letra', 'patterns' => ['\\p{L}']],
+            $this->requireNumbers ? ['label' => 'Al menos un número', 'patterns' => ['\\p{N}']] : null,
+            $this->requireSymbols ? ['label' => 'Al menos un símbolo, como ! o #', 'patterns' => ['[\\p{Z}\\p{S}\\p{P}]']] : null,
+            $this->checkUncompromised ? ['label' => 'Que no aparezca en filtraciones conocidas (lo revisamos al guardar)', 'serverOnly' => true] : null,
+        ]));
+    }
+
+    /**
      * Requisitos en palabras, para mostrar junto al campo.
      *
      * @return list<string>
