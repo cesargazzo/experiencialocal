@@ -88,5 +88,27 @@
         <p class="hint">Todavía no cargaste experiencias. <a href="{{ route('anfitrion.registro') }}">Creá la primera</a>.</p>
       @endforelse
     </section>
+
+    <section class="wizard__panel" id="opiniones">
+      <h2>Opiniones</h2>
+      @error('reply')<p class="notice" role="alert">{{ $message }}</p>@enderror
+      @forelse ($reviews as $review)
+        <div class="review" style="padding:16px 0;border-top:1px solid var(--linea)">
+          <header><strong>{{ $review->user->publicName() }}</strong><span>{{ $review->experience->title }} · <x-stars :rating="$review->rating" /></span></header>
+          <p>{{ $review->body }}</p>
+          @if ($review->host_reply)
+            <p class="review__reply"><strong>Tu respuesta:</strong> {{ $review->host_reply }}</p>
+          @else
+            <form method="post" action="{{ route('anfitrion.opiniones.responder', $review) }}" style="display:grid;gap:8px">
+              @csrf
+              <textarea name="host_reply" rows="2" maxlength="1000" required placeholder="Agradecé o contá algo más. Tu respuesta se ve en la experiencia."></textarea>
+              <span><button class="btn btn--tertiary btn--sm" type="submit">Respondé</button></span>
+            </form>
+          @endif
+        </div>
+      @empty
+        <p class="hint">Todavía no tenés opiniones. Llegan después de cada experiencia realizada.</p>
+      @endforelse
+    </section>
   </main>
 </x-layout>

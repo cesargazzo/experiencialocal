@@ -31,6 +31,24 @@
     @if ($booking->status === \App\Enums\BookingStatus::Requested)
       <p class="hint" style="margin:8px 0 0">El anfitrión confirma dentro de las 24 h. Recién ahí se cobra.</p>
     @endif
+    @if ($booking->review)
+      <p class="host-booking__note" style="margin:10px 0 0"><strong>Tu opinión:</strong> <x-stars :rating="$booking->review->rating" /> {{ Str::limit($booking->review->body, 140) }}</p>
+    @elseif ($booking->status === \App\Enums\BookingStatus::Completed && $booking->completed_at?->gt(now()->subDays(\App\Http\Controllers\ReviewController::WINDOW_DAYS)))
+      <form method="post" action="{{ route('cuenta.reservas.opinion', $booking) }}" class="review-form" id="opinar-{{ $booking->id }}">
+        @csrf
+        <p style="margin:0 0 6px"><strong>¿Cómo te fue?</strong></p>
+        <div class="star-input" role="radiogroup" aria-label="Calificación">
+          @for ($i = 5; $i >= 1; $i--)
+            <input type="radio" id="rating-{{ $booking->id }}-{{ $i }}" name="rating" value="{{ $i }}" @checked((int) old('rating') === $i) required>
+            <label for="rating-{{ $booking->id }}-{{ $i }}" title="{{ $i }} de 5"><x-icon name="star" :size="26" /><span class="sr-only">{{ $i }} de 5</span></label>
+          @endfor
+        </div>
+        <textarea name="body" rows="3" maxlength="1500" required placeholder="Qué te gustó, cómo te recibieron, qué recomendarías.">{{ old('body') }}</textarea>
+        @error('rating')<span class="error" style="display:block">{{ $message }}</span>@enderror
+        @error('body')<span class="error" style="display:block">{{ $message }}</span>@enderror
+        <button class="btn btn--primary btn--sm" type="submit" style="margin-top:8px">Publicá tu opinión</button>
+      </form>
+    @endif
     @if (in_array($booking->status, [\App\Enums\BookingStatus::Requested, \App\Enums\BookingStatus::Confirmed], true) && $booking->date->starts_at->isFuture())
       <form method="post" action="{{ route('cuenta.reservas.cancelar', $booking) }}" style="margin-top:10px" onsubmit="return confirm('¿Cancelás tu reserva de {{ $experience->title }}? Le avisamos al anfitrión.')">
         @csrf

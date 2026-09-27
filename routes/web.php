@@ -26,6 +26,7 @@ use App\Http\Controllers\HostBookingController;
 use App\Http\Controllers\HostDashboardController;
 use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\VerificationController;
@@ -67,6 +68,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/experiencias/{experience}/escribir', [MessageController::class, 'prompt'])->name('mensajes.escribir');
     Route::post('/experiencias/{experience}/consulta', [MessageController::class, 'start'])->middleware('throttle:20,1')->name('mensajes.iniciar');
     Route::get('/cuenta/reservas', [AccountBookingController::class, 'index'])->name('cuenta.reservas');
+    Route::post('/cuenta/reservas/{booking}/opinion', [ReviewController::class, 'store'])->name('cuenta.reservas.opinion');
+    Route::post('/anfitrion/opiniones/{review}/responder', [ReviewController::class, 'reply'])->name('anfitrion.opiniones.responder');
     Route::post('/cuenta/reservas/{booking}/cancelar', [AccountBookingController::class, 'cancel'])->name('cuenta.reservas.cancelar');
     Route::get('/cuenta/intereses', [InterestController::class, 'edit'])->name('cuenta.intereses');
     Route::put('/cuenta/intereses', [InterestController::class, 'update'])->name('cuenta.intereses.update');

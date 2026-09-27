@@ -17,7 +17,7 @@ class BookingController extends Controller
     public function index(Request $request): View
     {
         $bookings = $request->user()->bookings()
-            ->with(['date', 'experience.host.user', 'experience.province', 'experience.cover'])
+            ->with(['date', 'experience.host.user', 'experience.province', 'experience.cover', 'review'])
             ->get();
 
         [$upcoming, $past] = $bookings->partition(fn ($booking) => $booking->date->starts_at->isFuture()

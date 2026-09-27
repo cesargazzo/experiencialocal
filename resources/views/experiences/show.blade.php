@@ -134,7 +134,7 @@
         <div class="detail-block"><h2>Opiniones</h2>
           <div class="reviews">
             @forelse ($experience->reviews as $r)
-              <div class="review"><header><strong>{{ $r->user->publicName() }}</strong><span>{{ Str::ucfirst($r->published_at->timezone($experience->timezone())->translatedFormat('F Y')) }} · <x-stars :rating="$r->rating" /><span class="sr-only">{{ $r->rating }} de 5</span></span></header><p>{{ $r->body }}</p></div>
+              <div class="review"><header><strong>{{ $r->user->publicName() }}</strong><span>{{ Str::ucfirst($r->published_at->timezone($experience->timezone())->translatedFormat('F Y')) }} · <x-stars :rating="$r->rating" /><span class="sr-only">{{ $r->rating }} de 5</span></span></header><p>{{ $r->body }}</p>@if ($r->host_reply)<p class="review__reply"><strong>Respuesta de {{ $experience->host->user->first_name }}:</strong> {{ $r->host_reply }}</p>@endif</div>
             @empty
               <p>Todavía no hay opiniones. Las escriben solo quienes fueron.</p>
             @endforelse
