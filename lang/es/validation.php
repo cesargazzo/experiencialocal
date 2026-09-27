@@ -180,6 +180,7 @@ return [
         'name' => 'nombre y apellido',
         'email' => 'email',
         'phone' => 'teléfono',
+        'birth_date' => 'fecha de nacimiento',
         'password' => 'contraseña',
         'password_confirmation' => 'confirmación de la contraseña',
         'current_password' => 'contraseña actual',

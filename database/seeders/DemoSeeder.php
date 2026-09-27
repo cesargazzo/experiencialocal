@@ -51,6 +51,7 @@ class DemoSeeder extends Seeder
         foreach ($hosts as [$name, $email, $city, $nationality, $plan, $level, $since, $bio]) {
             $user = User::updateOrCreate(['email' => $email], [
                 'name' => $name, 'password' => 'password', 'country_code' => 'AR', 'nationality_code' => $nationality,
+                'birth_date' => now()->subYears(random_int(30, 70))->subDays(random_int(0, 364))->toDateString(),
                 'phone' => '+54 380 4'.random_int(100000, 999999), 'email_verified_at' => now(), 'phone_verified_at' => now(),
             ]);
             $this->seedVerifications($user, $level, $nationality, $admin);
@@ -71,6 +72,7 @@ class DemoSeeder extends Seeder
             [$name, $email, $nationality] = $g;
             $user = User::updateOrCreate(['email' => $email], [
                 'name' => $name, 'password' => 'password', 'nationality_code' => $nationality, 'country_code' => $nationality,
+                'birth_date' => now()->subYears(random_int(20, 65))->subDays(random_int(0, 364))->toDateString(),
                 'email_verified_at' => now(), 'phone_verified_at' => now(), 'phone' => '+54 11 4'.random_int(1000000, 9999999),
             ]);
             $this->seedVerifications($user, 2, $nationality, $admin);

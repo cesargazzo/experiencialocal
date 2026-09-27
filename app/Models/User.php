@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
  * Una sola cuenta con varios roles: todo usuario es participante, es anfitrión
  * si tiene un HostProfile y es administrador si tiene el flag is_admin.
  */
-#[Fillable(['name', 'email', 'password', 'phone', 'country_code', 'nationality_code', 'locale', 'avatar_path'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'nationality_code', 'locale', 'avatar_path'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -32,6 +32,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
+            'birth_date' => 'date',
             'suspended_at' => 'datetime',
             'password' => 'hashed',
             'must_change_password' => 'boolean',
@@ -119,6 +120,20 @@ class User extends Authenticatable
     public function hasExpiredPassword(): bool
     {
         return $this->password_expires_at !== null && $this->password_expires_at->isPast();
+    }
+
+    /**
+     * Reglas para la fecha de nacimiento: fecha real y edad mínima.
+     *
+     * @return list<string>
+     */
+    public static function birthDateRules(): array
+    {
+        return [
+            'date',
+            'after:1900-01-01',
+            'before_or_equal:'.now()->subYears((int) config('tinku.min_age'))->toDateString(),
+        ];
     }
 
     public function hasVerificationLevel(VerificationLevel $level): bool

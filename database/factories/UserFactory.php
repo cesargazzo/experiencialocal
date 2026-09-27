@@ -20,6 +20,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'phone' => fake()->phoneNumber(),
             'phone_verified_at' => now(),
+            'birth_date' => fake()->dateTimeBetween('-70 years', '-19 years')->format('Y-m-d'),
             'password' => static::$password ??= 'password',
             'country_code' => 'AR',
             'nationality_code' => 'AR',

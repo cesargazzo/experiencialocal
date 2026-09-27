@@ -64,7 +64,7 @@ class WebRoutesTest extends TestCase
     {
         $this->post('/registrarme', [
             'name' => 'Chiara Rossi', 'email' => 'chiara@example.com', 'phone' => '+39 333 1234567',
-            'nationality_code' => 'IT', 'password' => 'Secreto2026x', 'password_confirmation' => 'Secreto2026x',
+            'birth_date' => '1990-05-20', 'nationality_code' => 'IT', 'password' => 'Secreto2026x', 'password_confirmation' => 'Secreto2026x',
         ])->assertRedirect('/verificacion');
 
         $user = User::where('email', 'chiara@example.com')->firstOrFail();

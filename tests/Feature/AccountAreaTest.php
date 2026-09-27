@@ -41,7 +41,7 @@ class AccountAreaTest extends TestCase
     {
         $user = User::factory()->level(VerificationLevel::Contact)->create();
 
-        $this->actingAs($user)->put(route('cuenta.perfil.update'), ['name' => 'Lucía Paz'])->assertSessionHasNoErrors();
+        $this->actingAs($user)->put(route('cuenta.perfil.update'), ['name' => 'Lucía Paz', 'birth_date' => '1990-01-01'])->assertSessionHasNoErrors();
         $this->assertSame('Lucía Paz', $user->fresh()->name);
 
         $validated = User::factory()->level(VerificationLevel::Document)->create(['name' => 'Ana Molina']);
@@ -68,5 +68,33 @@ class AccountAreaTest extends TestCase
     {
         $this->get(route('cuenta.perfil'))->assertRedirect(route('login'));
         $this->get(route('cuenta.seguridad'))->assertRedirect(route('login'));
+    }
+
+    #[Test]
+    public function registration_requires_a_birth_date_and_the_minimum_age(): void
+    {
+        $data = [
+            'name' => 'Ana Paz', 'email' => 'ana@example.com', 'phone' => '+54 380 4000000', 'nationality_code' => 'AR',
+            'password' => 'Segura2026x', 'password_confirmation' => 'Segura2026x',
+        ];
+
+        $this->post(route('register'), $data)->assertSessionHasErrors('birth_date');
+        $this->post(route('register'), [...$data, 'birth_date' => now()->subYears(17)->toDateString()])
+            ->assertSessionHasErrors(['birth_date' => 'Tenés que tener al menos 18 años para usar Tinku.']);
+        $this->assertGuest();
+
+        $this->post(route('register'), [...$data, 'birth_date' => '1990-05-20'])->assertRedirect(route('verificacion'));
+        $this->assertSame('1990-05-20', User::where('email', 'ana@example.com')->value('birth_date')->toDateString());
+    }
+
+    #[Test]
+    public function the_birth_date_can_be_completed_once_but_not_changed_after_validation(): void
+    {
+        $withoutDate = User::factory()->level(VerificationLevel::Document)->create(['birth_date' => null]);
+        $this->actingAs($withoutDate)->put(route('cuenta.perfil.update'), ['birth_date' => '1985-03-10'])->assertSessionHasNoErrors();
+        $this->assertSame('1985-03-10', $withoutDate->fresh()->birth_date->toDateString());
+
+        $this->actingAs($withoutDate->fresh())->put(route('cuenta.perfil.update'), ['birth_date' => '1999-01-01'])->assertForbidden();
+        $this->assertSame('1985-03-10', $withoutDate->fresh()->birth_date->toDateString());
     }
 }

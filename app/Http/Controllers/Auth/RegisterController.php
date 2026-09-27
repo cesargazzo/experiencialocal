@@ -25,8 +25,12 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['required', 'string', 'max:32'],
+            'birth_date' => ['required', ...User::birthDateRules()],
             'nationality_code' => ['required', 'string', 'size:2'],
             'password' => ['required', 'confirmed', Password::defaults()],
+        ], [
+            'birth_date.before_or_equal' => 'Tenés que tener al menos '.config('tinku.min_age').' años para usar Tinku.',
+            'birth_date.after' => 'Revisá la fecha de nacimiento.',
         ]);
 
         $user = User::create([...$data, 'country_code' => $data['nationality_code']]);
