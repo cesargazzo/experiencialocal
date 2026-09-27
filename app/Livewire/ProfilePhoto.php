@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Media;
+use App\Rules\ImageSize;
 use App\Services\ImageService;
 use InvalidArgumentException;
 use Livewire\Component;
@@ -29,11 +30,7 @@ class ProfilePhoto extends Component
 
     public function updatedPhoto(ImageService $images): void
     {
-        [$minWidth, $minHeight] = config('tinku.images.collections.avatar.min');
-
-        $this->validate([
-            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.config('tinku.images.max_upload_kb'), "dimensions:min_width={$minWidth},min_height={$minHeight}"],
-        ], [], ['photo' => 'foto de perfil']);
+        $this->validate(['photo' => ['required', ImageSize::forCollection('avatar')]], [], ['photo' => 'foto de perfil']);
 
         try {
             $images->replace(auth()->user(), 'avatar', $this->photo, auth()->user()->name);

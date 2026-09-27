@@ -96,8 +96,8 @@ class ImageUploadTest extends TestCase
         $user = User::factory()->create();
 
         Livewire::actingAs($user)->test(ProfilePhoto::class)
-            ->set('photo', UploadedFile::fake()->image('chica.jpg', 120, 120))
-            ->assertHasErrors('photo');
+            ->set('photo', UploadedFile::fake()->image('chica.jpg', 120, 150))
+            ->assertHasErrors(['photo' => 'La foto mide 120 × 150 px y tiene que tener al menos 200 px de cada lado. Probá con la original del celular, sin recortar.']);
 
         Livewire::actingAs($user)->test(ProfilePhoto::class)
             ->set('photo', UploadedFile::fake()->create('virus.pdf', 100, 'application/pdf'))

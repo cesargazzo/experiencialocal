@@ -85,7 +85,7 @@
           <div class="upload__body">
             <input id="cover" class="sr-only" type="file" wire:model="cover" accept="image/jpeg,image/png,image/webp">
             <label for="cover" class="btn btn--tertiary btn--sm upload__pick">{{ $cover ? 'Cambiá la foto' : 'Elegí una foto' }}</label>
-            <span class="hint">Mostrá a las personas haciendo algo, con luz natural y en tu lugar. Nada de fotos de stock. Al menos 1200 × 800 px.</span>
+            <span class="hint">Mostrá a las personas haciendo algo, con luz natural y en tu lugar. Nada de fotos de stock. JPG, PNG o WebP de al menos 600 px de cada lado; cuanto más grande, mejor se ve.</span>
             <x-upload-progress />
             @error('cover')<span class="error" style="display:block">{{ $message }}</span>@enderror
           </div>

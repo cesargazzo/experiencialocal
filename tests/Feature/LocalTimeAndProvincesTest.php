@@ -120,4 +120,21 @@ class LocalTimeAndProvincesTest extends TestCase
             ->assertHasErrors('title')
             ->assertSet('step', 1);
     }
+
+    #[Test]
+    public function vertical_phone_photos_are_accepted_and_tiny_ones_get_a_clear_message(): void
+    {
+        $host = User::factory()->level(VerificationLevel::Residence)->create();
+
+        $this->fillOnboarding($host, 'AR-F')
+            ->set('cover', UploadedFile::fake()->image('vertical.jpg', 720, 1280))
+            ->call('publish')
+            ->assertHasNoErrors();
+
+        $other = User::factory()->level(VerificationLevel::Residence)->create();
+        $this->fillOnboarding($other, 'AR-F')
+            ->set('cover', UploadedFile::fake()->image('mini.jpg', 500, 400))
+            ->call('publish')
+            ->assertHasErrors(['cover' => 'La foto mide 500 × 400 px y tiene que tener al menos 600 px de cada lado. Probá con la original del celular, sin recortar.']);
+    }
 }

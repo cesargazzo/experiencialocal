@@ -114,7 +114,7 @@ return [
         'collections' => [
             'avatar' => [
                 'single' => true,
-                'min' => [200, 200],
+                'min_side' => 200,
                 'variants' => [
                     'sm' => [96, 96],
                     'md' => [320, 320],
@@ -122,7 +122,8 @@ return [
             ],
             'cover' => [
                 'single' => true,
-                'min' => [1200, 800],
+                // Lado más corto: acepta fotos horizontales y verticales de celular.
+                'min_side' => 600,
                 'variants' => [
                     'card' => [800, 600],
                     'hero' => [1920, 1080],

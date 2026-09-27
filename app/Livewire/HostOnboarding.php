@@ -11,6 +11,7 @@ use App\Models\Experience;
 use App\Models\HostProfile;
 use App\Models\Plan;
 use App\Models\Province;
+use App\Rules\ImageSize;
 use App\Services\ImageService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -119,18 +120,11 @@ class HostOnboarding extends Component
     }
 
     /**
-     * @return list<string>
+     * @return list<mixed>
      */
     private function imageRules(string $collection): array
     {
-        [$minWidth, $minHeight] = config("tinku.images.collections.{$collection}.min");
-
-        return [
-            'image',
-            'mimes:jpg,jpeg,png,webp',
-            'max:'.config('tinku.images.max_upload_kb'),
-            "dimensions:min_width={$minWidth},min_height={$minHeight}",
-        ];
+        return [ImageSize::forCollection($collection)];
     }
 
     public function next(): void
