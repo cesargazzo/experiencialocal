@@ -139,9 +139,11 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--font-titulos); font-weight: 700; 
 .brand { display: flex; align-items: center; padding: 4px 0; }
 .brand img { height: 40px; width: auto; }
 .nav { display: flex; align-items: center; gap: 2px; }
-.nav a:not(.btn), .nav__user { font-weight: 600; font-size: 15px; padding: 10px 12px; border-radius: var(--radio-sm); color: var(--tinta); display: inline-flex; align-items: center; gap: 6px; }
+.nav a:not(.btn), .nav__user { white-space: nowrap; font-weight: 600; font-size: 15px; padding: 10px 12px; border-radius: var(--radio-sm); color: var(--tinta); display: inline-flex; align-items: center; gap: 6px; }
 .nav a:not(.btn):hover { background: var(--superficie-calida); }
-.nav .btn { margin-left: 8px; }
+.nav .btn { margin-left: 8px; white-space: nowrap; }
+/* Con la sesión iniciada el encabezado tiene más íconos: los enlaces informativos se esconden antes. */
+@media (min-width: 721px) and (max-width: 1180px) { .nav a[href$="#como-ganas"], .nav a[href$="#planes"] { display: none; } }
 .nav-toggle { display: none; background: none; border: 0; width: 44px; height: 44px; border-radius: var(--radio-sm); color: var(--tinta); align-items: center; justify-content: center; }
 
 /* ---------- Menú de perfil ---------- */
@@ -729,3 +731,14 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .star-input label .icon { display: block; }
 .star-input input:checked ~ label, .star-input label:hover, .star-input label:hover ~ label { color: var(--naranja); }
 .star-input input:focus-visible + label { outline: 3px solid var(--foco); outline-offset: 2px; border-radius: 4px; }
+
+/* Doble factor */
+.code-input { font: 600 22px/28px ui-monospace, SFMono-Regular, Menlo, monospace !important; letter-spacing: .2em; text-align: center; }
+.qr { display: inline-block; padding: 12px; margin: 8px 0; border-radius: var(--radio-sm); background: #FFFFFF; box-shadow: inset 0 0 0 1px var(--linea); }
+.qr svg { display: block; width: 200px; height: 200px; }
+.secret { font-size: 15px; letter-spacing: .05em; word-break: break-all; }
+.recovery-codes ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; margin: 0; padding: 0; list-style: none; }
+.recovery-codes code { font-size: 15px; }
+.subform { padding: 16px; border-radius: var(--radio-sm); box-shadow: inset 0 0 0 1px var(--linea); }
+.subform h3 { margin: 0; font-size: 17px; }
+.steps { margin: 8px 0 0; padding-left: 20px; }

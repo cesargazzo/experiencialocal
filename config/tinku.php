@@ -76,6 +76,9 @@ return [
     // Apagado hasta que se decida abrir el sitio a los buscadores: se prende con TINKU_INDEXABLE=true.
     'indexable' => (bool) env('TINKU_INDEXABLE', false),
 
+    // La administración ve datos personales: exige doble factor (TOTP).
+    'admin_requires_two_factor' => (bool) env('TINKU_ADMIN_REQUIRES_2FA', true),
+
     /*
     |--------------------------------------------------------------------------
     | Política de contraseñas

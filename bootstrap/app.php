@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\BlockIndexingWhenDisabled;
 use App\Http\Middleware\EnsureAccountIsActive;
+use App\Http\Middleware\EnsureAdminHasTwoFactor;
 use App\Http\Middleware\EnsureIsAdmin;
 use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Middleware\EnsureTermsAccepted;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => EnsureIsAdmin::class,
+            'admin.2fa' => EnsureAdminHasTwoFactor::class,
             'verified.level' => EnsureVerificationLevel::class,
         ]);
     })

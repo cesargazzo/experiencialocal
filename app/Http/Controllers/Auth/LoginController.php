@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\SecurityLog;
 use App\Support\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
@@ -38,32 +39,42 @@ class LoginController extends Controller
                 ->onlyInput('email');
         }
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        // Se valida la contraseña sin iniciar sesión todavía: con doble factor falta el código.
+        if (! Auth::validate($credentials)) {
             RateLimiter::hit($throttleKey, $policy->lockoutMinutes * 60);
             $securityLog->record('login.failed', null, ['attempts' => RateLimiter::attempts($throttleKey)], $credentials['email'], 'warning');
 
             return back()->withErrors(['email' => 'El email o la contraseña no coinciden.'])->onlyInput('email');
         }
 
-        if (Auth::user()->isSuspended()) {
-            $securityLog->record('login.failed', Auth::user(), ['reason' => 'cuenta suspendida'], $credentials['email'], 'warning');
-            Auth::logout();
+        /** @var User $user */
+        $user = Auth::getProvider()->retrieveByCredentials($credentials);
+
+        if ($user->isSuspended()) {
+            $securityLog->record('login.failed', $user, ['reason' => 'cuenta suspendida'], $credentials['email'], 'warning');
 
             return back()->withErrors(['email' => 'Tu cuenta está suspendida. Escribinos para revisarla.'])->onlyInput('email');
         }
 
-        if (Auth::user()->hasExpiredPassword()) {
-            $securityLog->record('login.failed', Auth::user(), ['reason' => 'contraseña de única vez vencida'], $credentials['email'], 'warning');
-            Auth::logout();
+        if ($user->hasExpiredPassword()) {
+            $securityLog->record('login.failed', $user, ['reason' => 'contraseña de única vez vencida'], $credentials['email'], 'warning');
 
             return back()->withErrors(['email' => 'La contraseña de única vez venció. Pedí una nueva.'])->onlyInput('email');
         }
 
         RateLimiter::clear($throttleKey);
-        $request->session()->regenerate();
-        $securityLog->record('login.succeeded', Auth::user(), ['remember' => $request->boolean('remember')], $credentials['email']);
 
-        return redirect()->intended(route('home'))->with('status', 'Hola de nuevo, '.Str::before(Auth::user()->name, ' ').'.');
+        if ($user->hasTwoFactor()) {
+            $request->session()->put(['login.2fa.id' => $user->id, 'login.2fa.at' => now()->timestamp, 'login.2fa.remember' => $request->boolean('remember')]);
+
+            return redirect()->route('login.2fa');
+        }
+
+        Auth::login($user, $request->boolean('remember'));
+        $request->session()->regenerate();
+        $securityLog->record('login.succeeded', $user, ['remember' => $request->boolean('remember')], $credentials['email']);
+
+        return redirect()->intended(route('home'))->with('status', 'Hola de nuevo, '.Str::before($user->name, ' ').'.');
     }
 
     public function destroy(Request $request, SecurityLog $securityLog): RedirectResponse

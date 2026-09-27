@@ -41,6 +41,67 @@
           <button class="btn btn--secondary" type="submit">Guardá la contraseña</button>
         </div>
       </form>
-    </section>
+        </section>
+
+    @unless ($forced)
+      @php($user = auth()->user())
+      <section class="wizard__panel" id="doble-factor">
+        <h2>Doble factor</h2>
+        <p>Además de la contraseña, al ingresar te pedimos un código de 6 dígitos que genera una app en tu celular (Google Authenticator, Microsoft Authenticator, 1Password, Authy…). Si alguien consigue tu contraseña, igual no puede entrar.
+          @if ($user->isAdmin())<strong>Para la administración es obligatorio.</strong>@endif
+        </p>
+
+        @if ($codes = session('recovery_codes'))
+          <div class="notice recovery-codes" role="status">
+            <p style="margin:0 0 8px"><strong>Guardá estos códigos de recuperación.</strong> Sirven para entrar si perdés el celular; cada uno se usa una vez. No los vamos a volver a mostrar.</p>
+            <ul>@foreach ($codes as $code)<li><code>{{ $code }}</code></li>@endforeach</ul>
+          </div>
+        @endif
+
+        @if ($user->hasTwoFactor())
+          <p class="badge badge--ok" style="display:inline-flex">Activado desde el {{ $user->two_factor_confirmed_at->timezone(config('tinku.timezone'))->format('d/m/Y') }}</p>
+          <p class="hint">Te quedan {{ count($user->two_factor_recovery_codes ?? []) }} códigos de recuperación.</p>
+          <div class="grid-2">
+            <form method="post" action="{{ route('cuenta.2fa.codes') }}" class="subform">
+              @csrf
+              <h3>Códigos de recuperación nuevos</h3>
+              <div class="field"><label for="codes_password">Tu contraseña</label><x-password-input name="password" id="codes_password" autocomplete="current-password" /></div>
+              <button class="btn btn--tertiary btn--sm" type="submit" style="margin-top:12px">Generá códigos nuevos</button>
+            </form>
+            <form method="post" action="{{ route('cuenta.2fa.destroy') }}" class="subform">
+              @csrf
+              @method('delete')
+              <h3>Desactivar</h3>
+              <div class="field"><label for="off_password">Tu contraseña</label><x-password-input name="password" id="off_password" autocomplete="current-password" /></div>
+              <div class="field"><label for="off_code">Código de la app</label><input id="off_code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" required></div>
+              @error('code', 'twoFactor')<span class="error" style="display:block">{{ $message }}</span>@enderror
+              <button class="btn btn--ghost btn--sm" type="submit" style="margin-top:12px">Desactivá el doble factor</button>
+            </form>
+          </div>
+          @error('password', 'twoFactor')<span class="error" style="display:block">{{ $message }}</span>@enderror
+        @elseif ($user->two_factor_secret)
+          @php($uri = \App\Support\Totp::provisioningUri($user->two_factor_secret, $user->email, config('app.name')))
+          <p style="margin:12px 0 0"><strong>1.</strong> Abrí tu app de autenticación y escaneá este código.</p>
+          <div class="qr">{!! \App\Support\Totp::qrSvg($uri) !!}</div>
+          <p class="hint">Si no podés escanearlo, cargá esta clave a mano: <code class="secret">{{ trim(chunk_split($user->two_factor_secret, 4, ' ')) }}</code></p>
+          <form method="post" action="{{ route('cuenta.2fa.confirm') }}">
+            @csrf
+            <div class="field" style="max-width:260px">
+              <label for="code"><strong>2.</strong> Escribí el código que muestra la app</label>
+              <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required class="code-input" autofocus>
+              @error('code', 'twoFactor')<span class="error" style="display:block">{{ $message }}</span>@enderror
+            </div>
+            <div class="wizard__actions"><span></span><button class="btn btn--primary" type="submit">Activá el doble factor</button></div>
+          </form>
+        @else
+          <form method="post" action="{{ route('cuenta.2fa.start') }}">
+            @csrf
+            <div class="field" style="max-width:360px"><label for="tf_password">Confirmá tu contraseña para empezar</label><x-password-input name="password" id="tf_password" autocomplete="current-password" /></div>
+            @error('password', 'twoFactor')<span class="error" style="display:block">{{ $message }}</span>@enderror
+            <div class="wizard__actions"><span></span><button class="btn btn--primary" type="submit">Configurá el doble factor</button></div>
+          </form>
+        @endif
+      </section>
+    @endunless
   </main>
 </x-layout>

@@ -10,6 +10,7 @@ use App\Models\Concerns\Auditable;
 use App\Notifications\ResetPasswordNotification;
 use App\Support\CountryList;
 use App\Support\PasswordPolicy;
+use App\Support\Totp;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Database\Factories\UserFactory;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
@@ -33,13 +35,16 @@ use Illuminate\Support\Str;
  * si tiene un HostProfile y es administrador si tiene el flag is_admin.
  */
 #[Fillable(['name', 'first_name', 'last_name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'required_features', 'nationality_code', 'locale', 'avatar_path'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
     use Auditable;
 
     /** @var list<string> Salud y religión: datos sensibles, no se guardan en la auditoría. */
     protected array $auditMasked = ['dietary_needs', 'food_allergies'];
+
+    /** @var list<string> Secretos del doble factor: nunca van a la auditoría. */
+    protected array $auditExclude = ['two_factor_secret', 'two_factor_recovery_codes', 'two_factor_last_step'];
 
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -78,6 +83,9 @@ class User extends Authenticatable
             'dietary_needs' => AsEnumCollection::of(DietaryOption::class),
             'required_features' => AsEnumCollection::of(ExperienceFeature::class),
             'last_login_at' => 'datetime',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
             'last_seen_at' => 'datetime',
         ];
     }
@@ -203,6 +211,56 @@ class User extends Authenticatable
         $viewer ??= auth()->user();
 
         return $viewer?->is($this) || self::viewerSeesLastNames($viewer) ? $this->name : ($this->first_name ?: Str::before($this->name.' ', ' '));
+    }
+
+    public function hasTwoFactor(): bool
+    {
+        return $this->two_factor_confirmed_at !== null && filled($this->two_factor_secret);
+    }
+
+    /**
+     * Valida un código de la app o uno de recuperación (que se consume).
+     *
+     * @return 'totp'|'recovery'|null
+     */
+    public function verifyTwoFactorCode(string $code): ?string
+    {
+        if (! $this->two_factor_secret) {
+            return null;
+        }
+
+        $step = Totp::verify($this->two_factor_secret, $code, $this->two_factor_last_step);
+        if ($step !== null) {
+            $this->forceFill(['two_factor_last_step' => $step])->save();
+
+            return 'totp';
+        }
+
+        $normalized = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $code) ?? '');
+        foreach ($this->two_factor_recovery_codes ?? [] as $index => $hash) {
+            if ($normalized !== '' && Hash::check($normalized, $hash)) {
+                $codes = $this->two_factor_recovery_codes;
+                unset($codes[$index]);
+                $this->forceFill(['two_factor_recovery_codes' => array_values($codes)])->save();
+
+                return 'recovery';
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Genera códigos de recuperación nuevos. Se guardan con hash; los visibles se muestran una sola vez.
+     *
+     * @return list<string>
+     */
+    public function regenerateRecoveryCodes(): array
+    {
+        $codes = collect(range(1, 8))->map(fn () => strtoupper(Str::random(5).'-'.Str::random(5)))->all();
+        $this->forceFill(['two_factor_recovery_codes' => array_map(fn (string $code) => Hash::make(str_replace('-', '', $code)), $codes)])->save();
+
+        return $codes;
     }
 
     public function termsAcceptances(): HasMany

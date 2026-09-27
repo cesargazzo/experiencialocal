@@ -12,10 +12,10 @@ class SecurityLogController extends Controller
 {
     /** Grupos para filtrar el listado. */
     private const GROUPS = [
-        'accesos' => ['login.succeeded', 'login.failed', 'login.locked', 'logout', 'register'],
+        'accesos' => ['login.succeeded', 'login.failed', 'login.locked', 'logout', 'register', '2fa.enabled', '2fa.disabled', '2fa.failed', '2fa.recovery_used', '2fa.recovery_regenerated'],
         'contrasenas' => ['password.changed', 'password.reset_requested', 'password.reset', 'password.reset_failed', 'password.temporary_issued', 'policy.updated'],
         'admin' => ['admin.granted', 'admin.revoked', 'verification.approved', 'verification.rejected', 'verification.revoked', 'user.validation_blocked', 'admin.user_viewed', 'log.downloaded', 'admin.reports_viewed', 'admin.report_dismissed', 'policy.updated'],
-        'amenazas' => ['login.failed', 'login.locked', 'access.forbidden', 'request.throttled', 'probe.suspicious', 'password.reset_failed'],
+        'amenazas' => ['login.failed', 'login.locked', '2fa.failed', 'access.forbidden', 'request.throttled', 'probe.suspicious', 'password.reset_failed'],
         'errores' => ['error.server'],
     ];
 

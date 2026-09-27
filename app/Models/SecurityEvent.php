@@ -23,6 +23,11 @@ class SecurityEvent extends Model
     /** @var array<string, string> */
     public const LABELS = [
         'login.succeeded' => 'Ingreso',
+        '2fa.enabled' => 'Doble factor activado',
+        '2fa.disabled' => 'Doble factor desactivado',
+        '2fa.failed' => 'Código de doble factor incorrecto',
+        '2fa.recovery_used' => 'Ingreso con código de recuperación',
+        '2fa.recovery_regenerated' => 'Códigos de recuperación nuevos',
         'login.failed' => 'Ingreso fallido',
         'login.locked' => 'Bloqueo por intentos',
         'logout' => 'Salida',

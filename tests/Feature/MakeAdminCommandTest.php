@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Support\Totp;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use PHPUnit\Framework\Attributes\Test;
@@ -50,6 +51,12 @@ class MakeAdminCommandTest extends TestCase
         $user->refresh();
         $this->assertFalse($user->must_change_password);
         $this->assertNull($user->password_expires_at);
+
+        // Después, la administración pide activar el doble factor.
+        $this->get(route('admin.verificaciones'))->assertRedirect(route('cuenta.seguridad').'#doble-factor');
+        $this->post(route('cuenta.2fa.start'), ['password' => 'NuevaClave2026']);
+        $secret = $user->fresh()->two_factor_secret;
+        $this->post(route('cuenta.2fa.confirm'), ['code' => Totp::code($secret, Totp::currentStep())]);
         $this->get(route('admin.verificaciones'))->assertOk();
     }
 

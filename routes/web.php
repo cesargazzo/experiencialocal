@@ -6,6 +6,7 @@ use App\Http\Controllers\Account\InvitationController;
 use App\Http\Controllers\Account\NotificationController;
 use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Account\ProfileController;
+use App\Http\Controllers\Account\TwoFactorController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ExperienceController as AdminExperienceController;
 use App\Http\Controllers\Admin\LogController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HostBookingController;
@@ -45,6 +47,8 @@ Route::get('/terminos/version/{terms:version}', [TermsController::class, 'versio
 Route::middleware('guest')->group(function () {
     Route::get('/ingresar', [LoginController::class, 'create'])->name('login');
     Route::post('/ingresar', [LoginController::class, 'store']);
+    Route::get('/ingresar/codigo', [TwoFactorChallengeController::class, 'create'])->name('login.2fa');
+    Route::post('/ingresar/codigo', [TwoFactorChallengeController::class, 'store'])->middleware('throttle:20,1');
     Route::get('/registrarme', [RegisterController::class, 'create'])->name('register');
     Route::post('/registrarme', [RegisterController::class, 'store']);
     Route::get('/olvide-mi-contrasena', [ForgotPasswordController::class, 'create'])->name('password.request');
@@ -62,6 +66,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/cuenta/alimentacion', [ProfileController::class, 'updateDiet'])->name('cuenta.alimentacion.update');
     Route::get('/cuenta/seguridad', [PasswordController::class, 'edit'])->name('cuenta.seguridad');
     Route::put('/cuenta/seguridad', [PasswordController::class, 'update'])->name('cuenta.seguridad.update');
+    Route::post('/cuenta/seguridad/doble-factor', [TwoFactorController::class, 'start'])->name('cuenta.2fa.start');
+    Route::post('/cuenta/seguridad/doble-factor/confirmar', [TwoFactorController::class, 'confirm'])->name('cuenta.2fa.confirm');
+    Route::post('/cuenta/seguridad/doble-factor/codigos', [TwoFactorController::class, 'recoveryCodes'])->name('cuenta.2fa.codes');
+    Route::delete('/cuenta/seguridad/doble-factor', [TwoFactorController::class, 'destroy'])->name('cuenta.2fa.destroy');
     Route::get('/cuenta/avisos', [NotificationController::class, 'index'])->name('cuenta.avisos');
     Route::get('/mensajes', [MessageController::class, 'index'])->name('mensajes');
     Route::get('/mensajes/{conversation}', [MessageController::class, 'show'])->name('mensajes.show');
@@ -89,7 +97,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/anfitrion/experiencias/{experience}', ManageExperience::class)->name('anfitrion.experiencias.editar');
     Route::get('/anfitrion/registro', HostOnboarding::class)->middleware('verified.level:2')->name('anfitrion.registro');
 
-    Route::prefix('admin')->middleware('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->middleware(['admin', 'admin.2fa'])->name('admin.')->group(function () {
         Route::get('/verificaciones', [AdminVerificationController::class, 'index'])->name('verificaciones');
         Route::post('/verificaciones/{verification}/aprobar', [AdminVerificationController::class, 'approve'])->name('verificaciones.aprobar');
         Route::post('/verificaciones/{verification}/rechazar', [AdminVerificationController::class, 'reject'])->name('verificaciones.rechazar');
