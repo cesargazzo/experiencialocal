@@ -49,6 +49,11 @@ class User extends Authenticatable
         $this->notify(new ResetPasswordNotification($token));
     }
 
+    public function securityEvents(): HasMany
+    {
+        return $this->hasMany(SecurityEvent::class);
+    }
+
     public function invitations(): HasMany
     {
         return $this->hasMany(Invitation::class, 'inviter_id');

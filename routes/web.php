@@ -5,6 +5,7 @@ use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\PasswordPolicyController;
 use App\Http\Controllers\Admin\SecurityLogController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -59,6 +60,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/verificaciones/{verification}/rechazar', [AdminVerificationController::class, 'reject'])->name('verificaciones.rechazar');
         Route::get('/contrasenas', [PasswordPolicyController::class, 'edit'])->name('contrasenas');
         Route::get('/seguridad', [SecurityLogController::class, 'index'])->name('seguridad');
+        Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios');
+        Route::post('/usuarios/validar', [UserController::class, 'validateLevel'])->name('usuarios.validar');
+        Route::get('/usuarios/{user}', [UserController::class, 'show'])->name('usuarios.show');
+        Route::post('/usuarios/{user}/suspension', [UserController::class, 'toggleSuspension'])->name('usuarios.suspension');
         Route::put('/contrasenas', [PasswordPolicyController::class, 'update'])->name('contrasenas.update');
     });
 });

@@ -30,10 +30,10 @@ class AccountAreaTest extends TestCase
             ->assertSee('Lucía')
             ->assertSee(route('cuenta.perfil'), false)
             ->assertSee(route('cuenta.seguridad'), false)
-            ->assertDontSee(route('admin.verificaciones'), false);
+            ->assertDontSee(route('admin.usuarios'), false);
 
         $this->actingAs(User::factory()->admin()->create())->get(route('home'))
-            ->assertSee(route('admin.verificaciones'), false);
+            ->assertSee(route('admin.usuarios'), false);
     }
 
     #[Test]

@@ -45,6 +45,13 @@ class LoginController extends Controller
             return back()->withErrors(['email' => 'El email o la contraseña no coinciden.'])->onlyInput('email');
         }
 
+        if (Auth::user()->isSuspended()) {
+            $securityLog->record('login.failed', Auth::user(), ['reason' => 'cuenta suspendida'], $credentials['email'], 'warning');
+            Auth::logout();
+
+            return back()->withErrors(['email' => 'Tu cuenta está suspendida. Escribinos para revisarla.'])->onlyInput('email');
+        }
+
         if (Auth::user()->hasExpiredPassword()) {
             $securityLog->record('login.failed', Auth::user(), ['reason' => 'contraseña de única vez vencida'], $credentials['email'], 'warning');
             Auth::logout();

@@ -45,6 +45,9 @@ class SecurityEvent extends Model
         'invitation.sent' => 'Invitación por email',
         'invitation.link_created' => 'Enlace de invitación',
         'invitation.accepted' => 'Invitación aceptada',
+        'user.validated_manually' => 'Validación manual',
+        'user.suspended' => 'Cuenta suspendida',
+        'user.unsuspended' => 'Cuenta reactivada',
     ];
 
     protected function casts(): array

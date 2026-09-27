@@ -155,6 +155,51 @@ class VerificationService
      * El nivel es acumulativo: se alcanza un nivel solo si todos los tipos
      * de ese nivel y de los anteriores están aprobados.
      */
+    /**
+     * Validación manual de un administrador: aprueba, con proveedor "manual",
+     * las verificaciones que le falten a la cuenta hasta el nivel pedido.
+     * Solo sube niveles; para frenar una cuenta está la suspensión.
+     */
+    public function grantLevelManually(User $user, VerificationLevel $level, User $admin, string $reason): VerificationLevel
+    {
+        if (! $admin->isAdmin()) {
+            throw new VerificationException('Solo un administrador puede validar a mano.');
+        }
+
+        $required = collect(VerificationType::cases())
+            ->reject(fn (VerificationType $type) => $type === VerificationType::Interview)
+            ->filter(fn (VerificationType $type) => $type->level()->value <= $level->value);
+
+        return DB::transaction(function () use ($user, $required, $admin, $reason) {
+            $approved = $user->verifications()->where('status', VerificationStatus::Approved)->pluck('type')->map(fn ($t) => $t->value)->all();
+
+            foreach ($required as $type) {
+                if (in_array($type->value, $approved, true)) {
+                    continue;
+                }
+
+                $user->verifications()->create([
+                    'type' => $type,
+                    'provider' => VerificationProvider::Manual,
+                    'status' => VerificationStatus::Approved,
+                    'result' => ['manual' => true, 'reason' => $reason],
+                    'reviewed_by' => $admin->getKey(),
+                    'submitted_at' => now(),
+                    'reviewed_at' => now(),
+                ]);
+
+                if ($type === VerificationType::Email && ! $user->email_verified_at) {
+                    $user->forceFill(['email_verified_at' => now()]);
+                }
+                if ($type === VerificationType::Phone && ! $user->phone_verified_at) {
+                    $user->forceFill(['phone_verified_at' => now()]);
+                }
+            }
+
+            return $this->recalculateLevel($user);
+        });
+    }
+
     public function recalculateLevel(User $user): VerificationLevel
     {
         $approved = $user->verifications()
