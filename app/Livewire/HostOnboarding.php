@@ -91,9 +91,11 @@ class HostOnboarding extends Component
         $this->city = $user->city ?? '';
         $this->province_id = $user->province_id;
 
+        // Quien ya es anfitrión arranca directo en la nueva experiencia; puede volver a editar su perfil.
         if ($profile = $user->hostProfile) {
-            $this->fill($profile->only(['display_name', 'bio', 'city', 'province_id']));
+            $this->fill(array_filter($profile->only(['display_name', 'bio', 'city', 'province_id', 'address']), fn ($value) => $value !== null));
             $this->plan = $profile->plan->slug;
+            $this->step = 2;
         }
     }
 

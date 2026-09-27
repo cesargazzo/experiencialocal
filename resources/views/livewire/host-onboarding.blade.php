@@ -151,7 +151,8 @@
           @endif
         </p>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-          @if ($created)<a class="btn btn--secondary" href="{{ route('experiencias.show', $created) }}">Mirá tu experiencia</a>@endif
+          <a class="btn btn--secondary" href="{{ route('anfitrion.panel') }}">Andá a tu espacio de anfitrión</a>
+          @if ($created)<a class="btn btn--tertiary" href="{{ route('experiencias.show', $created) }}">Mirá tu experiencia</a>@endif
           <a class="btn btn--tertiary" href="{{ route('home') }}">Volvé al inicio</a>
         </div>
       </div>

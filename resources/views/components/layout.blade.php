@@ -99,7 +99,7 @@
         <a href="{{ route('home') }}#como-ganas">Cómo ganás</a>
         <a href="{{ route('home') }}#planes">Planes</a>
         @auth
-          <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">{{ auth()->user()->isHost() ? 'Mi perfil de anfitrión' : 'Quiero ser anfitrión' }}</a>
+          <a class="btn btn--secondary btn--sm" href="{{ route(auth()->user()->isHost() ? 'anfitrion.panel' : 'anfitrion.registro') }}">{{ auth()->user()->isHost() ? 'Mi espacio de anfitrión' : 'Quiero ser anfitrión' }}</a>
           <x-profile-menu />
         @else
           <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">Quiero ser anfitrión</a>

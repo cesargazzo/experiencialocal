@@ -118,7 +118,7 @@ class LocalTimeAndProvincesTest extends TestCase
 
         $this->fillOnboarding($host, 'AR-F', 'free')->call('publish')
             ->assertHasErrors('title')
-            ->assertSet('step', 1);
+            ->assertSet('step', 2);
     }
 
     #[Test]

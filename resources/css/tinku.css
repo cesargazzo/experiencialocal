@@ -602,3 +602,4 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .booking-item__facts .icon { color: var(--texto-petroleo); flex-shrink: 0; }
 .booking-item__facts small { color: var(--tinta-suave); }
 @media (max-width: 720px) { .booking-item { grid-template-columns: 80px 1fr; gap: 14px; } .booking-item__facts { grid-template-columns: 1fr; } }
+.host-head { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; margin-bottom: 8px; }

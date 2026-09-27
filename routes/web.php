@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HostDashboardController;
 use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\VerificationController;
@@ -61,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/verificacion/codigo', [VerificationController::class, 'confirm'])->name('verificacion.confirmar');
 
     // Publicar exige documento validado (nivel 2). Cobrar sin restricciones exige nivel 3.
+    Route::get('/anfitrion', [HostDashboardController::class, 'index'])->name('anfitrion.panel');
     Route::get('/anfitrion/registro', HostOnboarding::class)->middleware('verified.level:2')->name('anfitrion.registro');
 
     Route::prefix('admin')->middleware('admin')->name('admin.')->group(function () {
