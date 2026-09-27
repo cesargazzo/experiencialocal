@@ -68,6 +68,8 @@ class BookingService
                 'currency' => $experience->currency,
                 'status' => BookingStatus::Requested,
                 'guest_note' => $note,
+                'dietary_needs' => $user->dietary_needs?->map->value->all() ?: null,
+                'food_allergies' => $user->food_allergies,
             ]);
 
             $locked->increment('booked_count', $guests);

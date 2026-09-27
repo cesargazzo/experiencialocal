@@ -37,6 +37,29 @@
         @error('guests') <span class="error" style="display:block">{{ $message }}</span> @enderror
       </div>
 
+      @auth
+        @if (auth()->user()->hasDietaryNeeds())
+          @php($needs = auth()->user()->dietary_needs ?? collect())
+          @php($offered = $experience->dietary_options ?? collect())
+          <div class="diet-check">
+            <strong>Tu alimentación</strong>
+            <ul>
+              @foreach ($needs as $need)
+                @if ($need->isCoveredBy($offered))
+                  <li class="is-ok"><x-icon name="check" :size="16" /> {{ $need->needLabel() }}: la cubre</li>
+                @else
+                  <li class="is-missing">{{ $need->needLabel() }}: no la indica</li>
+                @endif
+              @endforeach
+              @if (auth()->user()->food_allergies)
+                <li>Alergias: {{ auth()->user()->food_allergies }}</li>
+              @endif
+            </ul>
+            <span class="hint">Se lo pasamos al anfitrión con tu reserva. Si algo no lo cubre, consultale en el mensaje antes de reservar. <a href="{{ route('cuenta.perfil') }}#alimentacion">Cambiala</a></span>
+          </div>
+        @endif
+      @endauth
+
       <div class="field">
         <label for="b-nota">Mensaje para el anfitrión</label>
         <textarea id="b-nota" rows="2" wire:model="note" placeholder="Alergias, ocasión especial, cómo llegan…"></textarea>

@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\BookingStatus;
+use App\Enums\DietaryOption;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +15,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'code', 'experience_date_id', 'experience_id', 'user_id', 'guests', 'unit_price', 'subtotal', 'service_fee_rate',
-    'service_fee', 'total', 'commission_rate', 'commission_amount', 'host_payout', 'currency', 'status', 'guest_note',
+    'service_fee', 'total', 'commission_rate', 'commission_amount', 'host_payout', 'currency', 'status', 'guest_note', 'dietary_needs', 'food_allergies',
     'payment_provider', 'payment_reference', 'confirmed_at', 'declined_at', 'cancelled_at', 'paid_at', 'completed_at', 'refunded_at',
 ])]
 class Booking extends Model
@@ -21,10 +23,14 @@ class Booking extends Model
     use Auditable;
     use HasFactory;
 
+    /** @var list<string> Salud y religión: datos sensibles, no se guardan en la auditoría. */
+    protected array $auditMasked = ['dietary_needs', 'food_allergies'];
+
     protected function casts(): array
     {
         return [
             'status' => BookingStatus::class,
+            'dietary_needs' => AsEnumCollection::of(DietaryOption::class),
             'unit_price' => 'decimal:2',
             'subtotal' => 'decimal:2',
             'service_fee_rate' => 'decimal:4',

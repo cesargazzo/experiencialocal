@@ -82,5 +82,30 @@
         <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit">Guardá tus datos</button></div>
       </form>
     </section>
+
+    <section class="wizard__panel" id="alimentacion">
+      <h2>Tu alimentación</h2>
+      <p>Marcá lo que necesitás y te avisamos en cada experiencia si el anfitrión lo cubre. Es opcional y solo lo ve el anfitrión de las experiencias que reserves.</p>
+      <form method="post" action="{{ route('cuenta.alimentacion.update') }}">
+        @csrf
+        @method('put')
+        @php($selectedNeeds = old('dietary_needs', $user->dietary_needs?->map->value->all() ?? []))
+        <div class="choice-grid">
+          @foreach ($dietaryOptions as $option)
+            <label class="choice">
+              <input type="checkbox" name="dietary_needs[]" value="{{ $option->value }}" @checked(in_array($option->value, $selectedNeeds, true))>
+              <span>{{ $option->needLabel() }}</span>
+            </label>
+          @endforeach
+        </div>
+        @error('dietary_needs.*')<span class="error" style="display:block">{{ $message }}</span>@enderror
+        <div class="field" style="margin-top:16px">
+          <label for="food_allergies">Alergias o intolerancias</label>
+          <input id="food_allergies" name="food_allergies" value="{{ old('food_allergies', $user->food_allergies) }}" maxlength="300" placeholder="Ej.: maní, mariscos, frutos secos">
+          @error('food_allergies')<span class="error" style="display:block">{{ $message }}</span>@enderror
+        </div>
+        <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit">Guardá tu alimentación</button></div>
+      </form>
+    </section>
   </main>
 </x-layout>

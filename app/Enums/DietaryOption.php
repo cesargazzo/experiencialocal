@@ -30,6 +30,43 @@ enum DietaryOption: string
         };
     }
 
+    /** Cómo se nombra cuando es una necesidad de la persona y no una oferta del anfitrión. */
+    public function needLabel(): string
+    {
+        return match ($this) {
+            self::Vegan => 'Alimentación vegana',
+            self::Vegetarian => 'Alimentación vegetariana',
+            self::SinTacc => 'Celiaquía (sin TACC)',
+            self::GlutenFree => 'Sin gluten',
+            self::LactoseFree => 'Sin lactosa',
+            self::Kosher => 'Kosher',
+            self::Halal => 'Halal',
+        };
+    }
+
+    /**
+     * Si lo que ofrece la experiencia alcanza para esta necesidad: vegano cubre
+     * vegetariano y sin TACC cubre sin gluten, pero no al revés.
+     *
+     * @param  iterable<self>  $offered
+     */
+    public function isCoveredBy(iterable $offered): bool
+    {
+        $accepted = match ($this) {
+            self::Vegetarian => [self::Vegetarian, self::Vegan],
+            self::GlutenFree => [self::GlutenFree, self::SinTacc],
+            default => [$this],
+        };
+
+        foreach ($offered as $option) {
+            if (in_array($option, $accepted, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function hint(): string
     {
         return match ($this) {

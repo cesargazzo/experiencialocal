@@ -579,3 +579,11 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .review-item__img--empty { display: grid; place-items: center; padding: 12px; text-align: center; font-size: 13px; line-height: 18px; color: var(--tinta-suave); box-shadow: inset 0 0 0 1.5px var(--linea); }
 .review-item details summary { cursor: pointer; color: var(--texto-petroleo); font: 600 15px/22px var(--font-texto); }
 @media (max-width: 720px) { .review-item { grid-template-columns: 1fr; } .review-item__img { width: 100%; } }
+
+/* Alimentación de la persona en el widget de reserva */
+.diet-check { margin: 0 0 16px; padding: 12px 14px; border-radius: var(--radio-sm); background: var(--superficie-calida); font-size: 14px; line-height: 20px; }
+.diet-check ul { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 4px; }
+.diet-check li { display: flex; gap: 6px; align-items: center; }
+.diet-check .is-ok { color: var(--texto-petroleo); font-weight: 600; }
+.diet-check .is-missing { color: var(--tinta); }
+.diet-check .is-missing::before { content: "!"; display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--coral); color: var(--tinta); font: 700 11px/1 var(--font-texto); }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Account;
 
+use App\Enums\DietaryOption;
 use App\Enums\VerificationLevel;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
@@ -24,6 +25,7 @@ class ProfileController extends Controller
             'nameLocked' => $this->identityIsLocked($user),
             'birthDateLocked' => $this->identityIsLocked($user) && $user->birth_date !== null,
             'countries' => CountryList::all(),
+            'dietaryOptions' => DietaryOption::cases(),
             'provincesByCountry' => Province::query()
                 ->whereIn('country_code', Country::active()->pluck('code'))
                 ->orderBy('name')
@@ -73,6 +75,25 @@ class ProfileController extends Controller
         $user->update([...$data, 'province_id' => $data['province_id'] ?? null, 'postal_code' => $data['postal_code'] ?? null]);
 
         return back()->with('status', 'Guardamos tus datos.');
+    }
+
+    /** Restricciones alimentarias: opcionales y se pueden cambiar siempre. */
+    public function updateDiet(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'dietary_needs' => ['nullable', 'array'],
+            'dietary_needs.*' => [Rule::enum(DietaryOption::class)],
+            'food_allergies' => ['nullable', 'string', 'max:300'],
+        ], [
+            'food_allergies.max' => 'Resumilo en 300 caracteres como máximo.',
+        ]);
+
+        $request->user()->update([
+            'dietary_needs' => array_values(array_unique($data['dietary_needs'] ?? [])) ?: null,
+            'food_allergies' => $data['food_allergies'] ?? null,
+        ]);
+
+        return back()->with('status', 'Guardamos tu alimentación.');
     }
 
     /**

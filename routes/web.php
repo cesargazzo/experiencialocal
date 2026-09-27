@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/salir', [LoginController::class, 'destroy'])->name('logout');
     Route::get('/cuenta', [ProfileController::class, 'edit'])->name('cuenta.perfil');
     Route::put('/cuenta', [ProfileController::class, 'update'])->name('cuenta.perfil.update');
+    Route::put('/cuenta/alimentacion', [ProfileController::class, 'updateDiet'])->name('cuenta.alimentacion.update');
     Route::get('/cuenta/seguridad', [PasswordController::class, 'edit'])->name('cuenta.seguridad');
     Route::put('/cuenta/seguridad', [PasswordController::class, 'update'])->name('cuenta.seguridad.update');
     Route::get('/cuenta/intereses', [InterestController::class, 'edit'])->name('cuenta.intereses');

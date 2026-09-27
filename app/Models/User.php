@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DietaryOption;
 use App\Enums\VerificationLevel;
 use App\Models\Concerns\Auditable;
 use App\Notifications\ResetPasswordNotification;
@@ -10,6 +11,7 @@ use App\Support\PasswordPolicy;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -24,11 +26,14 @@ use Illuminate\Support\Str;
  * Una sola cuenta con varios roles: todo usuario es participante, es anfitrión
  * si tiene un HostProfile y es administrador si tiene el flag is_admin.
  */
-#[Fillable(['name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'nationality_code', 'locale', 'avatar_path'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'nationality_code', 'locale', 'avatar_path'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     use Auditable;
+
+    /** @var list<string> Salud y religión: datos sensibles, no se guardan en la auditoría. */
+    protected array $auditMasked = ['dietary_needs', 'food_allergies'];
 
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -47,6 +52,7 @@ class User extends Authenticatable
             'verification_level' => VerificationLevel::class,
             'is_admin' => 'boolean',
             'interest_alerts' => 'boolean',
+            'dietary_needs' => AsEnumCollection::of(DietaryOption::class),
         ];
     }
 
@@ -96,6 +102,11 @@ class User extends Authenticatable
         $parts = array_filter([$this->city, $this->province?->name, CountryList::all()[$this->country_code] ?? null]);
 
         return $parts === [] ? null : implode(', ', $parts);
+    }
+
+    public function hasDietaryNeeds(): bool
+    {
+        return (bool) $this->dietary_needs?->isNotEmpty() || filled($this->food_allergies);
     }
 
     public function hostProfile(): HasOne
