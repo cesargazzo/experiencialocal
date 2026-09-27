@@ -1,92 +1,105 @@
 <!doctype html>
 <html lang="es-AR">
 <head>
-  <title>El Anfitrión · Experiencias locales entre personas</title>
+  <title>Tinku · Experiencias con personas locales</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tinku: experiencias con personas locales. Comidas en casa, clases de cocina, paseos y talleres.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23a8402b'/%3E%3Cpath d='M18 40h28M32 20v4M22 40c0-8 4-14 10-16 6 2 10 8 10 16' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff5a3c'/%3E%3Cstop offset='1' stop-color='%23ff8a3c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cpath d='M14 40c6-14 14-14 18 0M32 40c4-14 12-14 18 0' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
 </head>
 <body>
-  <div class="proto-banner"><strong>PROTOTIPO</strong> · Las experiencias, precios y registros son demostrativos.</div>
+  <div class="proto-banner"><strong>PROTOTIPO</strong> Las experiencias, precios y registros son demostrativos.</div>
   <header class="header">
     <div class="container header__inner">
-      <a class="brand" href="index.html" aria-label="El Anfitrión, inicio">
+      <a class="brand" href="index.html" aria-label="Tinku, inicio">
         <span class="brand__mark" aria-hidden="true">
-          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 22h20"/><path d="M16 8v3"/><path d="M9 22c0-5 3-9 7-11 4 2 7 6 7 11"/><path d="M4 26h24"/>
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+            <path d="M6 20c3-8 7-8 10 0"/><path d="M16 20c3-8 7-8 10 0"/>
           </svg>
         </span>
-        <span class="brand__name">El Anfitrión</span>
+        <span class="brand__name">Tinku</span>
       </a>
       <button class="nav-toggle" aria-label="Abrir menú"><span></span><span></span><span></span></button>
       <nav class="nav">
         <a href="index.html#experiencias">Experiencias</a>
         <a href="index.html#como-ganas">Cómo ganás</a>
         <a href="index.html#planes">Planes</a>
-        <a class="btn btn--primary btn--sm" href="registro.html">Quiero ser anfitrión</a>
+        <a class="btn btn--dark btn--sm" href="registro.html">Quiero ser anfitrión</a>
       </nav>
     </div>
   </header>
 
   <section class="hero" id="inicio">
-    <div class="hero__bg" style="--hero-img:url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2000&q=70')"></div>
-    <div class="container hero__inner">
-      <p class="eyebrow eyebrow--cream">Experiencias locales entre personas</p>
-      <h1 class="hero__title">Tu mesa puede convertirse en una experiencia.</h1>
-      <p class="hero__lead">Publicá lo que sabés hacer: una cena en tu casa, una clase de cocina, un paseo por tu pueblo. Recibí personas y generá ingresos. Nosotros te ayudamos a mostrarte, cobrar y construir reputación.</p>
-      <div class="hero__actions">
-        <a class="btn btn--primary" href="registro.html">Registrarme como anfitrión</a>
-        <a class="btn btn--light" href="#experiencias">Buscar una experiencia</a>
+    <div class="container hero__grid">
+      <div>
+        <p class="eyebrow">Tinku · encuentro, en quechua</p>
+        <h1 class="hero__title">Vivilo con alguien <span class="hl">de acá</span>.</h1>
+        <p class="hero__lead">Una cena en casa de una cocinera de barrio, una clase de pastas con una nonna, un paseo guiado por quien nació ahí. Tinku conecta personas locales con quienes quieren conocerlas.</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="#experiencias">Explorar experiencias <span class="arrow">→</span></a>
+          <a class="btn btn--light" href="registro.html">Quiero ser anfitrión</a>
+        </div>
+        <div class="hero__trust">
+          <span>Anfitriones verificados</span>
+          <span>Pago protegido</span>
+          <span>Opiniones reales</span>
+        </div>
       </div>
-      <div class="hero__trust">
-        <span>Perfil verificado</span>
-        <span>Reservas dentro de la plataforma</span>
-        <span>Calificaciones reales</span>
+      <div class="collage">
+        <div class="collage__img collage__img--tall" style="background-image:url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=70')"><span>🍽️ Cena en el patio</span></div>
+        <div class="collage__img" style="background-image:url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=700&q=70')"><span>👩‍🍳 Clase de pastas</span></div>
+        <div class="collage__img" style="background-image:url('https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=700&q=70')"><span>🚙 Paseo de campo</span></div>
+        <div class="float-card"><span class="avatar">MQ</span><div><div class="float-card__val">$ 262.400</div><div class="float-card__lbl">Marta recibió este mes</div></div></div>
       </div>
     </div>
   </section>
 
   <div class="container">
     <form class="search" id="search-form">
-      <div class="search__field">
-        <label for="search-cat">Qué querés vivir</label>
-        <select id="search-cat"></select>
-      </div>
-      <div class="search__field">
-        <label for="search-lugar">Dónde</label>
-        <input id="search-lugar" type="text" placeholder="La Rioja, Chilecito…">
-      </div>
-      <div class="search__field">
-        <label for="search-fecha">Cuándo</label>
-        <input id="search-fecha" type="date">
-      </div>
+      <div class="search__field"><label for="search-cat">Qué querés vivir</label><select id="search-cat"></select></div>
+      <div class="search__field"><label for="search-lugar">Dónde</label><input id="search-lugar" type="text" placeholder="La Rioja, Chilecito…"></div>
+      <div class="search__field"><label for="search-fecha">Cuándo</label><input id="search-fecha" type="date"></div>
       <div class="search__submit"><button class="btn btn--primary" type="submit">Buscar</button></div>
     </form>
   </div>
 
-  <section class="section" id="experiencias">
+  <section class="section section--tight">
+    <div class="container stats">
+      <div class="stat reveal"><div class="stat__val" data-count="6">0</div><div class="stat__lbl">experiencias publicadas</div></div>
+      <div class="stat reveal"><div class="stat__val" data-count="130" data-suffix="+">0</div><div class="stat__lbl">opiniones verificadas</div></div>
+      <div class="stat reveal"><div class="stat__val" data-count="4" data-suffix=",9">0</div><div class="stat__lbl">puntaje promedio</div></div>
+      <div class="stat reveal"><div class="stat__val" data-count="24" data-suffix=" h">0</div><div class="stat__lbl">para confirmar una reserva</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="experiencias" style="padding-top:20px">
     <div class="container">
-      <p class="eyebrow eyebrow--terracotta">Experiencias del mundo, cerca tuyo</p>
-      <h2 class="title">Elegí una mesa. Conocé a quien la crea.</h2>
-      <p class="lead">Cada experiencia muestra qué incluye, quién la ofrece, el precio final y las opiniones de quienes ya participaron.</p>
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Experiencias cerca tuyo</p>
+          <h2 class="title">Elegí un plan. <span class="hl">Conocé</span> a quien lo crea.</h2>
+        </div>
+        <p class="lead">Cada experiencia muestra qué incluye, quién la ofrece, el precio final y las opiniones de quienes ya fueron.</p>
+      </div>
       <div class="chips" id="chips"></div>
       <div class="grid" id="grid-experiencias"></div>
     </div>
   </section>
 
-  <section class="section section--white" id="tipos">
+  <section class="section section--alt" id="tipos">
     <div class="container">
-      <p class="eyebrow eyebrow--terracotta">Qué podés ofrecer</p>
-      <h2 class="title">No hace falta un restaurante. Hace falta algo que sepas hacer bien.</h2>
-      <div class="types">
-        <div class="type"><div class="type__icon">🍽️</div><h3>Comida en tu casa</h3><p>Una cena, un almuerzo de domingo, un asado. Vos ponés la mesa y la receta.</p></div>
-        <div class="type"><div class="type__icon">👩‍🍳</div><h3>Clases de cocina</h3><p>Enseñá lo que aprendiste de tu familia o de tu oficio. Cocinan, comen y se llevan la receta.</p></div>
-        <div class="type"><div class="type__icon">🚙</div><h3>Paseos y viajes</h3><p>Llevá gente a los lugares que solo conoce quien vive ahí. Con o sin comida al final.</p></div>
-        <div class="type"><div class="type__icon">🧶</div><h3>Talleres</h3><p>Pan, cerámica, huerta, vino. Cualquier saber que valga la pena compartir en una tarde.</p></div>
+      <p class="eyebrow">Qué podés ofrecer</p>
+      <h2 class="title">No hace falta un local. Hace falta algo que sepas hacer bien.</h2>
+      <div class="bento" style="margin-top:44px">
+        <div class="bento__item bento__item--wide bento__item--tall reveal" style="background-image:url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=70')"><div class="bento__icon">🍽️</div><h3>Comida en tu casa</h3><p>Una cena, un almuerzo de domingo, un asado. Vos ponés la mesa y la receta.</p></div>
+        <div class="bento__item reveal" style="background-image:url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=700&q=70')"><div class="bento__icon">👩‍🍳</div><h3>Clases de cocina</h3><p>Cocinan, comen y se llevan la receta.</p></div>
+        <div class="bento__item reveal" style="background-image:url('https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=700&q=70')"><div class="bento__icon">🚙</div><h3>Paseos y viajes</h3><p>Lugares que solo conoce quien vive ahí.</p></div>
+        <div class="bento__item reveal" style="background-image:url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=700&q=70')"><div class="bento__icon">🧶</div><h3>Talleres</h3><p>Pan, cerámica, huerta, vino.</p></div>
+        <div class="bento__item bento__item--solid reveal"><div class="bento__icon">✨</div><h3>Lo que se te ocurra</h3><p>Si vale la pena compartirlo en una tarde, tiene lugar en Tinku.</p></div>
       </div>
     </div>
   </section>
@@ -94,18 +107,18 @@
   <section class="section section--dark" id="como-ganas">
     <div class="container split">
       <div>
-        <p class="eyebrow eyebrow--cream">Ingresos para el anfitrión</p>
-        <h2 class="title">La aplicación gana cuando vos recibís una reserva.</h2>
-        <p class="lead">El anfitrión define el precio y los cupos. El participante paga dentro de la plataforma. El Anfitrión descuenta la comisión correspondiente al plan y liquida el saldo.</p>
+        <p class="eyebrow">Ingresos para el anfitrión</p>
+        <h2 class="title">Tinku gana solo cuando vos recibís una reserva.</h2>
+        <p class="lead">Vos definís el precio y los cupos. El participante paga dentro de la plataforma. Tinku descuenta la comisión de tu plan y te liquida el saldo después de la experiencia.</p>
         <p class="lead">Mové el valor y cambiá de plan para simular una reserva individual.</p>
       </div>
       <div class="calc" id="calc">
-        <div class="calc__label">Precio por persona: <span id="calc-precio-label"></span></div>
+        <div class="calc__label">Precio por persona <span id="calc-precio-label"></span></div>
         <input type="range" id="calc-precio" min="10000" max="120000" step="1000" value="40000" aria-label="Precio por persona">
         <div class="calc__plans" id="calc-planes"></div>
         <div class="calc__row"><span>Precio cobrado</span><b id="calc-cobrado"></b></div>
-        <div class="calc__row"><span>Comisión de la app (<span id="calc-comision-pct"></span>) · plan <span id="calc-plan-nombre"></span></span><b id="calc-comision"></b></div>
-        <div class="calc__row calc__row--total"><span>Recibís como anfitrión*</span><span id="calc-neto"></span></div>
+        <div class="calc__row"><span>Comisión Tinku (<span id="calc-comision-pct"></span>) · plan <span id="calc-plan-nombre"></span></span><b id="calc-comision"></b></div>
+        <div class="calc__row calc__row--total"><span>Recibís vos*</span><span id="calc-neto"></span></div>
         <p class="calc__note">*Antes de impuestos, retenciones, costos de cobro y gastos propios.</p>
       </div>
     </div>
@@ -113,38 +126,56 @@
 
   <section class="section" id="planes">
     <div class="container">
-      <p class="eyebrow eyebrow--terracotta">Oferta para anfitriones</p>
-      <h2 class="title">Empezá gratis. Pagá más servicios cuando los necesites.</h2>
-      <p class="lead">La comisión baja en los planes pagos. La suscripción empieza a convenir cuando el anfitrión recibe más reservas.</p>
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Planes para anfitriones</p>
+          <h2 class="title">Empezá gratis. <span class="hl">Crecé</span> cuando quieras.</h2>
+        </div>
+        <p class="lead">La comisión baja en los planes pagos. La suscripción empieza a convenir cuando recibís más reservas.</p>
+      </div>
       <div class="plans" id="planes"></div>
     </div>
   </section>
 
-  <section class="section section--white" id="testimonios-sec">
+  <section class="section section--alt" id="testimonios-sec">
     <div class="container">
-      <p class="eyebrow eyebrow--terracotta">Lo que dicen</p>
+      <p class="eyebrow">Lo que dicen</p>
       <h2 class="title">Anfitriones y participantes.</h2>
-      <div class="quotes" id="testimonios"></div>
+      <div class="quotes" id="testimonios" style="margin-top:44px"></div>
     </div>
   </section>
 
   <section class="section" id="camino">
     <div class="container">
-      <p class="eyebrow eyebrow--terracotta">Camino del anfitrión</p>
+      <p class="eyebrow">Camino del anfitrión</p>
       <h2 class="title">De tu idea a tu primera reserva.</h2>
-      <div class="steps">
-        <div class="step"><div class="step__num">01</div><h3 class="step__title">Registrate</h3><p>Contanos quién sos, qué sabés hacer y dónde querés recibir.</p></div>
-        <div class="step"><div class="step__num">02</div><h3 class="step__title">Verificá</h3><p>Completá identidad y requisitos de la actividad y del espacio.</p></div>
-        <div class="step"><div class="step__num">03</div><h3 class="step__title">Publicá</h3><p>Definí qué incluye, precio, fechas, cupos y condiciones.</p></div>
-        <div class="step"><div class="step__num">04</div><h3 class="step__title">Recibí</h3><p>Confirmá la reserva y construí reputación.</p></div>
+      <div class="steps" style="margin-top:44px">
+        <div class="step reveal"><div class="step__num">01</div><h3 class="step__title">Registrate</h3><p>Contanos quién sos, qué sabés hacer y dónde querés recibir.</p></div>
+        <div class="step reveal"><div class="step__num">02</div><h3 class="step__title">Verificá</h3><p>Completá identidad y requisitos de la actividad y del espacio.</p></div>
+        <div class="step reveal"><div class="step__num">03</div><h3 class="step__title">Publicá</h3><p>Definí qué incluye, precio, fechas, cupos y condiciones.</p></div>
+        <div class="step reveal"><div class="step__num">04</div><h3 class="step__title">Recibí</h3><p>Confirmá la reserva y construí reputación.</p></div>
       </div>
-      <div class="center"><a class="btn btn--primary" href="registro.html">Comenzar mi registro</a></div>
+      <div class="cta reveal">
+        <div><h2>Tu mesa, tu cocina o tu pueblo pueden ser una experiencia.</h2><p>Publicar es gratis. Cobrás cuando recibís.</p></div>
+        <a class="btn btn--light" href="registro.html">Comenzar mi registro <span class="arrow">→</span></a>
+      </div>
     </div>
   </section>
   <footer class="footer">
-    <div class="container footer__inner">
-      <span>© El Anfitrión · Prototipo de producto</span>
-      <span>Compartí tu mesa. Descubrí el mundo.</span>
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <a class="brand" href="index.html"><span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 20c3-8 7-8 10 0"/><path d="M16 20c3-8 7-8 10 0"/></svg></span><span class="brand__name">Tinku</span></a>
+          <p style="margin-top:14px">Tinku significa encuentro en quechua. Experiencias con personas locales: comidas, clases, paseos y talleres.</p>
+        </div>
+        <div><h4>Explorar</h4><ul><li><a href="index.html?cat=comida#experiencias">Comidas</a></li><li><a href="index.html?cat=cocina#experiencias">Clases de cocina</a></li><li><a href="index.html?cat=paseo#experiencias">Paseos y viajes</a></li><li><a href="index.html?cat=taller#experiencias">Talleres</a></li></ul></div>
+        <div><h4>Anfitriones</h4><ul><li><a href="registro.html">Publicar experiencia</a></li><li><a href="index.html#planes">Planes</a></li><li><a href="index.html#como-ganas">Cómo ganás</a></li></ul></div>
+        <div><h4>Tinku</h4><ul><li><a href="#">Cómo funciona</a></li><li><a href="#">Seguridad</a></li><li><a href="#">Ayuda</a></li></ul></div>
+      </div>
+      <div class="footer__bottom">
+        <span>© 2026 Tinku · Prototipo de producto</span>
+        <span>Encontrate con lo local.</span>
+      </div>
     </div>
   </footer>
   <script src="js/data.js"></script>

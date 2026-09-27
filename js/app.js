@@ -1,6 +1,6 @@
-// Lógica compartida del prototipo El Anfitrión.
+// Lógica compartida del prototipo Tinku.
 (function () {
-  const D = window.ANFITRION;
+  const D = window.TINKU;
 
   // ---------- Utilidades ----------
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -10,6 +10,10 @@
   const stars = (r) => "★".repeat(Math.round(r)) + "☆".repeat(5 - Math.round(r));
   const ratingFmt = (r) => r.toFixed(1).replace(".", ",");
   const param = (k) => new URLSearchParams(location.search).get(k);
+  const badge = (nivel, full) => {
+    const v = D.verificacion[nivel] || D.verificacion[1];
+    return `<span class="badge" style="--c:${v.color}" title="${v.nombre}">${v.icono}${full ? " " + v.nombre : ""}</span>`;
+  };
 
   function toast(msg) {
     let el = $(".toast");
@@ -20,6 +24,25 @@
     el._t = setTimeout(() => el.classList.remove("is-visible"), 2800);
   }
 
+  // ---------- Reveal al hacer scroll ----------
+  const io = "IntersectionObserver" in window ? new IntersectionObserver((entries) => {
+    entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); } });
+  }, { threshold: 0.12 }) : null;
+  function observeReveal() {
+    $$(".reveal:not(.is-in)").forEach((el, k) => { el.style.transitionDelay = (k % 6) * 60 + "ms"; io ? io.observe(el) : el.classList.add("is-in"); });
+    // Fallback: si el observador no dispara (impresión, visores embebidos), se muestra todo igual.
+    clearTimeout(observeReveal._t);
+    observeReveal._t = setTimeout(() => $$(".reveal:not(.is-in)").forEach((el) => el.classList.add("is-in")), 2500);
+  }
+  observeReveal();
+
+  // ---------- Contadores ----------
+  $$("[data-count]").forEach((el) => {
+    const target = Number(el.dataset.count); const suffix = el.dataset.suffix || "";
+    const run = () => { const t0 = performance.now(); const step = (t) => { const p = Math.min(1, (t - t0) / 1200); const v = Math.round(target * (1 - Math.pow(1 - p, 3))); el.textContent = v.toLocaleString("es-AR") + suffix; if (p < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
+    if (io) { const o = new IntersectionObserver((es) => { if (es[0].isIntersecting) { run(); o.disconnect(); } }); o.observe(el); } else run();
+  });
+
   // ---------- Header ----------
   const toggle = $(".nav-toggle");
   if (toggle) toggle.addEventListener("click", () => $(".nav").classList.toggle("is-open"));
@@ -27,20 +50,22 @@
   // ---------- Experiencias (landing) ----------
   function cardHTML(e) {
     return `
-      <article class="card" data-cat="${e.categoria}">
+      <article class="card reveal" data-cat="${e.categoria}">
         <a href="experiencia.html?id=${e.id}" class="card__media" style="background-image:url('${e.imagen}')">
-          <span class="card__tag">${e.tipo} · ${e.lugar}</span>
+          <span class="card__tag">${e.tipo}</span>
+          <span class="card__dur">⏱ ${e.duracion} · ${e.lugar}</span>
         </a>
+        <button class="card__fav" type="button" aria-label="Guardar" data-fav="${e.id}">♡</button>
         <div class="card__body">
           <div class="card__meta">
-            <span class="stars">${stars(e.rating)}<b>${ratingFmt(e.rating)}</b></span>
-            <span>${e.opiniones} opiniones</span>
+            <span class="stars">${stars(e.rating)}<b>${ratingFmt(e.rating)}</b> · ${e.opiniones} opiniones</span>
+            <span>Hasta ${e.cupos}</span>
           </div>
           <h3 class="card__title"><a href="experiencia.html?id=${e.id}">${e.titulo}</a></h3>
           <p class="card__text">${e.resumen}</p>
           <div class="card__foot">
-            <div class="card__host"><span class="avatar">${initials(e.anfitrion.nombre)}</span><span>${e.anfitrion.nombre}</span></div>
-            <div class="price">${money(e.precio)} <small>por persona</small></div>
+            <div class="card__host"><span class="avatar">${initials(e.anfitrion.nombre)}</span><span>${e.anfitrion.nombre}</span>${badge(e.anfitrion.nivel)}</div>
+            <div class="price">${money(e.precio)} <small>/ persona</small></div>
           </div>
         </div>
       </article>`;
@@ -49,11 +74,19 @@
   const grid = $("#grid-experiencias");
   if (grid) {
     const chips = $("#chips");
-    chips.innerHTML = D.categorias.map((c) => `<button class="chip${c.id === "todas" ? " is-active" : ""}" data-cat="${c.id}">${c.nombre}</button>`).join("");
+    chips.innerHTML = D.categorias.map((c) => `<button class="chip${c.id === "todas" ? " is-active" : ""}" data-cat="${c.id}">${c.icono || ""} ${c.nombre}</button>`).join("");
     const render = (cat) => {
       const list = D.experiencias.filter((e) => cat === "todas" || e.categoria === cat);
       grid.innerHTML = list.length ? list.map(cardHTML).join("") : `<div class="empty">Todavía no hay experiencias en esta categoría. ¿Querés ser el primero en publicar una?</div>`;
+      observeReveal();
     };
+    grid.addEventListener("click", (ev) => {
+      const b = ev.target.closest("[data-fav]");
+      if (!b) return;
+      b.classList.toggle("is-on");
+      b.textContent = b.classList.contains("is-on") ? "♥" : "♡";
+      toast(b.classList.contains("is-on") ? "Guardada en tus favoritas" : "Quitada de favoritas");
+    });
     chips.addEventListener("click", (ev) => {
       const b = ev.target.closest(".chip");
       if (!b) return;
@@ -85,7 +118,7 @@
     const range = $("#calc-precio");
     const plansEl = $("#calc-planes");
     let plan = D.planes[0];
-    plansEl.innerHTML = D.planes.map((p) => `<button type="button" data-plan="${p.id}"${p.id === plan.id ? ' class="is-active"' : ""}>${p.nombre} · ${Math.round(p.comision * 100)}%</button>`).join("");
+    plansEl.innerHTML = D.planes.map((p) => `<button type="button" data-plan="${p.id}"${p.id === plan.id ? ' class="is-active"' : ""}>${p.nombre} ${Math.round(p.comision * 100)}%</button>`).join("");
     const update = () => {
       const precio = Number(range.value);
       const pct = ((precio - range.min) / (range.max - range.min)) * 100;
@@ -113,7 +146,7 @@
   const plans = $("#planes");
   if (plans) {
     plans.innerHTML = D.planes.map((p) => `
-      <article class="plan${p.destacado ? " plan--featured" : ""}">
+      <article class="plan reveal${p.destacado ? " plan--featured" : ""}">
         ${p.destacado ? '<span class="plan__badge">Recomendado</span>' : ""}
         <div class="plan__kind">${p.tipo}</div>
         <h3 class="plan__name">${p.nombre}</h3>
@@ -122,30 +155,32 @@
         <ul>${p.items.map((i) => `<li>${i}</li>`).join("")}</ul>
         <a class="btn ${p.destacado ? "btn--primary" : "btn--outline"}" href="registro.html?plan=${p.id}">Elegir ${p.nombre}</a>
       </article>`).join("");
+    observeReveal();
   }
 
   // ---------- Testimonios ----------
   const quotes = $("#testimonios");
   if (quotes) {
     quotes.innerHTML = D.testimonios.map((t) => `
-      <figure class="quote">
+      <figure class="quote reveal">
         <p>“${t.texto}”</p>
         <footer><span class="avatar">${initials(t.nombre)}</span><span><strong>${t.nombre}</strong><br>${t.rol}</span></footer>
       </figure>`).join("");
+    observeReveal();
   }
 
   // ---------- Detalle de experiencia ----------
   const detail = $("#detalle");
   if (detail) {
     const e = D.experiencias.find((x) => x.id === param("id")) || D.experiencias[0];
-    document.title = `${e.titulo} · El Anfitrión`;
+    document.title = `${e.titulo} · Tinku`;
     $("#d-hero").style.backgroundImage = `url('${e.imagen}')`;
     $("#d-tipo").textContent = `${e.tipo} · ${e.lugar}`;
     $("#d-titulo").textContent = e.titulo;
-    $("#d-meta").innerHTML = `<span>${stars(e.rating)} ${ratingFmt(e.rating)} · ${e.opiniones} opiniones</span><span>⏱ ${e.duracion}</span><span>👥 Hasta ${e.cupos} personas</span>`;
+    $("#d-meta").innerHTML = `<span>★ ${ratingFmt(e.rating)} · ${e.opiniones} opiniones</span><span>⏱ ${e.duracion}</span><span>👥 Hasta ${e.cupos} personas</span><span>📍 ${e.lugar}</span>`;
     $("#d-desc").textContent = e.descripcion;
     $("#d-incluye").innerHTML = e.incluye.map(([k, v]) => `<li><strong>${k}</strong><span>${v}</span></li>`).join("");
-    $("#d-host").innerHTML = `<span class="avatar">${initials(e.anfitrion.nombre)}</span><div><strong>${e.anfitrion.nombre}</strong> · Anfitrión desde ${e.anfitrion.desde}<p>${e.anfitrion.bio}</p></div>`;
+    $("#d-host").innerHTML = `<span class="avatar">${initials(e.anfitrion.nombre)}</span><div><strong>${e.anfitrion.nombre}</strong> · Anfitrión desde ${e.anfitrion.desde}<br>${badge(e.anfitrion.nivel, true)}<p>${e.anfitrion.bio}</p></div>`;
     $("#d-reviews").innerHTML = e.reviews.map((r) => `
       <div class="review"><header><strong>${r.nombre}</strong><span>${r.fecha} · <span class="stars">${stars(r.rating)}</span></span></header><p>${r.texto}</p></div>`).join("");
     $("#b-precio").innerHTML = `${money(e.precio)} <small>por persona</small>`;
@@ -262,7 +297,7 @@
       const step = steps[i];
       if (!validate(step)) return;
       collect(step);
-      try { localStorage.setItem("anfitrion.registro", JSON.stringify(data)); } catch (_) {}
+      try { localStorage.setItem("tinku.registro", JSON.stringify(data)); } catch (_) {}
       show(4);
       toast("Tu experiencia quedó publicada");
     });

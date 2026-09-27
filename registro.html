@@ -1,42 +1,43 @@
 <!doctype html>
 <html lang="es-AR">
 <head>
-  <title>Registro de anfitrión · El Anfitrión</title>
+  <title>Registro de anfitrión · Tinku</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tinku: experiencias con personas locales. Comidas en casa, clases de cocina, paseos y talleres.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23a8402b'/%3E%3Cpath d='M18 40h28M32 20v4M22 40c0-8 4-14 10-16 6 2 10 8 10 16' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff5a3c'/%3E%3Cstop offset='1' stop-color='%23ff8a3c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cpath d='M14 40c6-14 14-14 18 0M32 40c4-14 12-14 18 0' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
 </head>
 <body>
-  <div class="proto-banner"><strong>PROTOTIPO</strong> · Las experiencias, precios y registros son demostrativos.</div>
+  <div class="proto-banner"><strong>PROTOTIPO</strong> Las experiencias, precios y registros son demostrativos.</div>
   <header class="header">
     <div class="container header__inner">
-      <a class="brand" href="index.html" aria-label="El Anfitrión, inicio">
+      <a class="brand" href="index.html" aria-label="Tinku, inicio">
         <span class="brand__mark" aria-hidden="true">
-          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 22h20"/><path d="M16 8v3"/><path d="M9 22c0-5 3-9 7-11 4 2 7 6 7 11"/><path d="M4 26h24"/>
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+            <path d="M6 20c3-8 7-8 10 0"/><path d="M16 20c3-8 7-8 10 0"/>
           </svg>
         </span>
-        <span class="brand__name">El Anfitrión</span>
+        <span class="brand__name">Tinku</span>
       </a>
       <button class="nav-toggle" aria-label="Abrir menú"><span></span><span></span><span></span></button>
       <nav class="nav">
         <a href="index.html#experiencias">Experiencias</a>
         <a href="index.html#como-ganas">Cómo ganás</a>
         <a href="index.html#planes">Planes</a>
-        <a class="btn btn--primary btn--sm" href="registro.html">Quiero ser anfitrión</a>
+        <a class="btn btn--dark btn--sm" href="registro.html">Quiero ser anfitrión</a>
       </nav>
     </div>
   </header>
 
   <main class="container wizard" id="wizard">
-    <p class="eyebrow eyebrow--terracotta">Camino del anfitrión</p>
-    <h1 class="title">Publicá tu primera experiencia.</h1>
+    <p class="eyebrow">Camino del anfitrión</p>
+    <h1 class="title">Publicá tu primera <span class="hl">experiencia</span>.</h1>
     <div class="wizard__progress">
-      <div>01 · Registrate</div><div>02 · Verificá</div><div>03 · Publicá</div><div>04 · Recibí</div>
+      <div data-label="01 · Registrate"></div><div data-label="02 · Verificá"></div><div data-label="03 · Publicá"></div><div data-label="04 · Recibí"></div>
     </div>
 
     <section class="wizard__panel wizard__step">
@@ -51,7 +52,7 @@
       <div class="field"><label for="r-bio">Contanos sobre vos</label><textarea id="r-bio" name="bio" rows="3" required placeholder="Qué cocinás, qué lugares conocés, por qué querés recibir gente."></textarea></div>
       <div class="field"><label for="r-plan">Plan</label><select id="r-plan" name="plan"></select><span class="hint">Podés cambiarlo cuando quieras. El plan Free no tiene costo mensual.</span></div>
       <p class="error">Completá los campos marcados para continuar.</p>
-      <div class="wizard__actions"><a class="btn btn--ghost" href="index.html">Cancelar</a><button class="btn btn--primary" type="button" data-next>Continuar</button></div>
+      <div class="wizard__actions"><a class="btn btn--ghost" href="index.html">Cancelar</a><button class="btn btn--primary" type="button" data-next>Continuar <span class="arrow">→</span></button></div>
     </section>
 
     <section class="wizard__panel wizard__step" hidden>
@@ -62,10 +63,10 @@
         <label><input type="checkbox" name="v_identidad" required><span><strong>Identidad</strong><br>Voy a subir una foto de mi documento y una selfie.</span></label>
         <label><input type="checkbox" name="v_espacio" required><span><strong>Espacio</strong><br>El lugar donde recibo es seguro, tiene baño y una salida despejada.</span></label>
         <label><input type="checkbox" name="v_alimentos" required><span><strong>Alimentos</strong><br>Si sirvo comida, conozco y cumplo las normas básicas de manipulación.</span></label>
-        <label><input type="checkbox" name="v_terminos" required><span><strong>Términos</strong><br>Acepto las condiciones de la plataforma y la política de cancelaciones.</span></label>
+        <label><input type="checkbox" name="v_terminos" required><span><strong>Términos</strong><br>Acepto las condiciones de Tinku y la política de cancelaciones.</span></label>
       </div>
       <p class="error">Necesitamos el documento y todas las confirmaciones.</p>
-      <div class="wizard__actions"><button class="btn btn--ghost" type="button" data-prev>Volver</button><button class="btn btn--primary" type="button" data-next>Continuar</button></div>
+      <div class="wizard__actions"><button class="btn btn--ghost" type="button" data-prev>Volver</button><button class="btn btn--primary" type="button" data-next>Continuar <span class="arrow">→</span></button></div>
     </section>
 
     <section class="wizard__panel wizard__step" hidden>
@@ -82,7 +83,7 @@
       </div>
       <div class="field"><label for="r-desc">Descripción</label><textarea id="r-desc" name="descripcion" rows="4" required placeholder="Qué van a vivir, qué incluye, qué tienen que traer."></textarea></div>
       <p class="error">Completá los campos marcados para publicar.</p>
-      <div class="wizard__actions"><button class="btn btn--ghost" type="button" data-prev>Volver</button><button class="btn btn--primary" type="button" data-next>Revisar</button></div>
+      <div class="wizard__actions"><button class="btn btn--ghost" type="button" data-prev>Volver</button><button class="btn btn--primary" type="button" data-next>Revisar <span class="arrow">→</span></button></div>
     </section>
 
     <section class="wizard__panel wizard__step" hidden>
@@ -97,7 +98,7 @@
       <div class="success">
         <div class="success__icon">✓</div>
         <h2>Tu experiencia está publicada</h2>
-        <p style="max-width:44ch;margin:8px auto 24px">Cuando alguien reserve, te avisamos por email. Confirmás la reserva, recibís a tus invitados y el saldo se liquida después de la experiencia.</p>
+        <p style="max-width:44ch;margin:8px auto 24px;color:var(--muted)">Cuando alguien reserve, te avisamos. Confirmás la reserva, recibís a tus invitados y el saldo se liquida después de la experiencia.</p>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
           <a class="btn btn--primary" href="index.html#experiencias">Ver experiencias</a>
           <a class="btn btn--outline" href="registro.html">Publicar otra</a>
@@ -106,9 +107,20 @@
     </section>
   </main>
   <footer class="footer">
-    <div class="container footer__inner">
-      <span>© El Anfitrión · Prototipo de producto</span>
-      <span>Compartí tu mesa. Descubrí el mundo.</span>
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <a class="brand" href="index.html"><span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 20c3-8 7-8 10 0"/><path d="M16 20c3-8 7-8 10 0"/></svg></span><span class="brand__name">Tinku</span></a>
+          <p style="margin-top:14px">Tinku significa encuentro en quechua. Experiencias con personas locales: comidas, clases, paseos y talleres.</p>
+        </div>
+        <div><h4>Explorar</h4><ul><li><a href="index.html?cat=comida#experiencias">Comidas</a></li><li><a href="index.html?cat=cocina#experiencias">Clases de cocina</a></li><li><a href="index.html?cat=paseo#experiencias">Paseos y viajes</a></li><li><a href="index.html?cat=taller#experiencias">Talleres</a></li></ul></div>
+        <div><h4>Anfitriones</h4><ul><li><a href="registro.html">Publicar experiencia</a></li><li><a href="index.html#planes">Planes</a></li><li><a href="index.html#como-ganas">Cómo ganás</a></li></ul></div>
+        <div><h4>Tinku</h4><ul><li><a href="#">Cómo funciona</a></li><li><a href="#">Seguridad</a></li><li><a href="#">Ayuda</a></li></ul></div>
+      </div>
+      <div class="footer__bottom">
+        <span>© 2026 Tinku · Prototipo de producto</span>
+        <span>Encontrate con lo local.</span>
+      </div>
     </div>
   </footer>
   <script src="js/data.js"></script>

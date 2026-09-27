@@ -1,5 +1,5 @@
 // Datos demostrativos del prototipo. En una versión real vendrían de la API.
-window.ANFITRION = {
+window.TINKU = {
   planes: [
     { id: "free", nombre: "Free", tipo: "Para probar", precio: 0, comision: 0.18,
       items: ["Perfil público", "Una experiencia activa", "Reservas y pagos", "Calificaciones"] },
@@ -9,12 +9,19 @@ window.ANFITRION = {
       items: ["Experiencias sin límite", "Calendario y equipo", "Soporte prioritario", "Facturación integrada"] }
   ],
 
+  // Niveles de verificación de identidad. La seguridad de la identidad es el eje del producto.
+  verificacion: {
+    1: { nombre: "Email y teléfono", icono: "✓", color: "#9aa0ab" },
+    2: { nombre: "Documento validado", icono: "✓", color: "#14b8a6" },
+    3: { nombre: "Identidad y domicilio validados", icono: "✓✓", color: "#6b4cf6" }
+  },
+
   categorias: [
-    { id: "todas", nombre: "Todas" },
-    { id: "comida", nombre: "Comidas" },
-    { id: "cocina", nombre: "Clases de cocina" },
-    { id: "paseo", nombre: "Paseos y viajes" },
-    { id: "taller", nombre: "Talleres" }
+    { id: "todas", nombre: "Todas", icono: "✨" },
+    { id: "comida", nombre: "Comidas", icono: "🍽️" },
+    { id: "cocina", nombre: "Clases de cocina", icono: "👩‍🍳" },
+    { id: "paseo", nombre: "Paseos y viajes", icono: "🚙" },
+    { id: "taller", nombre: "Talleres", icono: "🧶" }
   ],
 
   experiencias: [
@@ -31,7 +38,7 @@ window.ANFITRION = {
       cupos: 8,
       rating: 4.9,
       opiniones: 28,
-      anfitrion: { nombre: "Marta Quiroga", desde: 2024, bio: "Cocinera de familia, docente jubilada. Recibo en mi casa del barrio San Martín desde hace dos años." },
+      anfitrion: { nombre: "Marta Quiroga", nivel: 3, desde: 2024, bio: "Cocinera de familia, docente jubilada. Recibo en mi casa del barrio San Martín desde hace dos años." },
       imagen: "https://images.unsplash.com/photo-1529543544282-ea669407fca3?auto=format&fit=crop&w=1200&q=70",
       incluye: [["Recepción", "Vermú con aceitunas y quesos regionales"], ["Principal", "Empanadas riojanas y cabrito al horno de barro"], ["Postre", "Dulce de cayote con nuez y café de olla"], ["Bebida", "Vino torrontés de la zona, sin límite"]],
       fechas: ["Sáb 3 oct · 20:30", "Sáb 10 oct · 20:30", "Vie 16 oct · 21:00"],
@@ -54,7 +61,7 @@ window.ANFITRION = {
       cupos: 6,
       rating: 4.8,
       opiniones: 16,
-      anfitrion: { nombre: "Giuliana Ferrero", desde: 2025, bio: "Nieta de inmigrantes calabreses. Doy clases de pasta en la cocina de mi abuela, que sigue siendo la misma." },
+      anfitrion: { nombre: "Giuliana Ferrero", nivel: 2, desde: 2025, bio: "Nieta de inmigrantes calabreses. Doy clases de pasta en la cocina de mi abuela, que sigue siendo la misma." },
       imagen: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1200&q=70",
       incluye: [["Clase", "Masa, relleno y corte de tres tipos de pasta"], ["Cena", "Lo que cocinamos, con salsas caseras"], ["Para llevar", "Recetario impreso y medio kilo de pasta fresca"], ["Bebida", "Vino de la casa y agua"]],
       fechas: ["Dom 4 oct · 11:00", "Dom 11 oct · 11:00", "Dom 18 oct · 11:00"],
@@ -76,7 +83,7 @@ window.ANFITRION = {
       cupos: 10,
       rating: 5.0,
       opiniones: 11,
-      anfitrion: { nombre: "Rodrigo Salas", desde: 2025, bio: "Limeño, cocinero de profesión. Hace cinco años que vivo en La Rioja y extraño el ceviche, así que lo hago yo." },
+      anfitrion: { nombre: "Rodrigo Salas", nivel: 3, desde: 2025, bio: "Limeño, cocinero de profesión. Hace cinco años que vivo en La Rioja y extraño el ceviche, así que lo hago yo." },
       imagen: "https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=1200&q=70",
       incluye: [["Entrada", "Ceviche clásico y causa limeña"], ["Principal", "Lomo saltado y ají de gallina"], ["Postre", "Suspiro a la limeña"], ["Bebida", "Pisco sour de bienvenida y chicha morada"]],
       fechas: ["Vie 2 oct · 21:00", "Vie 9 oct · 21:00", "Sáb 17 oct · 21:00"],
@@ -97,7 +104,7 @@ window.ANFITRION = {
       cupos: 12,
       rating: 4.9,
       opiniones: 34,
-      anfitrion: { nombre: "Pablo Herrera", desde: 2024, bio: "Nací en Chilecito y conozco cada curva de la cuesta. Guía habilitado y productor de aceite de oliva." },
+      anfitrion: { nombre: "Pablo Herrera", nivel: 3, desde: 2024, bio: "Nací en Chilecito y conozco cada curva de la cuesta. Guía habilitado y productor de aceite de oliva." },
       imagen: "https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=1200&q=70",
       incluye: [["Traslado", "Camioneta desde Chilecito, ida y vuelta"], ["Recorrido", "Cuesta de Miranda y cable carril con guía"], ["Almuerzo", "Asado al asador y verduras de huerta en la finca"], ["Bebida", "Vino de bodega familiar y agua"]],
       fechas: ["Sáb 3 oct · 08:00", "Sáb 10 oct · 08:00", "Dom 18 oct · 08:00"],
@@ -119,7 +126,7 @@ window.ANFITRION = {
       cupos: 8,
       rating: 4.7,
       opiniones: 22,
-      anfitrion: { nombre: "Julieta Moreno", desde: 2025, bio: "Panadera autodidacta. Empecé en pandemia y hoy vivo de esto. Mi horno de barro lo construimos con mi papá." },
+      anfitrion: { nombre: "Julieta Moreno", nivel: 2, desde: 2025, bio: "Panadera autodidacta. Empecé en pandemia y hoy vivo de esto. Mi horno de barro lo construimos con mi papá." },
       imagen: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=70",
       incluye: [["Taller", "Masa madre, plegados, formado y horneado"], ["Desayuno", "Pan recién salido, manteca y dulces caseros"], ["Para llevar", "Un pan y un frasco de masa madre activa"], ["Material", "Guía impresa con tiempos y temperaturas"]],
       fechas: ["Sáb 3 oct · 09:00", "Sáb 17 oct · 09:00"],
@@ -141,7 +148,7 @@ window.ANFITRION = {
       cupos: 14,
       rating: 4.8,
       opiniones: 19,
-      anfitrion: { nombre: "Elena Ruiz", desde: 2024, bio: "Tercera generación en la bodega. Hago los vinos con mi hermano y recibo a quienes quieran conocerlos." },
+      anfitrion: { nombre: "Elena Ruiz", nivel: 3, desde: 2024, bio: "Tercera generación en la bodega. Hago los vinos con mi hermano y recibo a quienes quieran conocerlos." },
       imagen: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=70",
       incluye: [["Recorrido", "Viña, bodega y sala de barricas"], ["Cata", "Cuatro vinos con explicación"], ["Picada", "Quesos, fiambres y aceitunas regionales"], ["Para llevar", "Una botella a elección con descuento"]],
       fechas: ["Vie 2 oct · 18:00", "Sáb 10 oct · 18:00", "Vie 16 oct · 18:00"],
