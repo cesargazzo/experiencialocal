@@ -41,7 +41,7 @@ class UserController extends Controller
 
     public function show(User $user): View
     {
-        $user->load(['avatar', 'hostProfile.plan', 'verifications' => fn ($q) => $q->latest(), 'verifications.reviewer', 'invitedBy']);
+        $user->load(['avatar', 'hostProfile.plan', 'verifications' => fn ($q) => $q->latest(), 'verifications.reviewer', 'invitedBy', 'province']);
 
         return view('admin.users.show', [
             'user' => $user,

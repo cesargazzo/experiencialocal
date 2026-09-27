@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\VerificationLevel;
 use App\Models\Concerns\Auditable;
 use App\Notifications\ResetPasswordNotification;
+use App\Support\CountryList;
 use App\Support\PasswordPolicy;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -23,7 +24,7 @@ use Illuminate\Support\Str;
  * Una sola cuenta con varios roles: todo usuario es participante, es anfitrión
  * si tiene un HostProfile y es administrador si tiene el flag is_admin.
  */
-#[Fillable(['name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'nationality_code', 'locale', 'avatar_path'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'nationality_code', 'locale', 'avatar_path'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -82,6 +83,19 @@ class User extends Authenticatable
     public function invitedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'invited_by');
+    }
+
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(Province::class);
+    }
+
+    /** Dónde vive, para mostrar: "Chilecito, La Rioja, Argentina". */
+    public function locationLabel(): ?string
+    {
+        $parts = array_filter([$this->city, $this->province?->name, CountryList::all()[$this->country_code] ?? null]);
+
+        return $parts === [] ? null : implode(', ', $parts);
     }
 
     public function hostProfile(): HasOne

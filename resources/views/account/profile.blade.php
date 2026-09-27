@@ -29,6 +29,38 @@
           @endif
           @error('birth_date')<span class="error" style="display:block">{{ $message }}</span>@enderror
         </div>
+        @php($selectedCountry = old('country_code', $user->country_code ?? 'AR'))
+        <fieldset class="field-group" x-data="{ country: @js($selectedCountry) }" style="border:0;padding:0;margin:0">
+          <legend class="hint" style="margin-bottom:8px">Dónde vivís. Lo podés cambiar cuando te mudes.</legend>
+          <div class="grid-2">
+            <div class="field">
+              <label for="country_code">País</label>
+              <select id="country_code" name="country_code" x-model="country" autocomplete="country" required>
+                @foreach ($countries as $code => $countryName)
+                  <option value="{{ $code }}" @selected($selectedCountry === $code)>{{ $countryName }}</option>
+                @endforeach
+              </select>
+              @error('country_code')<span class="error" style="display:block">{{ $message }}</span>@enderror
+            </div>
+            @foreach ($provincesByCountry as $code => $provinces)
+              <div class="field" x-show="country === @js($code)" @style(['display:none' => $selectedCountry !== $code])>
+                <label for="province_id_{{ $code }}">Provincia</label>
+                <select id="province_id_{{ $code }}" name="province_id" :disabled="country !== @js($code)" @disabled($selectedCountry !== $code) required>
+                  <option value="">Elegí tu provincia</option>
+                  @foreach ($provinces as $provinceId => $provinceName)
+                    <option value="{{ $provinceId }}" @selected((int) old('province_id', $user->province_id) === $provinceId)>{{ $provinceName }}</option>
+                  @endforeach
+                </select>
+                @error('province_id')<span class="error" style="display:block">{{ $message }}</span>@enderror
+              </div>
+            @endforeach
+          </div>
+          <div class="field">
+            <label for="city">Ciudad</label>
+            <input id="city" name="city" value="{{ old('city', $user->city) }}" maxlength="80" autocomplete="address-level2" placeholder="Ej.: Chilecito" required>
+            @error('city')<span class="error" style="display:block">{{ $message }}</span>@enderror
+          </div>
+        </fieldset>
         <div class="grid-2">
           <div class="field">
             <label for="email">Email</label>
@@ -40,9 +72,7 @@
           </div>
         </div>
         <p class="hint" style="margin-top:12px">El email y el teléfono están validados. Para cambiarlos, escribinos y lo hacemos verificando tu identidad.</p>
-        @unless ($nameLocked && $birthDateLocked)
-          <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit">Guardá tus datos</button></div>
-        @endunless
+        <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit">Guardá tus datos</button></div>
       </form>
     </section>
   </main>

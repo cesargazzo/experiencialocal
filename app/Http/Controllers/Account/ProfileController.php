@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Account;
 
 use App\Enums\VerificationLevel;
 use App\Http\Controllers\Controller;
+use App\Models\Country;
+use App\Models\Province;
 use App\Models\User;
+use App\Support\CountryList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -19,6 +23,13 @@ class ProfileController extends Controller
             'user' => $user,
             'nameLocked' => $this->identityIsLocked($user),
             'birthDateLocked' => $this->identityIsLocked($user) && $user->birth_date !== null,
+            'countries' => CountryList::all(),
+            'provincesByCountry' => Province::query()
+                ->whereIn('country_code', Country::active()->pluck('code'))
+                ->orderBy('name')
+                ->get(['id', 'name', 'country_code'])
+                ->groupBy('country_code')
+                ->map(fn ($provinces) => $provinces->pluck('name', 'id')),
         ]);
     }
 
@@ -28,22 +39,35 @@ class ProfileController extends Controller
         $locked = $this->identityIsLocked($user);
         $birthDateLocked = $locked && $user->birth_date !== null;
 
-        abort_if($locked && $birthDateLocked, 403, 'Tus datos ya quedaron validados con tu documento.');
+        $countryHasProvinces = Province::query()->where('country_code', $request->input('country_code'))->exists();
 
         $data = $request->validate([
             'name' => $locked ? ['prohibited'] : ['required', 'string', 'max:120'],
             'birth_date' => $birthDateLocked ? ['prohibited'] : ['required', ...User::birthDateRules()],
+            'country_code' => ['required', Rule::in(CountryList::codes())],
+            'province_id' => $countryHasProvinces
+                ? ['required', Rule::exists('provinces', 'id')->where('country_code', $request->input('country_code'))]
+                : ['exclude'],
+            'city' => ['required', 'string', 'max:80'],
         ], [
             'birth_date.before_or_equal' => 'Tenés que tener al menos '.config('tinku.min_age').' años para usar Tinku.',
             'birth_date.after' => 'Revisá la fecha de nacimiento.',
+            'name.prohibited' => 'Tu nombre quedó validado con tu documento.',
+            'birth_date.prohibited' => 'Tu fecha de nacimiento quedó validada con tu documento.',
+            'province_id.required' => 'Elegí tu provincia.',
+            'province_id.exists' => 'Elegí una provincia de la lista.',
+            'city.required' => 'Contanos en qué ciudad vivís.',
         ]);
 
-        $user->update($data);
+        $user->update([...$data, 'province_id' => $data['province_id'] ?? null]);
 
         return back()->with('status', 'Guardamos tus datos.');
     }
 
-    /** Con el documento validado, nombre y fecha de nacimiento quedan fijos: son los del documento. */
+    /**
+     * Con el documento validado, nombre y fecha de nacimiento quedan fijos: son los del documento.
+     * Dónde vive se puede cambiar siempre, porque la gente se muda.
+     */
     private function identityIsLocked(User $user): bool
     {
         return $user->hasVerificationLevel(VerificationLevel::Document);

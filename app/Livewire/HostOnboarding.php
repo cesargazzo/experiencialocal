@@ -84,6 +84,9 @@ class HostOnboarding extends Component
         $this->plan = request()->query('plan', 'free');
         $this->first_date = now()->addWeek()->toDateString();
 
+        $this->city = $user->city ?? '';
+        $this->province_id = $user->province_id;
+
         if ($profile = $user->hostProfile) {
             $this->fill($profile->only(['display_name', 'bio', 'city', 'province_id']));
             $this->plan = $profile->plan->slug;

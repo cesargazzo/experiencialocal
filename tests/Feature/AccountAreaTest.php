@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Enums\VerificationLevel;
+use App\Livewire\HostOnboarding;
+use App\Models\Province;
 use App\Models\User;
 use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -41,12 +44,12 @@ class AccountAreaTest extends TestCase
     {
         $user = User::factory()->level(VerificationLevel::Contact)->create();
 
-        $this->actingAs($user)->put(route('cuenta.perfil.update'), ['name' => 'Lucía Paz', 'birth_date' => '1990-01-01'])->assertSessionHasNoErrors();
+        $this->actingAs($user)->put(route('cuenta.perfil.update'), ['name' => 'Lucía Paz', 'birth_date' => '1990-01-01', ...$this->location()])->assertSessionHasNoErrors();
         $this->assertSame('Lucía Paz', $user->fresh()->name);
 
         $validated = User::factory()->level(VerificationLevel::Document)->create(['name' => 'Ana Molina']);
         $this->actingAs($validated)->get(route('cuenta.perfil'))->assertOk()->assertSee('quedó validado con tu documento');
-        $this->actingAs($validated)->put(route('cuenta.perfil.update'), ['name' => 'Otro Nombre'])->assertForbidden();
+        $this->actingAs($validated)->put(route('cuenta.perfil.update'), ['name' => 'Otro Nombre', ...$this->location()])->assertSessionHasErrors('name');
         $this->assertSame('Ana Molina', $validated->fresh()->name);
     }
 
@@ -91,10 +94,58 @@ class AccountAreaTest extends TestCase
     public function the_birth_date_can_be_completed_once_but_not_changed_after_validation(): void
     {
         $withoutDate = User::factory()->level(VerificationLevel::Document)->create(['birth_date' => null]);
-        $this->actingAs($withoutDate)->put(route('cuenta.perfil.update'), ['birth_date' => '1985-03-10'])->assertSessionHasNoErrors();
+        $this->actingAs($withoutDate)->put(route('cuenta.perfil.update'), ['birth_date' => '1985-03-10', ...$this->location()])->assertSessionHasNoErrors();
         $this->assertSame('1985-03-10', $withoutDate->fresh()->birth_date->toDateString());
 
-        $this->actingAs($withoutDate->fresh())->put(route('cuenta.perfil.update'), ['birth_date' => '1999-01-01'])->assertForbidden();
+        $this->actingAs($withoutDate->fresh())->put(route('cuenta.perfil.update'), ['birth_date' => '1999-01-01', ...$this->location()])->assertSessionHasErrors('birth_date');
         $this->assertSame('1985-03-10', $withoutDate->fresh()->birth_date->toDateString());
+    }
+
+    #[Test]
+    public function a_validated_person_can_still_update_where_they_live(): void
+    {
+        $user = User::factory()->level(VerificationLevel::Document)->create(['name' => 'Ana Molina']);
+        $laRioja = Province::where('code', 'AR-F')->value('id');
+
+        $this->actingAs($user)->get(route('cuenta.perfil'))->assertOk()->assertSee('Provincia')->assertSee('Ciudad');
+        $this->actingAs($user)->put(route('cuenta.perfil.update'), ['country_code' => 'AR', 'province_id' => $laRioja, 'city' => 'Chilecito'])
+            ->assertSessionHasNoErrors();
+
+        $user->refresh();
+        $this->assertSame([$laRioja, 'Chilecito', 'Ana Molina'], [$user->province_id, $user->city, $user->name]);
+        $this->assertSame('Chilecito, La Rioja, Argentina', $user->locationLabel());
+    }
+
+    #[Test]
+    public function the_province_must_belong_to_the_chosen_country(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->put(route('cuenta.perfil.update'), ['country_code' => 'AR', 'city' => 'Rosario'])
+            ->assertSessionHasErrors(['province_id' => 'Elegí tu provincia.']);
+
+        $this->actingAs($user)->put(route('cuenta.perfil.update'), [
+            'country_code' => 'UY', 'province_id' => Province::where('code', 'AR-S')->value('id'), 'city' => 'Montevideo',
+        ])->assertSessionHasNoErrors();
+
+        $user->refresh();
+        $this->assertSame(['UY', null, 'Montevideo'], [$user->country_code, $user->province_id, $user->city]);
+    }
+
+    #[Test]
+    public function host_onboarding_starts_with_the_persons_province_and_city(): void
+    {
+        $mendoza = Province::where('code', 'AR-M')->value('id');
+        $user = User::factory()->level(VerificationLevel::Document)->create(['province_id' => $mendoza, 'city' => 'Maipú']);
+
+        Livewire::actingAs($user)->test(HostOnboarding::class)
+            ->assertSet('province_id', $mendoza)
+            ->assertSet('city', 'Maipú');
+    }
+
+    /** @return array{country_code: string, province_id: int, city: string} */
+    private function location(): array
+    {
+        return ['country_code' => 'AR', 'province_id' => Province::where('code', 'AR-C')->value('id'), 'city' => 'Buenos Aires'];
     }
 }
