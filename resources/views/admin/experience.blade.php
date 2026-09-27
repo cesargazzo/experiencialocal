@@ -37,6 +37,22 @@
     </section>
 
     <section class="wizard__panel">
+      <h2>Punto de encuentro</h2>
+      @error('address')<p class="notice" role="alert">{{ $message }}</p>@enderror
+      <div class="summary">
+        <div><span>Dirección</span><strong>{{ $experience->meeting_address ?? 'Sin cargar' }}</strong></div>
+        <div><span>Normalizada con Georef</span><strong>{{ $experience->address_normalized_at?->timezone(config('tinku.timezone'))->format('d/m/Y H:i') ?? 'No' }}</strong></div>
+        <div><span>Coordenadas</span><strong>{{ $experience->hasLocation() ? number_format($experience->latitude, 6, ',', '.').' · '.number_format($experience->longitude, 6, ',', '.') : 'Sin marcar' }}</strong></div>
+      </div>
+      @if ($experience->hasLocation())
+        <div wire:ignore class="map" style="margin-top:16px" x-data="tinkuMap({ config: @js(config('tinku.maps')), lat: @js($experience->latitude), lng: @js($experience->longitude), zoom: 16 })"></div>
+      @endif
+      @if ($experience->meeting_address)
+        <form method="post" action="{{ route('admin.experiencias.normalizar', $experience) }}" style="margin-top:12px">@csrf<button class="btn btn--tertiary btn--sm">Normalizá con Georef</button></form>
+      @endif
+    </section>
+
+    <section class="wizard__panel">
       <h2>Reservas</h2>
       @if ($bookings->isEmpty())
         <p class="hint">Todavía no tiene reservas.</p>

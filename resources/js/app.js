@@ -1,5 +1,6 @@
 // Tinku: comportamiento de interfaz que no depende de Livewire.
 // Alpine viene incluido con Livewire, así que los widgets interactivos usan x-data.
+import './maps';
 
 const io = 'IntersectionObserver' in window
     ? new IntersectionObserver((entries) => {

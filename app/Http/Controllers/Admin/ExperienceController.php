@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Experience;
 use App\Models\Review;
 use App\Services\ExperienceModeration;
+use App\Services\Georef;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 
 class ExperienceController extends Controller
 {
+    private const NORMALIZE_BATCH = 30;
+
     public function index(Request $request): View
     {
         $filters = $request->validate([
@@ -50,6 +53,7 @@ class ExperienceController extends Controller
             'all' => $all,
             'filters' => $filters,
             'statuses' => ExperienceStatus::cases(),
+            'pendingAddresses' => Experience::query()->whereNotNull('meeting_address')->whereNull('address_normalized_at')->count(),
         ]);
     }
 
@@ -62,6 +66,34 @@ class ExperienceController extends Controller
             'bookings' => $experience->bookings()->with(['user', 'date'])->latest()->limit(50)->get(),
             'reviews' => Review::query()->with('user')->where('experience_id', $experience->id)->latest()->get(),
         ]);
+    }
+
+    /** Normaliza con Georef la dirección del punto de encuentro de una experiencia. */
+    public function normalizeAddress(Experience $experience, Georef $georef): RedirectResponse
+    {
+        if (! $experience->meeting_address) {
+            return back()->withErrors(['address' => 'Esta experiencia no tiene dirección cargada.']);
+        }
+
+        $result = $this->normalize($experience, $georef);
+
+        return $result === 'normalized'
+            ? back()->with('status', "Dirección normalizada: {$experience->meeting_address}.")
+            : back()->withErrors(['address' => $result === 'located'
+                ? 'Georef no encontró la calle; ubicamos la experiencia en el centro de la localidad.'
+                : 'Georef no encontró la dirección o no respondió. Probá más tarde o corregila a mano.']);
+    }
+
+    /** Normaliza las direcciones pendientes, de a tandas para no saturar la API. */
+    public function normalizePending(Georef $georef): RedirectResponse
+    {
+        $pending = Experience::query()->with('province')->whereNotNull('meeting_address')->whereNull('address_normalized_at')->oldest('id')->limit(self::NORMALIZE_BATCH)->get();
+        $results = $pending->map(fn (Experience $experience) => $this->normalize($experience, $georef))->countBy();
+
+        return back()->with('status', sprintf(
+            'Revisamos %d direcciones: %d normalizadas, %d ubicadas solo por localidad, %d sin encontrar.',
+            $pending->count(), $results['normalized'] ?? 0, $results['located'] ?? 0, $results['missing'] ?? 0,
+        ));
     }
 
     public function pause(Request $request, Experience $experience, ExperienceModeration $moderation): RedirectResponse
@@ -102,5 +134,24 @@ class ExperienceController extends Controller
         $moderation->reject($experience, $data['reason'], $request->user());
 
         return back()->with('status', "Devolvimos {$experience->title} al anfitrión con el motivo.");
+    }
+
+    /** @return 'normalized'|'located'|'missing' */
+    private function normalize(Experience $experience, Georef $georef): string
+    {
+        $found = $georef->normalize($experience->meeting_address, $experience->city, $experience->province?->name);
+        if (! $found || $found['lat'] === null) {
+            return 'missing';
+        }
+
+        $experience->update([
+            'meeting_address' => $found['normalized'] ? $found['address'] : $experience->meeting_address,
+            // Si la ubicación la marcó el anfitrión a mano, se respeta; solo se completa si falta.
+            'latitude' => $experience->hasLocation() && ! $found['normalized'] ? $experience->latitude : $found['lat'],
+            'longitude' => $experience->hasLocation() && ! $found['normalized'] ? $experience->longitude : $found['lng'],
+            'address_normalized_at' => $found['normalized'] ? now() : null,
+        ]);
+
+        return $found['normalized'] ? 'normalized' : 'located';
     }
 }

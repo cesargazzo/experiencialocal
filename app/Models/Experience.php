@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 #[Fillable([
     'host_profile_id', 'category_id', 'title', 'slug', 'type_label', 'summary', 'description', 'city', 'province_id',
+    'meeting_address', 'latitude', 'longitude', 'address_normalized_at',
     'country_code', 'price', 'currency', 'duration_minutes', 'max_guests', 'includes', 'cover_image_url', 'status', 'published_at',
     'dietary_options', 'difficulty', 'what_to_bring', 'min_age', 'features', 'approved_at', 'approved_by', 'rejection_reason', 'paused_reason',
 ])]
@@ -39,6 +40,9 @@ class Experience extends Model
             'difficulty' => Difficulty::class,
             'features' => AsEnumCollection::of(ExperienceFeature::class),
             'approved_at' => 'datetime',
+            'latitude' => 'float',
+            'longitude' => 'float',
+            'address_normalized_at' => 'datetime',
         ];
     }
 
@@ -129,6 +133,42 @@ class Experience extends Model
             ExperienceStatus::Paused => 'Pausada',
             ExperienceStatus::Archived => 'Archivada',
         };
+    }
+
+    public function hasLocation(): bool
+    {
+        return $this->latitude !== null && $this->longitude !== null;
+    }
+
+    /**
+     * Zona aproximada para mostrar en público: el punto real corrido unos
+     * cientos de metros, siempre igual para la misma experiencia. El punto
+     * exacto no sale nunca en una página pública.
+     *
+     * @return array{lat: float, lng: float, radius: int}|null
+     */
+    public function approximateLocation(): ?array
+    {
+        if (! $this->hasLocation()) {
+            return null;
+        }
+
+        $radius = (int) config('tinku.maps.approximate_radius');
+        $seed = crc32('tinku-zona-'.$this->id);
+        $angle = deg2rad($seed % 360);
+        $distance = $radius * 0.6 * (($seed >> 9) % 100) / 100;
+        $lat = $this->latitude + ($distance * cos($angle)) / 111320;
+        $lng = $this->longitude + ($distance * sin($angle)) / (111320 * max(cos(deg2rad($this->latitude)), 0.1));
+
+        return ['lat' => round($lat, 5), 'lng' => round($lng, 5), 'radius' => $radius];
+    }
+
+    /** Enlace para llegar al punto exacto (solo para reservas confirmadas). */
+    public function directionsUrl(): ?string
+    {
+        return $this->hasLocation()
+            ? sprintf('https://www.openstreetmap.org/?mlat=%1$.6F&mlon=%2$.6F#map=17/%1$.6F/%2$.6F', $this->latitude, $this->longitude)
+            : null;
     }
 
     public function statusBadgeClass(): string

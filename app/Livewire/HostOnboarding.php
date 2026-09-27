@@ -13,6 +13,7 @@ use App\Models\HostProfile;
 use App\Models\Plan;
 use App\Models\Province;
 use App\Rules\ImageSize;
+use App\Services\Georef;
 use App\Services\ImageService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -217,6 +218,18 @@ class HostOnboarding extends Component
             $this->addError('title', 'Tu plan no permite más experiencias activas. Cambiá de plan para publicar otra.');
 
             return;
+        }
+
+        // El punto de encuentro arranca en el domicilio del anfitrión; si Georef lo encuentra, queda normalizado y en el mapa.
+        $this->created->forceFill(['meeting_address' => $this->address])->save();
+        $found = app(Georef::class)->normalize($this->address, $this->city, $province->name);
+        if ($found && $found['lat'] !== null) {
+            $this->created->forceFill([
+                'meeting_address' => $found['normalized'] ? $found['address'] : $this->address,
+                'latitude' => $found['lat'],
+                'longitude' => $found['lng'],
+                'address_normalized_at' => $found['normalized'] ? now() : null,
+            ])->save();
         }
 
         $images = app(ImageService::class);

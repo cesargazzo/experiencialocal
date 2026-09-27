@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Experience;
 use App\Rules\ImageSize;
 use App\Services\ExperienceModeration;
+use App\Services\Georef;
 use App\Services\ImageService;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Carbon;
@@ -70,6 +71,16 @@ class ManageExperience extends Component
 
     public string $time = '20:30';
 
+    // Punto de encuentro: la dirección exacta solo la ven las reservas confirmadas.
+    public string $meeting_address = '';
+
+    public ?float $latitude = null;
+
+    public ?float $longitude = null;
+
+    /** Si la dirección actual salió de Georef (normalizada). */
+    public bool $addressNormalized = false;
+
     /** Aviso del último guardado, visible sin recargar. */
     public ?string $notice = null;
 
@@ -82,6 +93,10 @@ class ManageExperience extends Component
         $this->price = (int) $experience->price;
         $this->duration_hours = max(1, intdiv($experience->duration_minutes, 60));
         $this->fillDetailsFrom($experience);
+        $this->meeting_address = $experience->meeting_address ?? '';
+        $this->latitude = $experience->latitude;
+        $this->longitude = $experience->longitude;
+        $this->addressNormalized = $experience->address_normalized_at !== null;
         $this->single_date = now($experience->timezone())->addWeek()->toDateString();
         $this->range_from = now($experience->timezone())->addDay()->toDateString();
         $this->range_to = now($experience->timezone())->addMonth()->toDateString();
@@ -133,6 +148,72 @@ class ManageExperience extends Component
         $this->notice = ($needsReview
             ? 'Guardamos los cambios. Como cambiaste el contenido, la revisamos de nuevo antes de publicarla.'
             : 'Guardamos los cambios.');
+    }
+
+    /** Busca la dirección en Georef, la normaliza y centra el mapa. */
+    public function searchAddress(Georef $georef): void
+    {
+        $this->authorize('update', $this->experience);
+        $this->validate(['meeting_address' => ['required', 'string', 'max:200']], ['meeting_address.required' => 'Escribí la dirección para buscarla.']);
+
+        $found = $georef->normalize($this->meeting_address, $this->experience->city, $this->experience->province?->name);
+        if (! $found || $found['lat'] === null) {
+            $this->addError('meeting_address', 'No encontramos esa dirección. Marcá el punto a mano en el mapa.');
+
+            return;
+        }
+
+        $this->latitude = $found['lat'];
+        $this->longitude = $found['lng'];
+        if ($found['normalized']) {
+            $this->meeting_address = $found['address'];
+            $this->addressNormalized = true;
+            $this->notice = "Encontramos {$found['address']}. Revisá el punto en el mapa y guardalo.";
+        } else {
+            $this->notice = 'No encontramos la calle: te dejamos en el centro de la localidad. Marcá el punto exacto en el mapa.';
+        }
+        $this->dispatch('map-move', lat: $this->latitude, lng: $this->longitude);
+    }
+
+    /** El anfitrión marcó o movió el punto en el mapa. */
+    public function setPoint(float $latitude, float $longitude): void
+    {
+        $this->authorize('update', $this->experience);
+
+        if (abs($latitude) > 90 || abs($longitude) > 180) {
+            return;
+        }
+        $this->latitude = round($latitude, 7);
+        $this->longitude = round($longitude, 7);
+    }
+
+    public function updatedMeetingAddress(): void
+    {
+        $this->addressNormalized = false;
+    }
+
+    /** El punto de encuentro no pasa por revisión: no se muestra en público. */
+    public function saveLocation(): void
+    {
+        $this->authorize('update', $this->experience);
+        $this->validate([
+            'meeting_address' => ['required', 'string', 'max:200'],
+            'latitude' => ['required', 'numeric', 'between:-90,90'],
+            'longitude' => ['required', 'numeric', 'between:-180,180'],
+        ], [
+            'meeting_address.required' => 'Escribí la dirección del punto de encuentro.',
+            'latitude.required' => 'Marcá el punto en el mapa.',
+            'longitude.required' => 'Marcá el punto en el mapa.',
+        ]);
+
+        $this->experience->update([
+            'meeting_address' => trim($this->meeting_address),
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
+            'address_normalized_at' => $this->addressNormalized ? now() : null,
+        ]);
+
+        $this->notice = 'Guardamos el punto de encuentro. En la ficha se ve solo la zona aproximada.';
     }
 
     public function addDates(): void
@@ -221,7 +302,28 @@ class ManageExperience extends Component
         return view('livewire.manage-experience', [
             'categories' => Category::orderBy('sort_order')->get(),
             'upcomingDates' => $this->experience->dates()->where('status', 'open')->where('starts_at', '>', now())->get(),
+            'mapCenter' => $this->latitude === null ? $this->mapFallbackCenter() : [$this->latitude, $this->longitude],
             'weekdayNames' => [1 => 'Lun', 2 => 'Mar', 3 => 'Mié', 4 => 'Jue', 5 => 'Vie', 6 => 'Sáb', 7 => 'Dom'],
         ]);
+    }
+
+    /**
+     * Si todavía no hay punto, el mapa arranca en el centro de la localidad de la experiencia.
+     *
+     * @return array{0: float, 1: float}
+     */
+    private function mapFallbackCenter(): array
+    {
+        $key = 'mapa-localidad-'.md5($this->experience->city.'|'.$this->experience->province?->name);
+        if ($cached = cache()->get($key)) {
+            return $cached;
+        }
+
+        // Lo encontrado se guarda una semana; si Georef no respondió, se usa el centro del país y se reintenta en diez minutos.
+        $center = app(Georef::class)->locality((string) $this->experience->city, $this->experience->province?->name);
+        $result = $center ? [$center['lat'], $center['lng']] : config('tinku.maps.default_center');
+        cache()->put($key, $result, $center ? now()->addWeek() : now()->addMinutes(10));
+
+        return $result;
     }
 }

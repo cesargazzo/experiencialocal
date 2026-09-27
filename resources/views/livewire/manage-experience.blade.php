@@ -63,6 +63,25 @@
     </div>
   </section>
 
+  <section class="wizard__panel" id="punto-de-encuentro">
+    <h2>Punto de encuentro</h2>
+    <p>Dónde se encuentran con vos. En la ficha se muestra solo una zona aproximada; la dirección exacta la ve quien tiene la reserva confirmada.</p>
+    <div class="field">
+      <label for="meeting_address">Dirección</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="meeting_address" wire:model.blur="meeting_address" maxlength="200" placeholder="San Martín 123" style="flex:1;min-width:220px" wire:keydown.enter.prevent="searchAddress">
+        <button type="button" class="btn btn--tertiary btn--sm" wire:click="searchAddress" wire:loading.attr="disabled" wire:target="searchAddress">Buscala en el mapa</button>
+      </div>
+      <span class="hint">{{ $addressNormalized ? 'Dirección normalizada con Georef.' : 'La buscamos con Georef, la base de direcciones del Estado argentino. También podés tocar el mapa para marcar el punto.' }}</span>
+      @error('meeting_address')<span class="error" style="display:block">{{ $message }}</span>@enderror
+    </div>
+    <div wire:ignore class="map map--picker"
+      x-data="tinkuMapPicker({ config: @js(config('tinku.maps')), lat: @js($latitude), lng: @js($longitude), fallback: @js($mapCenter) })"
+      x-on:map-move.window="moveTo($event.detail)"></div>
+    @error('latitude')<span class="error" style="display:block">{{ $message }}</span>@enderror
+    <div class="wizard__actions"><span class="hint">{{ $latitude ? 'Punto marcado. Podés arrastrarlo para ajustarlo.' : 'Todavía no marcaste el punto.' }}</span><button class="btn btn--secondary" type="button" wire:click="saveLocation" wire:loading.attr="disabled">Guardá el punto</button></div>
+  </section>
+
   <section class="wizard__panel">
     <h2>Precio, cupos y datos prácticos</h2>
     <p>Estos cambios se aplican al momento, salvo "qué llevar", que se revisa. Las reservas que ya existen mantienen su precio.</p>

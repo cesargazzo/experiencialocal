@@ -58,7 +58,12 @@
     @endif
 
     <section class="wizard__panel" id="todas">
-      <h2>Todas</h2>
+      <div class="host-head">
+        <h2 style="margin:0">Todas</h2>
+        @if ($pendingAddresses)
+          <form method="post" action="{{ route('admin.experiencias.direcciones') }}">@csrf<button class="btn btn--tertiary btn--sm">Normalizá {{ plural_es($pendingAddresses, 'dirección pendiente', 'direcciones pendientes') }} con Georef</button></form>
+        @endif
+      </div>
       <form method="get" action="{{ route('admin.experiencias') }}#todas" class="filters">
         <div class="field"><label for="q">Buscar</label><input id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Título o anfitrión"></div>
         <div class="field"><label for="estado">Estado</label>

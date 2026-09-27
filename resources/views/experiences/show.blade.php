@@ -113,6 +113,13 @@
         @if ($experience->includes)
           <div class="detail-block"><h2>Qué incluye</h2><ul class="menu-list">@foreach ($experience->includes as $i)<li><strong>{{ $i['label'] }}</strong><span>{{ $i['text'] }}</span></li>@endforeach</ul></div>
         @endif
+        @if ($zone = $experience->approximateLocation())
+          <div class="detail-block"><h2>Dónde</h2>
+            <p>{{ $experience->placeLabel() }}. En el mapa ves la zona aproximada: la dirección exacta te la pasamos cuando el anfitrión confirma tu reserva.</p>
+            <div wire:ignore class="map" role="img" aria-label="Mapa con la zona aproximada de la experiencia"
+              x-data="tinkuMap({ config: @js(config('tinku.maps')), lat: @js($zone['lat']), lng: @js($zone['lng']), radius: @js($zone['radius']) })"></div>
+          </div>
+        @endif
         <div class="detail-block"><h2>Quién te recibe</h2>
           <div class="host-card"><x-avatar :user="$experience->host->user" :size="56" /><div><strong>{{ $experience->host->display_name }}</strong> · En Tinku desde {{ $experience->host->hosting_since?->year }}<br><x-verification-badge :level="$experience->host->user->verification_level" full /><p>{{ $experience->host->bio }}</p></div></div>
         </div>

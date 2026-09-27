@@ -136,4 +136,27 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mapas y direcciones
+    |--------------------------------------------------------------------------
+    |
+    | Mapa base Argenmap del Instituto Geográfico Nacional (datos de
+    | OpenStreetMap). Las direcciones se normalizan con la API Georef del
+    | Estado argentino. En público se muestra solo una zona aproximada.
+    |
+    */
+
+    'maps' => [
+        'tiles' => env('TINKU_MAP_TILES', 'https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png'),
+        'attribution' => '<a href="https://www.ign.gob.ar/AreaServicios/Argenmap/Introduccion" target="_blank" rel="noopener">Instituto Geográfico Nacional</a> + <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
+        'approximate_radius' => 600,
+        'default_center' => [-38.4161, -63.6167],
+    ],
+
+    'georef' => [
+        'url' => env('TINKU_GEOREF_URL', 'https://apis.datos.gob.ar/georef/api'),
+        'timeout' => 6,
+    ],
+
 ];

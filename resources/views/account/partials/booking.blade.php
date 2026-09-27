@@ -23,6 +23,11 @@
       <li><x-icon name="users" :size="16" /> {{ plural_es($booking->guests, 'persona', 'personas') }}</li>
       <li><x-icon name="wallet" :size="16" /> {{ money($booking->total) }} · código {{ $booking->code }}</li>
     </ul>
+    @if ($booking->status === \App\Enums\BookingStatus::Confirmed && $experience->meeting_address)
+      <p class="host-booking__note" style="margin:10px 0 0"><strong>Punto de encuentro:</strong> {{ $experience->meeting_address }}
+        @if ($url = $experience->directionsUrl()) · <a href="{{ $url }}" target="_blank" rel="noopener">Cómo llegar</a>@endif
+      </p>
+    @endif
     @if ($booking->status === \App\Enums\BookingStatus::Requested)
       <p class="hint" style="margin:8px 0 0">El anfitrión confirma dentro de las 24 h. Recién ahí se cobra.</p>
     @endif
