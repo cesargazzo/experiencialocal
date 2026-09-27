@@ -32,6 +32,21 @@ class ExperienceModeration
         $experience->host->user->notify(new ExperienceReviewedNotification($experience, approved: true));
     }
 
+    /**
+     * El anfitrión cambió texto, categoría o foto: vuelve a revisión y deja de
+     * verse hasta que se apruebe de nuevo.
+     */
+    public function resubmit(Experience $experience): void
+    {
+        $experience->update([
+            'status' => ExperienceStatus::InReview,
+            'approved_at' => null,
+            'approved_by' => null,
+            'rejection_reason' => null,
+            'published_at' => null,
+        ]);
+    }
+
     /** La devuelve a borrador con el motivo, para que el anfitrión la corrija. */
     public function reject(Experience $experience, string $reason, ?User $reviewer = null): void
     {

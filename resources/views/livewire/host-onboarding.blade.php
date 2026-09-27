@@ -70,7 +70,7 @@
         <div class="field"><label>Cupos por fecha</label><input type="number" min="1" max="50" wire:model="max_guests" placeholder="8">@error('max_guests')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
         <div class="field"><label>Duración (horas)</label><input type="number" min="1" max="24" wire:model="duration_hours">@error('duration_hours')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
         <div class="field"><label>Primera fecha</label><input type="date" wire:model="first_date">@error('first_date')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
-        <div class="field"><label>Hora</label><input type="time" wire:model="first_time"><span class="hint">En la hora del lugar donde recibís.</span></div>
+        <div class="field"><label>Hora</label><input type="time" wire:model="first_time"><span class="hint">En la hora del lugar donde recibís. Después sumás más fechas o varias de una vez (por ejemplo, viernes y sábados de todo el mes) desde tu espacio de anfitrión.</span></div>
       </div>
       <div class="field">
         <label for="cover">Foto de la experiencia</label>

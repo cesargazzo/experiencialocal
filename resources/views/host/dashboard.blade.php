@@ -61,6 +61,10 @@
             @if ($experience->latestCoverUpload?->isProcessing())
               <p class="hint" style="margin:0 0 8px">La foto se está procesando.</p>
             @endif
+            <p style="margin:0 0 8px;display:flex;gap:12px;flex-wrap:wrap">
+              <a class="btn btn--tertiary btn--sm" href="{{ route('anfitrion.experiencias.editar', $experience) }}">Editala</a>
+              <a class="btn btn--ghost btn--sm" href="{{ route('anfitrion.experiencias.editar', $experience) }}#fechas"><x-icon name="calendar-blank" :size="16" /> Fechas</a>
+            </p>
             <ul class="booking-item__facts">
               <li><x-icon name="calendar-blank" :size="16" /> {{ $next ? Str::ucfirst($next->localStart()->translatedFormat('D j M · H:i')) : 'Sin fechas próximas' }}</li>
               <li><x-icon name="users" :size="16" /> {{ $experience->pending_bookings_count ? plural_es($experience->pending_bookings_count, 'reserva por confirmar', 'reservas por confirmar') : 'Sin reservas por confirmar' }}</li>

@@ -23,6 +23,7 @@ use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\VerificationController;
 use App\Livewire\HostOnboarding;
+use App\Livewire\ManageExperience;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -63,6 +64,7 @@ Route::middleware('auth')->group(function () {
 
     // Publicar exige documento validado (nivel 2). Cobrar sin restricciones exige nivel 3.
     Route::get('/anfitrion', [HostDashboardController::class, 'index'])->name('anfitrion.panel');
+    Route::get('/anfitrion/experiencias/{experience}', ManageExperience::class)->name('anfitrion.experiencias.editar');
     Route::get('/anfitrion/registro', HostOnboarding::class)->middleware('verified.level:2')->name('anfitrion.registro');
 
     Route::prefix('admin')->middleware('admin')->name('admin.')->group(function () {
