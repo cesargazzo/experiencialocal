@@ -160,6 +160,7 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--font-titulos); font-weight: 700; 
 .profile-menu__panel a, .profile-menu__panel button[type=submit] { display: flex; width: 100%; align-items: center; gap: 10px; padding: 10px; border: 0; border-radius: var(--radio-sm); background: transparent; color: var(--tinta); font: 500 15px/20px var(--font-texto); text-align: left; }
 .profile-menu__panel a:hover, .profile-menu__panel button[type=submit]:hover { background: var(--superficie-calida); }
 .profile-menu__panel .icon { color: var(--texto-petroleo); }
+.profile-menu__panel .badge .icon { color: inherit; }
 .profile-menu__panel form { margin: 6px 0 0; padding-top: 6px; border-top: 1px solid var(--linea); }
 .profile-menu__panel form .icon { color: var(--texto-coral); }
 
@@ -653,3 +654,5 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .birthdays__week li:first-child { border-top: 0; }
 .birthdays__week li.is-today { font-weight: 700; }
 .birthdays__week li.is-past { opacity: .6; }
+
+.revoke summary { cursor: pointer; color: var(--texto-coral); font-weight: 600; font-size: 13px; }

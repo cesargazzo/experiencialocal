@@ -56,15 +56,27 @@
           </div>
           <div class="field"><label for="reason">Motivo</label><input id="reason" name="reason" required minlength="5" maxlength="300" placeholder="Por ejemplo: validé el DNI en persona">@error('reason')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
         </div>
+        @unless ($user->verification_level->atLeast(\App\Enums\VerificationLevel::Document))
+          <div class="grid-2">
+            <div class="field"><label for="document_country">País del documento</label>
+              <select id="document_country" name="document_country"><x-country-options :selected="old('document_country', $user->nationality_code ?? 'AR')" /></select>
+            </div>
+            <div class="field"><label for="document_number">Número de documento</label><input id="document_number" name="document_number" value="{{ old('document_number') }}" inputmode="numeric" autocomplete="off" maxlength="40"><span class="hint">Obligatorio para validar el nivel 2 o 3 si la persona no cargó su documento. No se guarda el número: solo su huella, para que no se repita en otra cuenta.</span></div>
+          </div>
+        @endunless
+        @if ($errors->has('users'))
+          <div class="notice" role="alert">@foreach ($errors->get('users') as $problem)<p style="margin:0">{{ $problem }}</p>@endforeach</div>
+        @endif
         <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit" @disabled($user->verification_level->value >= 3)>Validá</button></div>
       </form>
     </section>
 
     <section class="wizard__panel">
       <h2>Verificaciones</h2>
+      @error('revoke')<p class="notice" role="alert">{{ $message }}</p>@enderror
       <div class="table-wrap">
         <table class="table">
-          <thead><tr><th>Tipo</th><th>Proveedor</th><th>Estado</th><th>Revisó</th><th>Fecha</th></tr></thead>
+          <thead><tr><th>Tipo</th><th>Proveedor</th><th>Estado</th><th>Revisó</th><th>Fecha</th><th></th></tr></thead>
           <tbody>
             @forelse ($user->verifications as $v)
               <tr>
@@ -73,9 +85,16 @@
                 <td>{{ $v->status->value }}@if ($v->result['reason'] ?? null)<br><small class="hint">{{ $v->result['reason'] }}</small>@endif</td>
                 <td>{{ $v->reviewer?->name ?? '—' }}</td>
                 <td style="white-space:nowrap">{{ ($v->reviewed_at ?? $v->submitted_at)?->timezone(config('tinku.timezone'))->format('d/m/Y H:i') }}</td>
+                <td>
+                  @if ($v->status === \App\Enums\VerificationStatus::Approved)
+                    <details class="revoke"><summary>Revocar</summary>
+                      <form method="post" action="{{ route('admin.usuarios.verificaciones.revocar', [$user, $v]) }}" style="display:flex;gap:6px;margin-top:6px">@csrf<input name="reason" class="inline-input" minlength="5" maxlength="300" placeholder="Motivo" aria-label="Motivo de la revocación" required><button class="btn btn--tertiary btn--sm">Revocá</button></form>
+                    </details>
+                  @endif
+                </td>
               </tr>
             @empty
-              <tr><td colspan="5" class="hint">Sin verificaciones.</td></tr>
+              <tr><td colspan="6" class="hint">Sin verificaciones.</td></tr>
             @endforelse
           </tbody>
         </table>

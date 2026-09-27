@@ -12,7 +12,9 @@ use App\Exceptions\VerificationException;
 use App\Models\IdentityVerification;
 use App\Models\User;
 use App\Notifications\VerificationCodeNotification;
+use App\Notifications\VerificationUpdatedNotification;
 use App\Support\PlatformSettings;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -123,6 +125,10 @@ class VerificationService
             throw new VerificationException('El nivel 3 solo lo aprueba un administrador.');
         }
 
+        if ($verification->document_hash) {
+            $this->ensureDocumentIsNotTaken($verification->user, $verification->document_hash);
+        }
+
         return DB::transaction(function () use ($verification, $reviewer, $result) {
             $verification->forceFill([
                 'status' => VerificationStatus::Approved,
@@ -147,7 +153,12 @@ class VerificationService
                 'reviewed_at' => now(),
             ])->save();
 
-            $this->recalculateLevel($verification->user);
+            $level = $this->recalculateLevel($verification->user);
+
+            // Lo que rechaza o revoca una persona del equipo se avisa con el motivo.
+            if ($reviewer?->isAdmin()) {
+                $verification->user->notify(VerificationUpdatedNotification::rejected($level, $verification->type, $reason));
+            }
 
             return $verification;
         });
@@ -162,17 +173,31 @@ class VerificationService
      * las verificaciones que le falten a la cuenta hasta el nivel pedido.
      * Solo sube niveles; para frenar una cuenta está la suspensión.
      */
-    public function grantLevelManually(User $user, VerificationLevel $level, User $admin, string $reason): VerificationLevel
+    public function grantLevelManually(User $user, VerificationLevel $level, User $admin, string $reason, ?string $documentCountry = null, ?string $documentNumber = null): VerificationLevel
     {
         if (! $admin->isAdmin()) {
             throw new VerificationException('Solo un administrador puede validar a mano.');
+        }
+
+        // Validar el documento a mano exige saber qué documento es, para que no se repita en otra cuenta.
+        $document = null;
+        if ($level->atLeast(VerificationLevel::Document) && ! $this->hasApproved($user, VerificationType::Document)) {
+            $pending = $user->verifications()->where('type', VerificationType::Document)->where('status', VerificationStatus::Pending)->whereNotNull('document_hash')->latest('id')->first();
+            $document = $documentNumber
+                ? ['document_country' => strtoupper($documentCountry ?: 'AR'), 'document_type' => 'dni', 'document_hash' => self::documentHash($documentCountry ?: 'AR', $documentNumber)]
+                : ($pending ? $pending->only(['document_country', 'document_type', 'document_hash']) : null);
+
+            if (! $document) {
+                throw new VerificationException('Para validar el documento a mano cargá el país y el número del documento.');
+            }
+            $this->ensureDocumentIsNotTaken($user, $document['document_hash']);
         }
 
         $required = collect(VerificationType::cases())
             ->reject(fn (VerificationType $type) => $type === VerificationType::Interview)
             ->filter(fn (VerificationType $type) => $type->level()->value <= $level->value);
 
-        return DB::transaction(function () use ($user, $required, $admin, $reason) {
+        return DB::transaction(function () use ($user, $required, $admin, $reason, $document) {
             $approved = $user->verifications()->where('status', VerificationStatus::Approved)->pluck('type')->map(fn ($t) => $t->value)->all();
 
             foreach ($required as $type) {
@@ -188,6 +213,7 @@ class VerificationService
                     'reviewed_by' => $admin->getKey(),
                     'submitted_at' => now(),
                     'reviewed_at' => now(),
+                    ...($type === VerificationType::Document ? $document : []),
                 ]);
 
                 if ($type === VerificationType::Email && ! $user->email_verified_at) {
@@ -198,12 +224,23 @@ class VerificationService
                 }
             }
 
+            // El documento que estaba en trámite ya quedó validado a mano.
+            if ($document) {
+                $user->verifications()->where('type', VerificationType::Document)->where('status', VerificationStatus::Pending)->update(['status' => VerificationStatus::Expired]);
+            }
+
             return $this->recalculateLevel($user);
         });
     }
 
-    public function recalculateLevel(User $user): VerificationLevel
+    /**
+     * Recalcula el nivel. Si sube, se le avisa a la persona (salvo en recálculos
+     * masivos, como al cambiar la configuración de SMS).
+     */
+    public function recalculateLevel(User $user, bool $notify = true): VerificationLevel
     {
+        $previous = $user->verification_level;
+
         $approved = $user->verifications()
             ->where('status', VerificationStatus::Approved)
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
@@ -231,6 +268,10 @@ class VerificationService
         }
 
         $user->forceFill(['verification_level' => $level])->save();
+
+        if ($notify && $level->value > ($previous?->value ?? 0)) {
+            $user->notify(VerificationUpdatedNotification::levelReached($level));
+        }
 
         if ($level === VerificationLevel::Residence) {
             $this->activateHostIfEligible($user);
@@ -273,6 +314,60 @@ class VerificationService
             ->whereNotNull('document_country')
             ->latest('id')
             ->value('document_country') ?? $user->nationality_code ?? 'AR';
+    }
+
+    /**
+     * Un administrador revoca una verificación aprobada (por ejemplo, un documento
+     * repetido). Queda rechazada con el motivo y el nivel se recalcula.
+     */
+    public function revoke(IdentityVerification $verification, string $reason, User $admin): IdentityVerification
+    {
+        if (! $admin->isAdmin()) {
+            throw new VerificationException('Solo un administrador puede revocar una verificación.');
+        }
+        if ($verification->status !== VerificationStatus::Approved) {
+            throw new VerificationException('Solo se revoca una verificación aprobada.');
+        }
+
+        return $this->reject($verification, 'Revocada: '.$reason, $admin);
+    }
+
+    /**
+     * Grupos de cuentas que comparten un documento (sin contar los rechazados).
+     *
+     * @return Collection<int, Collection<int, User>>
+     */
+    public function accountsSharingDocuments(): Collection
+    {
+        $hashes = IdentityVerification::query()
+            ->whereNotNull('document_hash')
+            ->where('status', '!=', VerificationStatus::Rejected)
+            ->groupBy('document_hash')
+            ->havingRaw('count(distinct user_id) > 1')
+            ->pluck('document_hash');
+
+        return $hashes->map(fn (string $hash) => User::query()
+            ->whereHas('verifications', fn ($q) => $q->where('document_hash', $hash)->where('status', '!=', VerificationStatus::Rejected))
+            ->get())->values();
+    }
+
+    private function hasApproved(User $user, VerificationType $type): bool
+    {
+        return $user->verifications()->where('type', $type)->where('status', VerificationStatus::Approved)->exists();
+    }
+
+    private function ensureDocumentIsNotTaken(User $user, string $hash): void
+    {
+        $owner = IdentityVerification::query()
+            ->with('user')
+            ->where('document_hash', $hash)
+            ->where('user_id', '!=', $user->getKey())
+            ->where('status', '!=', VerificationStatus::Rejected)
+            ->first()?->user;
+
+        if ($owner) {
+            throw new VerificationException("Ese documento ya está en otra cuenta: {$owner->name} ({$owner->email}).");
+        }
     }
 
     private function documentBelongsToSomeoneElse(User $user, string $hash): bool

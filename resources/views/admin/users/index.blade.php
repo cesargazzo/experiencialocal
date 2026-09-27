@@ -4,6 +4,16 @@
     <h1 class="title">Usuarios.</h1>
     @include('admin.partials.nav')
 
+    @if ($sharedDocuments->isNotEmpty())
+      <section class="wizard__panel" role="alert">
+        <h2>Documentos en más de una cuenta</h2>
+        <p>El mismo documento aparece en estas cuentas. Revisalas y revocá la verificación que no corresponda.</p>
+        @foreach ($sharedDocuments as $accounts)
+          <p class="notice" style="margin:0 0 8px">@foreach ($accounts as $account)<a href="{{ route('admin.usuarios.show', $account) }}">{{ $account->name }}</a> ({{ $account->email }})@if (! $loop->last) · @endif @endforeach</p>
+        @endforeach
+      </section>
+    @endif
+
     @if ($birthdaysThisWeek->isNotEmpty())
       @php($birthdaysToday = $birthdaysThisWeek->filter(fn ($user) => $user->birthdayOnOrAfter($today)->isSameDay($today)))
       <section class="wizard__panel birthdays">
@@ -79,7 +89,9 @@
 
       <form method="post" action="{{ route('admin.usuarios.validar') }}" x-data="{ selected: [], all: @js($users->pluck('id')) }">
         @csrf
-        @error('users')<p class="error" style="display:block">{{ $message }}</p>@enderror
+        @if ($errors->has('users'))
+          <div class="notice" role="alert">@foreach ($errors->get('users') as $problem)<p style="margin:0">{{ $problem }}</p>@endforeach</div>
+        @endif
         @error('reason')<p class="error" style="display:block">{{ $message }}</p>@enderror
         <div class="bulk" x-show="selected.length > 0" x-cloak>
           <strong x-text="selected.length === 1 ? '1 cuenta elegida' : selected.length + ' cuentas elegidas'"></strong>

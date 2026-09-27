@@ -100,6 +100,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios');
         Route::post('/usuarios/validar', [UserController::class, 'validateLevel'])->name('usuarios.validar');
         Route::get('/usuarios/{user}', [UserController::class, 'show'])->name('usuarios.show');
+        Route::post('/usuarios/{user}/verificaciones/{verification}/revocar', [UserController::class, 'revokeVerification'])->name('usuarios.verificaciones.revocar');
         Route::post('/usuarios/{user}/suspension', [UserController::class, 'toggleSuspension'])->name('usuarios.suspension');
         Route::put('/contrasenas', [PasswordPolicyController::class, 'update'])->name('contrasenas.update');
     });

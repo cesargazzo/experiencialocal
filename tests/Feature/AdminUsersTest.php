@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\HostStatus;
 use App\Enums\VerificationLevel;
 use App\Enums\VerificationType;
+use App\Exceptions\VerificationException;
 use App\Models\HostProfile;
 use App\Models\Province;
 use App\Models\SecurityEvent;
@@ -44,10 +45,16 @@ class AdminUsersTest extends TestCase
         $admin = User::factory()->admin()->create();
         $first = User::factory()->level(VerificationLevel::None)->create();
         $second = User::factory()->level(VerificationLevel::Contact)->create();
+        $withoutDocument = User::factory()->level(VerificationLevel::Contact)->create(['name' => 'Sin Documento']);
+        // Los dos primeros ya cargaron su documento; en lote se valida ese.
+        app(VerificationService::class)->submit($first, VerificationType::Document, ['document_country' => 'AR', 'document_number' => '20111222']);
+        app(VerificationService::class)->submit($second, VerificationType::Document, ['document_country' => 'AR', 'document_number' => '20333444']);
 
         $this->actingAs($admin)->post(route('admin.usuarios.validar'), [
-            'users' => [$first->id, $second->id], 'level' => '2', 'reason' => 'Validados en persona en la feria',
-        ])->assertSessionHas('status', 'Validamos 2 cuentas.');
+            'users' => [$first->id, $second->id, $withoutDocument->id], 'level' => '2', 'reason' => 'Validados en persona en la feria',
+        ])->assertSessionHas('status', 'Validamos 2 cuentas.')
+            ->assertSessionHasErrors(['users' => 'Sin Documento: Para validar el documento a mano cargá el país y el número del documento.']);
+        $this->assertSame(VerificationLevel::Contact, $withoutDocument->fresh()->verification_level);
 
         foreach ([$first, $second] as $user) {
             $user->refresh();
@@ -67,7 +74,7 @@ class AdminUsersTest extends TestCase
         $host = User::factory()->level(VerificationLevel::Document)->create();
         $profile = HostProfile::factory()->inReview()->for($host)->create();
 
-        $this->actingAs($admin)->post(route('admin.usuarios.validar'), ['users' => [$host->id], 'level' => '3', 'reason' => 'Visité el domicilio']);
+        $this->actingAs($admin)->post(route('admin.usuarios.validar'), ['users' => [$host->id], 'level' => '3', 'reason' => 'Visité el domicilio', 'document_country' => 'AR', 'document_number' => '28999111']);
 
         $this->assertSame(VerificationLevel::Residence, $host->fresh()->verification_level);
         $this->assertSame(HostStatus::Active, $profile->fresh()->status);
@@ -158,5 +165,68 @@ class AdminUsersTest extends TestCase
             ->assertSeeInOrder(['Cuenta Vieja', 'Recién Llegada']);
         $this->actingAs($admin)->get(route('admin.usuarios'))
             ->assertSeeInOrder(['Recién Llegada', 'Cuenta Vieja', 'Equipo Tinku']);
+    }
+
+    #[Test]
+    public function a_document_already_in_another_account_cannot_be_validated_by_hand(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->level(VerificationLevel::Contact)->create(['name' => 'Titular Real']);
+        app(VerificationService::class)->submit($owner, VerificationType::Document, ['document_country' => 'AR', 'document_number' => '30.111.222']);
+        $impostor = User::factory()->level(VerificationLevel::Contact)->create();
+
+        $this->actingAs($admin)->post(route('admin.usuarios.validar'), [
+            'users' => [$impostor->id], 'level' => '2', 'reason' => 'Validado en persona', 'document_country' => 'AR', 'document_number' => '30111222',
+        ])->assertSessionHasErrors('users');
+
+        $this->assertStringContainsString('Titular Real', session('errors')->first('users'));
+        $this->assertSame(VerificationLevel::Contact, $impostor->fresh()->verification_level);
+        $this->assertSame(1, SecurityEvent::where('type', 'user.validation_blocked')->count());
+
+        // Con un documento nuevo sí; y después nadie más puede usarlo.
+        $this->actingAs($admin)->post(route('admin.usuarios.validar'), [
+            'users' => [$impostor->id], 'level' => '2', 'reason' => 'Validado en persona', 'document_country' => 'AR', 'document_number' => '40555666',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame(VerificationLevel::Document, $impostor->fresh()->verification_level);
+        $this->expectException(VerificationException::class);
+        app(VerificationService::class)->submit(User::factory()->create(), VerificationType::Document, ['document_country' => 'AR', 'document_number' => '40555666']);
+    }
+
+    #[Test]
+    public function accounts_sharing_a_document_are_listed_and_a_verification_can_be_revoked(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $first = User::factory()->create(['name' => 'Primera Cuenta']);
+        $second = User::factory()->create(['name' => 'Segunda Cuenta']);
+        $hash = VerificationService::documentHash('AR', '30111222');
+        foreach ([$first, $second] as $user) {
+            $user->verifications()->create(['type' => VerificationType::Document, 'provider' => 'manual', 'status' => 'approved', 'document_country' => 'AR', 'document_hash' => $hash, 'submitted_at' => now(), 'reviewed_at' => now()]);
+        }
+
+        $this->actingAs($admin)->get(route('admin.usuarios'))->assertSee('Documentos en más de una cuenta')->assertSeeInOrder(['Primera Cuenta', 'Segunda Cuenta']);
+
+        $verification = $second->verifications()->where('type', 'document')->firstOrFail();
+        $this->actingAs($admin)->post(route('admin.usuarios.verificaciones.revocar', [$second, $verification]), ['reason' => 'Documento de otra persona'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('rejected', $verification->fresh()->status->value);
+        $this->assertSame(1, $second->notifications()->count());
+        $this->assertSame(1, SecurityEvent::where('type', 'verification.revoked')->count());
+        $this->actingAs($admin)->get(route('admin.usuarios'))->assertDontSee('Documentos en más de una cuenta');
+    }
+
+    #[Test]
+    public function the_person_gets_a_notice_when_their_account_is_validated(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $user = User::factory()->level(VerificationLevel::Contact)->create();
+
+        $this->actingAs($admin)->post(route('admin.usuarios.validar'), [
+            'users' => [$user->id], 'level' => '3', 'reason' => 'Validado en persona', 'document_country' => 'AR', 'document_number' => '27123456',
+        ])->assertSessionHasNoErrors();
+
+        $notice = $user->notifications()->sole();
+        $this->assertSame('Tu cuenta está validada: Identidad y domicilio validados', $notice->data['title']);
+        $this->actingAs($user)->get(route('home'))->assertSee('Avisos: 1 sin leer');
     }
 }

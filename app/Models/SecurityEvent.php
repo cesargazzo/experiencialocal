@@ -36,6 +36,8 @@ class SecurityEvent extends Model
         'admin.revoked' => 'Permiso de administración quitado',
         'policy.updated' => 'Política de contraseñas',
         'verification.approved' => 'Verificación aprobada',
+        'verification.revoked' => 'Verificación revocada',
+        'user.validation_blocked' => 'Validación manual frenada',
         'verification.rejected' => 'Verificación rechazada',
         'access.forbidden' => 'Acceso denegado',
         'request.throttled' => 'Demasiados pedidos',

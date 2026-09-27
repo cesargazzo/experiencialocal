@@ -14,7 +14,7 @@ class SecurityLogController extends Controller
     private const GROUPS = [
         'accesos' => ['login.succeeded', 'login.failed', 'login.locked', 'logout', 'register'],
         'contrasenas' => ['password.changed', 'password.reset_requested', 'password.reset', 'password.reset_failed', 'password.temporary_issued', 'policy.updated'],
-        'admin' => ['admin.granted', 'admin.revoked', 'verification.approved', 'verification.rejected', 'policy.updated'],
+        'admin' => ['admin.granted', 'admin.revoked', 'verification.approved', 'verification.rejected', 'verification.revoked', 'user.validation_blocked', 'policy.updated'],
         'amenazas' => ['login.failed', 'login.locked', 'access.forbidden', 'request.throttled', 'probe.suspicious', 'password.reset_failed'],
         'errores' => ['error.server'],
     ];

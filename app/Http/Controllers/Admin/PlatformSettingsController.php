@@ -44,7 +44,7 @@ class PlatformSettingsController extends Controller
             User::query()->where('verification_level', '<=', VerificationLevel::Residence->value)->chunkById(200, function ($users) use ($verifications, &$changed) {
                 foreach ($users as $user) {
                     $previous = $user->verification_level;
-                    if ($verifications->recalculateLevel($user) !== $previous) {
+                    if ($verifications->recalculateLevel($user, notify: false) !== $previous) {
                         $changed++;
                     }
                 }

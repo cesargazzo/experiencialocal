@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\VerificationLevel;
+use App\Exceptions\VerificationException;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\IdentityVerification;
 use App\Models\Province;
 use App\Models\SecurityEvent;
 use App\Models\User;
@@ -64,6 +66,7 @@ class UserController extends Controller
             'sorts' => self::SORTS,
             'today' => $today,
             'weekStart' => $week[0],
+            'sharedDocuments' => app(VerificationService::class)->accountsSharingDocuments(),
             'birthdaysThisWeek' => User::query()->with('avatar')->birthdayBetween(...$week)->get()
                 ->sortBy(fn (User $user) => $user->birthdayOnOrAfter($week[0])->timestamp)
                 ->values(),
@@ -118,17 +121,30 @@ class UserController extends Controller
             'users.*' => ['integer', 'exists:users,id'],
             'level' => ['required', Rule::in(['1', '2', '3'])],
             'reason' => ['required', 'string', 'min:5', 'max:300'],
+            'document_country' => ['nullable', Rule::in(CountryList::codes())],
+            'document_number' => ['nullable', 'string', 'max:40'],
         ], [
             'users.required' => 'Elegí al menos una cuenta.',
             'reason.required' => 'Contá el motivo: queda registrado.',
         ]);
 
         $level = VerificationLevel::from((int) $data['level']);
+        // El número de documento solo tiene sentido validando una cuenta por vez.
+        $documentNumber = count($data['users']) === 1 ? ($data['document_number'] ?? null) : null;
         $updated = 0;
+        $problems = [];
 
-        User::query()->whereIn('id', $data['users'])->get()->each(function (User $user) use ($verifications, $securityLog, $level, $data, $request, &$updated) {
+        User::query()->whereIn('id', $data['users'])->get()->each(function (User $user) use ($verifications, $securityLog, $level, $data, $documentNumber, $request, &$updated, &$problems) {
             $before = $user->verification_level;
-            $after = $verifications->grantLevelManually($user, $level, $request->user(), $data['reason']);
+
+            try {
+                $after = $verifications->grantLevelManually($user, $level, $request->user(), $data['reason'], $data['document_country'] ?? 'AR', $documentNumber);
+            } catch (VerificationException $e) {
+                $problems[] = "{$user->name}: {$e->getMessage()}";
+                $securityLog->record('user.validation_blocked', $request->user(), ['account' => $user->email, 'account_id' => $user->id, 'level' => $level->value, 'reason' => $e->getMessage()], null, 'warning');
+
+                return;
+            }
 
             if ($after !== $before) {
                 $updated++;
@@ -138,7 +154,28 @@ class UserController extends Controller
             }
         });
 
-        return back()->with('status', $updated === 1 ? 'Validamos 1 cuenta.' : "Validamos {$updated} cuentas.");
+        $response = back()->with('status', $updated === 1 ? 'Validamos 1 cuenta.' : "Validamos {$updated} cuentas.");
+
+        return $problems ? $response->withErrors(['users' => $problems]) : $response;
+    }
+
+    public function revokeVerification(Request $request, User $user, IdentityVerification $verification, VerificationService $verifications, SecurityLog $securityLog): RedirectResponse
+    {
+        abort_unless($verification->user_id === $user->id, 404);
+
+        $data = $request->validate(['reason' => ['required', 'string', 'min:5', 'max:300']], ['reason.required' => 'Contá por qué la revocás.']);
+
+        try {
+            $verifications->revoke($verification, $data['reason'], $request->user());
+        } catch (VerificationException $e) {
+            return back()->withErrors(['revoke' => $e->getMessage()]);
+        }
+
+        $securityLog->record('verification.revoked', $request->user(), [
+            'account' => $user->email, 'account_id' => $user->id, 'verification_id' => $verification->id, 'type' => $verification->type->value, 'reason' => $data['reason'],
+        ], null, 'warning');
+
+        return back()->with('status', 'Revocamos la verificación. La cuenta quedó en '.$user->fresh()->verification_level->label().'.');
     }
 
     public function toggleSuspension(Request $request, User $user, SecurityLog $securityLog): RedirectResponse

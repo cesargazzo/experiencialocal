@@ -133,7 +133,7 @@ class ExperienceModerationTest extends TestCase
         $this->assertSame(ExperienceStatus::InReview, $approved->fresh()->status);
         $this->assertNotNull($approved->fresh()->approved_at);
 
-        $this->actingAs($admin)->post(route('admin.usuarios.validar'), ['users' => [$host->id], 'level' => '3', 'reason' => 'Visité el domicilio']);
+        $this->actingAs($admin)->post(route('admin.usuarios.validar'), ['users' => [$host->id], 'level' => '3', 'reason' => 'Visité el domicilio', 'document_country' => 'AR', 'document_number' => '28999111']);
 
         $this->assertSame(ExperienceStatus::Published, $approved->fresh()->status);
         $this->assertSame(ExperienceStatus::InReview, $notReviewed->fresh()->status);

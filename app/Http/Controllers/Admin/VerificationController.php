@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\VerificationStatus;
+use App\Exceptions\VerificationException;
 use App\Http\Controllers\Controller;
 use App\Models\IdentityVerification;
 use App\Services\SecurityLog;
@@ -22,7 +23,11 @@ class VerificationController extends Controller
 
     public function approve(Request $request, IdentityVerification $verification, VerificationService $verifications, SecurityLog $securityLog): RedirectResponse
     {
-        $verifications->approve($verification, $request->user(), ['reviewed_in' => 'admin']);
+        try {
+            $verifications->approve($verification, $request->user(), ['reviewed_in' => 'admin']);
+        } catch (VerificationException $e) {
+            return back()->withErrors(['verification' => $e->getMessage()]);
+        }
         $securityLog->record('verification.approved', $request->user(), ['verification_id' => $verification->id, 'type' => $verification->type->value, 'account' => $verification->user->email]);
 
         return back()->with('status', 'Verificación aprobada para '.$verification->user->name.'.');
