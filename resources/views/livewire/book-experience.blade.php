@@ -3,7 +3,7 @@
     <div class="success">
       <div class="success__icon"><x-icon name="check" :size="32" /></div>
       <h3 style="font-size:26px;margin-bottom:8px">Pediste tu lugar</h3>
-      <p style="color:var(--tinta-suave);margin:0">Código <strong>{{ $booking->code }}</strong>. Pediste {{ plural_es($booking->guests, 'lugar', 'lugares') }} para <strong>{{ $booking->date->starts_at->translatedFormat('D j M · H:i') }}</strong>. {{ Str::before($experience->host->display_name, ' ') }} confirma dentro de las 24 h y recién ahí se cobra.</p>
+      <p style="color:var(--tinta-suave);margin:0">Código <strong>{{ $booking->code }}</strong>. Pediste {{ plural_es($booking->guests, 'lugar', 'lugares') }} para <strong>{{ $booking->date->localStart()->translatedFormat('D j M · H:i') }}</strong>. {{ Str::before($experience->host->display_name, ' ') }} confirma dentro de las 24 h y recién ahí se cobra.</p>
       <p class="hint" style="margin-top:14px">Total a pagar al confirmar: <strong>{{ money($booking->total) }}</strong></p>
     </div>
   @elseif ($experience->upcomingDates->isEmpty())
@@ -15,9 +15,10 @@
 
       <div class="field">
         <label for="b-fecha">Fecha</label>
+        <span class="hint" style="margin-top:-2px">Horarios de {{ $experience->province?->name ?? $experience->city }}.</span>
         <select id="b-fecha" wire:model.live="dateId">
           @foreach ($experience->upcomingDates as $d)
-            <option value="{{ $d->id }}" @disabled($d->seatsLeft() === 0)>{{ $d->starts_at->translatedFormat('D j M · H:i') }}{{ $d->seatsLeft() === 0 ? ' · completo' : '' }}</option>
+            <option value="{{ $d->id }}" @disabled($d->seatsLeft() === 0)>{{ $d->localStart()->translatedFormat('D j M · H:i') }}{{ $d->seatsLeft() === 0 ? ' · completo' : '' }}</option>
           @endforeach
         </select>
         @error('dateId') <span class="error" style="display:block">{{ $message }}</span> @enderror

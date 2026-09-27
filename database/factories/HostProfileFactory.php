@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\HostStatus;
 use App\Models\HostProfile;
 use App\Models\Plan;
+use App\Models\Province;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,7 +20,7 @@ class HostProfileFactory extends Factory
             'display_name' => fake()->name(),
             'bio' => fake()->paragraph(),
             'city' => 'La Rioja',
-            'province' => 'La Rioja',
+            'province_id' => fn () => Province::query()->where('code', 'AR-F')->value('id'),
             'country_code' => 'AR',
             'address' => fake()->streetAddress(),
             'status' => HostStatus::Active,

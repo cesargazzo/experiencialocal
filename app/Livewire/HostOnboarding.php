@@ -6,12 +6,15 @@ use App\Enums\ExperienceStatus;
 use App\Enums\HostStatus;
 use App\Enums\VerificationLevel;
 use App\Models\Category;
+use App\Models\Country;
 use App\Models\Experience;
 use App\Models\HostProfile;
 use App\Models\Plan;
+use App\Models\Province;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -33,7 +36,7 @@ class HostOnboarding extends Component
 
     public string $city = '';
 
-    public string $province = 'La Rioja';
+    public ?int $province_id = null;
 
     public string $address = '';
 
@@ -70,7 +73,7 @@ class HostOnboarding extends Component
         $this->first_date = now()->addWeek()->toDateString();
 
         if ($profile = $user->hostProfile) {
-            $this->fill($profile->only(['display_name', 'bio', 'city', 'province']));
+            $this->fill($profile->only(['display_name', 'bio', 'city', 'province_id']));
             $this->plan = $profile->plan->slug;
         }
     }
@@ -82,7 +85,7 @@ class HostOnboarding extends Component
                 'display_name' => 'required|string|max:80',
                 'bio' => 'required|string|min:40|max:1000',
                 'city' => 'required|string|max:80',
-                'province' => 'nullable|string|max:80',
+                'province_id' => ['required', Rule::exists('provinces', 'id')->whereIn('country_code', Country::active()->pluck('code')->all())],
                 'address' => 'required|string|max:200',
                 'plan' => 'required|exists:plans,slug',
             ],
@@ -121,24 +124,25 @@ class HostOnboarding extends Component
         $user = auth()->user();
         $plan = Plan::where('slug', $this->plan)->firstOrFail();
 
-        DB::transaction(function () use ($user, $plan) {
+        $province = Province::query()->findOrFail($this->province_id);
+
+        $published = DB::transaction(function () use ($user, $plan, $province): bool {
             $profile = HostProfile::updateOrCreate(['user_id' => $user->id], [
                 'plan_id' => $plan->id,
                 'display_name' => $this->display_name,
                 'bio' => $this->bio,
                 'city' => $this->city,
-                'province' => $this->province ?: null,
-                'country_code' => $user->country_code ?? 'AR',
+                'province_id' => $province->id,
+                'country_code' => $province->country_code,
                 'address' => $this->address,
                 // Con nivel 3 el perfil se activa solo; con nivel 2 queda en revisión.
                 'status' => $user->hasVerificationLevel(VerificationLevel::Residence) ? HostStatus::Active : HostStatus::InReview,
-                'hosting_since' => now(),
+                'hosting_since' => $user->hostProfile?->hosting_since ?? now(),
                 'payout_holder_name' => $user->name,
             ]);
 
             if (! $profile->canPublishAnother()) {
-                $this->addError('title', 'Tu plan no permite más experiencias activas. Cambiá de plan para publicar otra.');
-                throw new \RuntimeException('plan limit');
+                return false;
             }
 
             $slug = Str::slug($this->title);
@@ -155,10 +159,10 @@ class HostOnboarding extends Component
                 'summary' => $this->summary,
                 'description' => $this->description,
                 'city' => $this->city,
-                'province' => $this->province ?: null,
-                'country_code' => $profile->country_code,
+                'province_id' => $province->id,
+                'country_code' => $province->country_code,
                 'price' => $this->price,
-                'currency' => 'ARS',
+                'currency' => $province->country->currency,
                 'duration_minutes' => $this->duration_hours * 60,
                 'max_guests' => $this->max_guests,
                 'includes' => [],
@@ -166,13 +170,22 @@ class HostOnboarding extends Component
                 'published_at' => $profile->isActive() ? now() : null,
             ]);
 
-            $start = Carbon::parse($this->first_date.' '.$this->first_time);
+            // La fecha se carga en la hora del lugar y se guarda en UTC.
+            $start = Carbon::parse($this->first_date.' '.$this->first_time, $province->timezone)->utc();
             $this->created->dates()->create([
                 'starts_at' => $start,
                 'ends_at' => $start->copy()->addHours($this->duration_hours),
                 'capacity' => $this->max_guests,
             ]);
+
+            return true;
         });
+
+        if (! $published) {
+            $this->addError('title', 'Tu plan no permite más experiencias activas. Cambiá de plan para publicar otra.');
+
+            return;
+        }
 
         $this->step = 4;
     }
@@ -182,6 +195,7 @@ class HostOnboarding extends Component
         return view('livewire.host-onboarding', [
             'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(),
             'categories' => Category::orderBy('sort_order')->get(),
+            'countries' => Country::active()->with('provinces')->orderBy('name')->get(),
         ]);
     }
 }

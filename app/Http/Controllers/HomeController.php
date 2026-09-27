@@ -17,9 +17,12 @@ class HomeController extends Controller
         $activeCategory = $categories->firstWhere('slug', $request->query('cat'));
 
         $experiences = Experience::published()
-            ->with(['host.user', 'category'])
+            ->with(['host.user', 'host.plan', 'category', 'province'])
             ->when($activeCategory, fn ($q) => $q->where('category_id', $activeCategory->id))
-            ->when($request->filled('lugar'), fn ($q) => $q->where('city', 'ilike', '%'.$request->query('lugar').'%'))
+            ->when($request->filled('lugar'), function ($query) use ($request) {
+                $place = '%'.$request->string('lugar')->trim()->toString().'%';
+                $query->where(fn ($q) => $q->where('city', 'ilike', $place)->orWhereHas('province', fn ($p) => $p->where('name', 'ilike', $place)));
+            })
             ->orderByDesc('rating_avg')
             ->orderByDesc('reviews_count')
             ->get();

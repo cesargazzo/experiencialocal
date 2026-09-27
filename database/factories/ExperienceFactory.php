@@ -6,6 +6,7 @@ use App\Enums\ExperienceStatus;
 use App\Models\Category;
 use App\Models\Experience;
 use App\Models\HostProfile;
+use App\Models\Province;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -25,6 +26,7 @@ class ExperienceFactory extends Factory
             'summary' => fake()->sentence(8),
             'description' => fake()->paragraphs(2, true),
             'city' => 'La Rioja',
+            'province_id' => fn () => Province::query()->where('code', 'AR-F')->value('id'),
             'country_code' => 'AR',
             'price' => 40000,
             'currency' => 'ARS',

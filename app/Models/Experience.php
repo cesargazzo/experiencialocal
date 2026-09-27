@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'host_profile_id', 'category_id', 'title', 'slug', 'type_label', 'summary', 'description', 'city', 'province',
+    'host_profile_id', 'category_id', 'title', 'slug', 'type_label', 'summary', 'description', 'city', 'province_id',
     'country_code', 'price', 'currency', 'duration_minutes', 'max_guests', 'includes', 'cover_image_url', 'status', 'published_at',
 ])]
 class Experience extends Model
@@ -37,6 +37,11 @@ class Experience extends Model
     public function host(): BelongsTo
     {
         return $this->belongsTo(HostProfile::class, 'host_profile_id');
+    }
+
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(Province::class);
     }
 
     public function category(): BelongsTo
@@ -67,6 +72,18 @@ class Experience extends Model
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', ExperienceStatus::Published);
+    }
+
+    /** Zona horaria del lugar: las fechas se guardan en UTC y se muestran en la hora local. */
+    public function timezone(): string
+    {
+        return $this->province?->timezone ?? config('tinku.timezone');
+    }
+
+    /** "Chilecito, La Rioja". */
+    public function placeLabel(): string
+    {
+        return $this->province ? "{$this->city}, {$this->province->name}" : $this->city;
     }
 
     public function durationLabel(): string

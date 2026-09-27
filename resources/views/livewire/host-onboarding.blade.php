@@ -17,7 +17,17 @@
           <select wire:model="plan">@foreach ($plans as $p)<option value="{{ $p->slug }}">{{ $p->name }} · {{ money($p->monthly_price) }} por mes · {{ $p->commissionPercent() }}% por reserva</option>@endforeach</select>
         </div>
         <div class="field"><label>Ciudad</label><input wire:model="city" placeholder="La Rioja">@error('city')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
-        <div class="field"><label>Provincia</label><input wire:model="province"></div>
+        <div class="field"><label for="province_id">Provincia</label>
+          <select id="province_id" wire:model="province_id">
+            <option value="">Elegí una</option>
+            @foreach ($countries as $country)
+              <optgroup label="{{ $country->name }}">
+                @foreach ($country->provinces as $p)<option value="{{ $p->id }}">{{ $p->name }}</option>@endforeach
+              </optgroup>
+            @endforeach
+          </select>
+          @error('province_id')<span class="error" style="display:block">{{ $message }}</span>@enderror
+        </div>
       </div>
       <div class="field"><label>Dirección donde recibís</label><input wire:model="address" placeholder="Calle y número. Solo la ven quienes tienen reserva confirmada.">@error('address')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label>Contanos sobre vos</label><textarea rows="3" wire:model="bio" placeholder="Qué cocinás, qué lugares conocés, por qué querés recibir gente."></textarea>@error('bio')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
@@ -39,7 +49,7 @@
         <div class="field"><label>Cupos por fecha</label><input type="number" min="1" max="50" wire:model="max_guests" placeholder="8">@error('max_guests')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
         <div class="field"><label>Duración (horas)</label><input type="number" min="1" max="24" wire:model="duration_hours">@error('duration_hours')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
         <div class="field"><label>Primera fecha</label><input type="date" wire:model="first_date">@error('first_date')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
-        <div class="field"><label>Hora</label><input type="time" wire:model="first_time"></div>
+        <div class="field"><label>Hora</label><input type="time" wire:model="first_time"><span class="hint">En la hora del lugar donde recibís.</span></div>
       </div>
       <div class="field"><label>Resumen (una línea)</label><input wire:model="summary" maxlength="200" placeholder="Empanadas, cabrito y sobremesa con recetas de familia.">@error('summary')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label>Descripción</label><textarea rows="4" wire:model="description" placeholder="Qué van a vivir, qué incluye, qué tienen que traer."></textarea>@error('description')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>

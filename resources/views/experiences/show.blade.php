@@ -10,7 +10,7 @@
               <span><x-icon name="star" :size="16" /> {{ $experience->reviews_count > 0 ? number_format($experience->rating_avg, 1, ',', '.').' · '.plural_es($experience->reviews_count, 'opinión', 'opiniones') : 'Nueva en Tinku' }}</span>
               <span><x-icon name="clock" :size="16" /> {{ $experience->durationLabel() }}</span>
               <span><x-icon name="users" :size="16" /> Hasta {{ $experience->max_guests }} personas</span>
-              <span><x-icon name="map-pin" :size="16" /> {{ $experience->city }}</span>
+              <span><x-icon name="map-pin" :size="16" /> {{ $experience->placeLabel() }}</span>
               @if ($experience->status !== \App\Enums\ExperienceStatus::Published)<span class="meta--status">{{ $experience->status->value === 'in_review' ? 'En revisión' : ucfirst($experience->status->value) }}</span>@endif
             </div>
           </div>
@@ -30,7 +30,7 @@
         <div class="detail-block"><h2>Opiniones</h2>
           <div class="reviews">
             @forelse ($experience->reviews as $r)
-              <div class="review"><header><strong>{{ $r->user->name }}</strong><span>{{ Str::ucfirst($r->published_at->translatedFormat('F Y')) }} · <x-stars :rating="$r->rating" /><span class="sr-only">{{ $r->rating }} de 5</span></span></header><p>{{ $r->body }}</p></div>
+              <div class="review"><header><strong>{{ $r->user->name }}</strong><span>{{ Str::ucfirst($r->published_at->timezone($experience->timezone())->translatedFormat('F Y')) }} · <x-stars :rating="$r->rating" /><span class="sr-only">{{ $r->rating }} de 5</span></span></header><p>{{ $r->body }}</p></div>
             @empty
               <p>Todavía no hay opiniones. Las escriben solo quienes fueron.</p>
             @endforelse

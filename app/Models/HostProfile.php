@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'user_id', 'plan_id', 'display_name', 'bio', 'city', 'province', 'country_code', 'address',
+    'user_id', 'plan_id', 'display_name', 'bio', 'city', 'province_id', 'country_code', 'address',
     'latitude', 'longitude', 'status', 'payout_holder_name', 'payout_account', 'hosting_since',
 ])]
 class HostProfile extends Model
@@ -34,6 +34,11 @@ class HostProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(Province::class);
     }
 
     public function plan(): BelongsTo

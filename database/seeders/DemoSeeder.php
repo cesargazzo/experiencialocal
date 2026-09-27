@@ -14,6 +14,7 @@ use App\Models\Category;
 use App\Models\Experience;
 use App\Models\HostProfile;
 use App\Models\Plan;
+use App\Models\Province;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -45,6 +46,7 @@ class DemoSeeder extends Seeder
             ['Elena Ruiz', 'elena@tinku.test', 'Nonogasta', 'AR', 'pro', 3, 2024, 'Tercera generación en la bodega. Hago los vinos con mi hermano y recibo a quienes quieran conocerlos.'],
         ];
 
+        $laRioja = Province::query()->where('code', 'AR-F')->firstOrFail();
         $profiles = [];
         foreach ($hosts as [$name, $email, $city, $nationality, $plan, $level, $since, $bio]) {
             $user = User::updateOrCreate(['email' => $email], [
@@ -54,7 +56,7 @@ class DemoSeeder extends Seeder
             $this->seedVerifications($user, $level, $nationality, $admin);
             $profiles[$name] = HostProfile::updateOrCreate(['user_id' => $user->id], [
                 'plan_id' => Plan::where('slug', $plan)->value('id'),
-                'display_name' => $name, 'bio' => $bio, 'city' => $city, 'province' => 'La Rioja', 'country_code' => 'AR',
+                'display_name' => $name, 'bio' => $bio, 'city' => $city, 'province_id' => $laRioja->id, 'country_code' => 'AR',
                 'status' => HostStatus::Active, 'hosting_since' => now()->setYear($since)->startOfYear(),
                 'payout_holder_name' => $name,
             ]);
@@ -139,7 +141,7 @@ class DemoSeeder extends Seeder
                 'host_profile_id' => $profiles[$data['host']]->id,
                 'category_id' => $cat($data['cat']),
                 'title' => $data['title'], 'type_label' => $data['type'], 'summary' => $data['summary'], 'description' => $data['description'],
-                'city' => $data['city'], 'province' => 'La Rioja', 'country_code' => 'AR',
+                'city' => $data['city'], 'province_id' => $laRioja->id, 'country_code' => 'AR',
                 'price' => $data['price'], 'currency' => 'ARS', 'duration_minutes' => $data['minutes'], 'max_guests' => $data['guests'],
                 'includes' => array_map(fn ($i) => ['label' => $i[0], 'text' => $i[1]], $data['includes']),
                 'cover_image_url' => $data['image'], 'status' => ExperienceStatus::Published, 'published_at' => now()->subMonths(3),
@@ -149,7 +151,8 @@ class DemoSeeder extends Seeder
                 foreach ($data['dates'] as [$when]) {
                     $time = substr($when, strrpos($when, ' ') + 1);
                     $offset = substr($when, 0, strrpos($when, ' '));
-                    $start = now()->modify($offset)->setTimeFromTimeString($time);
+                    // Hora local de La Rioja, guardada en UTC.
+                    $start = now($laRioja->timezone)->modify($offset)->setTimeFromTimeString($time)->utc();
                     $experience->dates()->create(['starts_at' => $start, 'ends_at' => $start->copy()->addMinutes($data['minutes']), 'capacity' => $data['guests']]);
                 }
             }

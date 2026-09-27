@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 #[Fillable(['experience_id', 'starts_at', 'ends_at', 'capacity', 'booked_count', 'status'])]
 class ExperienceDate extends Model
@@ -29,6 +30,12 @@ class ExperienceDate extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /** Inicio en la hora local de la experiencia, listo para mostrar. */
+    public function localStart(): Carbon
+    {
+        return $this->starts_at->copy()->timezone($this->experience->timezone());
     }
 
     public function seatsLeft(): int
