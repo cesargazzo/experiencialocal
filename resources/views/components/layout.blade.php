@@ -99,7 +99,15 @@
         <a href="{{ route('home') }}#como-ganas">Cómo ganás</a>
         <a href="{{ route('home') }}#planes">Planes</a>
         @auth
-          <a class="btn btn--secondary btn--sm" href="{{ route(auth()->user()->isHost() ? 'anfitrion.panel' : 'anfitrion.registro') }}">{{ auth()->user()->isHost() ? 'Mi espacio de anfitrión' : 'Quiero ser anfitrión' }}</a>
+          @if (auth()->user()->isHost())
+            @php($pendingHostBookings = auth()->user()->pendingHostBookingsCount())
+            <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.panel') }}{{ $pendingHostBookings ? '#reservas' : '' }}">
+              Mi espacio de anfitrión
+              @if ($pendingHostBookings)<span class="btn__count" aria-label="{{ plural_es($pendingHostBookings, 'reserva por confirmar', 'reservas por confirmar') }}">{{ $pendingHostBookings }}</span>@endif
+            </a>
+          @else
+            <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">Quiero ser anfitrión</a>
+          @endif
           @php($unreadNotifications = auth()->user()->unreadNotifications()->count())
           <a class="bell" href="{{ route('cuenta.avisos') }}" aria-label="Avisos{{ $unreadNotifications ? ': '.$unreadNotifications.' sin leer' : '' }}">
             <x-icon name="bell" :size="22" />

@@ -656,3 +656,15 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .birthdays__week li.is-past { opacity: .6; }
 
 .revoke summary { cursor: pointer; color: var(--texto-coral); font-weight: 600; font-size: 13px; }
+
+/* Reservas del anfitrión */
+.btn__count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; margin-left: 8px; padding: 0 6px; border-radius: var(--radio-pill); background: var(--coral); color: var(--tinta); font: 700 12px/22px var(--font-texto); }
+.host-booking { display: grid; grid-template-columns: 56px 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid var(--linea); }
+.host-booking:first-of-type { border-top: 0; }
+.host-booking__who { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0; }
+.host-booking__who strong { font-size: 18px; }
+.host-booking__facts { list-style: none; margin: 8px 0; padding: 0; display: flex; gap: 6px 18px; flex-wrap: wrap; font-size: 15px; }
+.host-booking__facts li { display: inline-flex; gap: 6px; align-items: center; }
+.host-booking__facts .icon { color: var(--texto-petroleo); }
+.host-booking__note { margin: 8px 0; padding: 10px 12px; border-radius: var(--radio-sm); background: var(--superficie-calida); font-size: 15px; }
+.host-booking__actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }

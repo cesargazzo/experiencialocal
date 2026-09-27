@@ -12,6 +12,24 @@
       </p>
     @endunless
 
+    @error('booking')<p class="notice" role="alert">{{ $message }}</p>@enderror
+
+    <section class="wizard__panel" id="reservas">
+      <h2>Reservas por confirmar</h2>
+      @forelse ($pendingBookings as $booking)
+        @include('host.partials.booking', ['booking' => $booking, 'pending' => true])
+      @empty
+        <p class="hint">No tenés reservas esperando. Cuando alguien pida lugar, te avisamos acá y por mail.</p>
+      @endforelse
+
+      @if ($confirmedBookings->isNotEmpty())
+        <h2 style="margin-top:32px">Próximas confirmadas</h2>
+        @foreach ($confirmedBookings as $booking)
+          @include('host.partials.booking', ['booking' => $booking, 'pending' => false])
+        @endforeach
+      @endif
+    </section>
+
     <section class="wizard__panel">
       <div class="host-head">
         <div>

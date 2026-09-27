@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BookingStatus;
 use App\Enums\DietaryOption;
 use App\Enums\VerificationLevel;
 use App\Models\Concerns\Auditable;
@@ -179,6 +180,18 @@ class User extends Authenticatable
         return $required === null || $this->termsAcceptances()
             ->whereHas('version', fn ($query) => $query->where('published_at', '>=', $required->published_at))
             ->exists();
+    }
+
+    /** Reservas de sus experiencias que esperan que las confirme. */
+    public function pendingHostBookingsCount(): int
+    {
+        return $this->hostProfile
+            ? Booking::query()
+                ->where('status', BookingStatus::Requested)
+                ->whereHas('experience', fn ($q) => $q->where('host_profile_id', $this->hostProfile->id))
+                ->whereHas('date', fn ($q) => $q->where('starts_at', '>', now()))
+                ->count()
+            : 0;
     }
 
     public function hostProfile(): HasOne

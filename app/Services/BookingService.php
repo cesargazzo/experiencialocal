@@ -9,6 +9,7 @@ use App\Exceptions\BookingException;
 use App\Models\Booking;
 use App\Models\ExperienceDate;
 use App\Models\User;
+use App\Notifications\BookingUpdatedNotification;
 use Illuminate\Support\Facades\DB;
 
 class BookingService
@@ -32,7 +33,7 @@ class BookingService
             throw new BookingException('Indicá cuántas personas van.');
         }
 
-        return DB::transaction(function () use ($user, $date, $guests, $note) {
+        $booking = DB::transaction(function () use ($user, $date, $guests, $note) {
             /** @var ExperienceDate $locked */
             $locked = ExperienceDate::query()->whereKey($date->getKey())->lockForUpdate()->firstOrFail();
             $experience = $locked->experience()->with('host.plan')->firstOrFail();
@@ -80,6 +81,10 @@ class BookingService
 
             return $booking;
         });
+
+        $booking->experience->host->user->notify(new BookingUpdatedNotification($booking, BookingUpdatedNotification::REQUESTED));
+
+        return $booking;
     }
 
     /** El anfitrión confirma. Acá se captura el pago autorizado. */
@@ -89,6 +94,7 @@ class BookingService
         $this->assertStatus($booking, BookingStatus::Requested);
 
         $booking->forceFill(['status' => BookingStatus::Confirmed, 'confirmed_at' => now()])->save();
+        $booking->user->notify(new BookingUpdatedNotification($booking, BookingUpdatedNotification::CONFIRMED));
 
         return $booking;
     }
@@ -98,7 +104,10 @@ class BookingService
         $this->assertHostOwns($booking, $host);
         $this->assertStatus($booking, BookingStatus::Requested);
 
-        return $this->release($booking, BookingStatus::Declined, 'declined_at');
+        $this->release($booking, BookingStatus::Declined, 'declined_at');
+        $booking->user->notify(new BookingUpdatedNotification($booking, BookingUpdatedNotification::DECLINED));
+
+        return $booking;
     }
 
     /** Cancela el participante o el anfitrión. Libera los lugares. */
@@ -113,7 +122,14 @@ class BookingService
             throw new BookingException('Esta reserva ya no se puede cancelar.');
         }
 
-        return $this->release($booking, BookingStatus::Cancelled, 'cancelled_at');
+        $this->release($booking, BookingStatus::Cancelled, 'cancelled_at');
+
+        // Se avisa a la otra parte.
+        $isGuest
+            ? $booking->experience->host->user->notify(new BookingUpdatedNotification($booking, BookingUpdatedNotification::CANCELLED_BY_GUEST))
+            : $booking->user->notify(new BookingUpdatedNotification($booking, BookingUpdatedNotification::CANCELLED_BY_HOST));
+
+        return $booking;
     }
 
     public function complete(Booking $booking): Booking

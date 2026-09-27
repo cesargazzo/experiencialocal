@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\BookingStatus;
 use App\Enums\VerificationLevel;
+use App\Models\Booking;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -26,7 +27,17 @@ class HostDashboardController extends Controller
             ->latest()
             ->get();
 
+        $bookings = Booking::query()
+            ->whereIn('experience_id', $experiences->pluck('id'))
+            ->whereIn('status', [BookingStatus::Requested, BookingStatus::Confirmed])
+            ->whereHas('date', fn ($q) => $q->where('starts_at', '>', now()))
+            ->with(['user.avatar', 'date', 'experience.province'])
+            ->get()
+            ->sortBy(fn (Booking $booking) => $booking->date->starts_at);
+
         return view('host.dashboard', [
+            'pendingBookings' => $bookings->where('status', BookingStatus::Requested)->values(),
+            'confirmedBookings' => $bookings->where('status', BookingStatus::Confirmed)->values(),
             'profile' => $profile,
             'experiences' => $experiences,
             'canCreateAnother' => $profile->canPublishAnother(),

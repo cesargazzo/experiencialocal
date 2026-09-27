@@ -20,6 +20,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HostBookingController;
 use App\Http\Controllers\HostDashboardController;
 use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\SeoController;
@@ -72,6 +73,8 @@ Route::middleware('auth')->group(function () {
 
     // Publicar exige documento validado (nivel 2). Cobrar sin restricciones exige nivel 3.
     Route::get('/anfitrion', [HostDashboardController::class, 'index'])->name('anfitrion.panel');
+    Route::post('/anfitrion/reservas/{booking}/confirmar', [HostBookingController::class, 'confirm'])->name('anfitrion.reservas.confirmar');
+    Route::post('/anfitrion/reservas/{booking}/rechazar', [HostBookingController::class, 'decline'])->name('anfitrion.reservas.rechazar');
     Route::get('/anfitrion/experiencias/{experience}', ManageExperience::class)->name('anfitrion.experiencias.editar');
     Route::get('/anfitrion/registro', HostOnboarding::class)->middleware('verified.level:2')->name('anfitrion.registro');
 
