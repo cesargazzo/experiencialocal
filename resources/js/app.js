@@ -38,7 +38,11 @@ function animateCounters() {
 document.addEventListener('DOMContentLoaded', () => {
     observeReveal();
     animateCounters();
-    document.querySelector('.nav-toggle')?.addEventListener('click', () => document.querySelector('.nav')?.classList.toggle('is-open'));
+    const toggle = document.querySelector('.nav-toggle');
+    toggle?.addEventListener('click', () => {
+        const open = document.querySelector('.nav')?.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
 });
 
 document.addEventListener('livewire:navigated', () => observeReveal());

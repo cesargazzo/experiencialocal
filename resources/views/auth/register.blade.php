@@ -21,7 +21,7 @@
           <div class="field"><label for="password">Contraseña</label><input id="password" name="password" type="password" required>@error('password')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
           <div class="field"><label for="password_confirmation">Repetí la contraseña</label><input id="password_confirmation" name="password_confirmation" type="password" required></div>
         </div>
-        <div class="wizard__actions"><a class="btn btn--ghost" href="{{ route('login') }}">Ya tengo cuenta</a><button class="btn btn--primary" type="submit">Crear cuenta <span class="arrow">→</span></button></div>
+        <div class="wizard__actions"><a class="btn btn--ghost" href="{{ route('login') }}">Ya tengo cuenta</a><button class="btn btn--secondary" type="submit">Creá tu cuenta <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
       </form>
     </section>
   </main>

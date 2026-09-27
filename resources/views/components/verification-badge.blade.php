@@ -1,11 +1,8 @@
 @props(['level', 'full' => false])
 @php
-  $level = $level instanceof \App\Enums\VerificationLevel ? $level : \App\Enums\VerificationLevel::from((int) $level);
-  [$color, $icon] = match ($level) {
-    \App\Enums\VerificationLevel::Residence => ['#6b4cf6', '✓✓'],
-    \App\Enums\VerificationLevel::Document => ['#14b8a6', '✓'],
-    \App\Enums\VerificationLevel::Contact => ['#9aa0ab', '✓'],
-    default => ['#c9c4b8', '·'],
-  };
+    $level = $level instanceof \App\Enums\VerificationLevel ? $level : \App\Enums\VerificationLevel::from((int) $level);
+    $icon = $level->value >= 2 ? 'seal-check' : 'check';
 @endphp
-<span class="badge" style="--c:{{ $color }}" title="{{ $level->label() }}">{{ $icon }}@if ($full) {{ $level->label() }}@endif</span>
+<span class="badge badge--nivel-{{ $level->value }}" title="{{ $level->label() }}">
+  <x-icon :name="$icon" :size="14" />@if ($full)<span>{{ $level->label() }}</span>@else<span class="sr-only">{{ $level->label() }}</span>@endif
+</span>

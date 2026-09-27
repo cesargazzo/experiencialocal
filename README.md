@@ -92,6 +92,14 @@ Reglas complementarias:
 
 Cada anfitrión muestra su insignia de nivel en las tarjetas y en el detalle de la experiencia.
 
+## Marca
+
+El manual de marca está en https://claude.ai/artifact/1W2nbDTmxWopzWG8hiC2PA. En el código:
+
+- Colores, tipografías, radios y espaciado: variables al principio de `resources/css/tinku.css`, con los mismos nombres que el manual.
+- Logos: `public/brand/`, copiados sin modificar.
+- Íconos: Phosphor Bold en `resources/icons/` (licencia MIT), con el componente `<x-icon name="..." />`.
+
 ## Stack
 
 - PHP 8.4 con Laravel 13, vistas Blade con Livewire y Tailwind.
@@ -106,4 +114,5 @@ Cada anfitrión muestra su insignia de nivel en las tarjetas y en el detalle de 
 3. Panel del anfitrión: reservas pendientes, calendario de fechas, liquidaciones y estadísticas.
 4. Panel del participante: mis reservas, cancelación y opiniones.
 5. Búsqueda por fecha con disponibilidad real y subida de fotos propias.
-6. Aplicar el manual de marca cuando esté: colores y tipografía viven en `resources/css/tinku.css`.
+6. Reemplazar las fotos de stock de los datos demo por fotos reales de cada anfitrión, como pide el manual de marca.
+7. Tema oscuro: el manual ya define sus colores.

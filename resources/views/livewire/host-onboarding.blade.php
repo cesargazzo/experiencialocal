@@ -21,16 +21,16 @@
       </div>
       <div class="field"><label>Dirección donde recibís</label><input wire:model="address" placeholder="Calle y número. Solo la ven quienes tienen reserva confirmada.">@error('address')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label>Contanos sobre vos</label><textarea rows="3" wire:model="bio" placeholder="Qué cocinás, qué lugares conocés, por qué querés recibir gente."></textarea>@error('bio')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
-      <div class="wizard__actions"><a class="btn btn--ghost" href="{{ route('home') }}">Cancelar</a><button class="btn btn--primary" type="button" wire:click="next">Continuar <span class="arrow">→</span></button></div>
+      <div class="wizard__actions"><a class="btn btn--ghost" href="{{ route('home') }}">Cancelar</a><button class="btn btn--secondary" type="button" wire:click="next">Continuá <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
     </section>
 
   @elseif ($step === 2)
     <section class="wizard__panel">
       <h2>Tu primera experiencia</h2>
       <p>Definí qué incluye, precio, fecha y cupos. Después podés agregar más fechas.</p>
-      <div class="field"><label>Título</label><input wire:model="title" placeholder="Sabores riojanos en el patio">@error('title')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+      <div class="field"><label>Título</label><input wire:model="title" placeholder="Cociná empanadas con Marta en su patio">@error('title')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="grid-2">
-        <div class="field"><label>Categoría</label><select wire:model="category_id"><option value="">Elegí una</option>@foreach ($categories as $c)<option value="{{ $c->id }}">{{ $c->icon }} {{ $c->name }}</option>@endforeach</select>@error('category_id')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+        <div class="field"><label>Categoría</label><select wire:model="category_id"><option value="">Elegí una</option>@foreach ($categories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach</select>@error('category_id')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
         <div class="field"><label>Tipo</label><input wire:model="type_label" placeholder="Cocina regional, Paseo de medio día…">@error('type_label')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
         <div class="field"><label>Precio por persona</label><input type="number" min="1000" step="500" wire:model.live="price" placeholder="40000">
           @php $p = $plans->firstWhere('slug', $plan); @endphp
@@ -43,7 +43,7 @@
       </div>
       <div class="field"><label>Resumen (una línea)</label><input wire:model="summary" maxlength="200" placeholder="Empanadas, cabrito y sobremesa con recetas de familia.">@error('summary')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label>Descripción</label><textarea rows="4" wire:model="description" placeholder="Qué van a vivir, qué incluye, qué tienen que traer."></textarea>@error('description')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
-      <div class="wizard__actions"><button class="btn btn--ghost" type="button" wire:click="back">Volver</button><button class="btn btn--primary" type="button" wire:click="next">Revisar <span class="arrow">→</span></button></div>
+      <div class="wizard__actions"><button class="btn btn--ghost" type="button" wire:click="back">Volver</button><button class="btn btn--secondary" type="button" wire:click="next">Revisá <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
     </section>
 
   @elseif ($step === 3)
@@ -61,20 +61,20 @@
         <div><span>Plan</span><strong>{{ $p->name }} · {{ $p->commissionPercent() }}% por reserva</strong></div>
         <div><span>Recibís por persona*</span><strong>{{ money($p->hostPayoutFor($price ?? 0)) }}</strong></div>
       </div>
-      <p class="hint" style="font-size:13px;color:var(--muted)">*Antes de impuestos, retenciones, costos de cobro y gastos propios.</p>
+      <p class="hint">*Antes de impuestos, retenciones, costos de cobro y gastos propios.</p>
       @unless (auth()->user()->hasVerificationLevel(\App\Enums\VerificationLevel::Residence))
-        <p class="hint" style="font-size:14px;color:var(--ink-2);background:var(--bg-2);padding:12px 14px;border-radius:12px">Tu perfil queda <strong>en revisión</strong> hasta que valides tu domicilio (nivel 3). Podés hacerlo desde <a href="{{ route('verificacion') }}" style="text-decoration:underline">tu centro de verificación</a>.</p>
+        <p class="notice">Tu perfil queda <strong>en revisión</strong> hasta que valides tu domicilio (nivel 3). Podés hacerlo desde <a href="{{ route('verificacion') }}">tu centro de verificación</a>.</p>
       @endunless
       @error('title')<span class="error" style="display:block">{{ $message }}</span>@enderror
-      <div class="wizard__actions"><button class="btn btn--ghost" type="button" wire:click="back">Volver</button><button class="btn btn--primary" type="button" wire:click="publish" wire:loading.attr="disabled">Publicar experiencia</button></div>
+      <div class="wizard__actions"><button class="btn btn--ghost" type="button" wire:click="back">Volver</button><button class="btn btn--primary" type="button" wire:click="publish" wire:loading.attr="disabled">Publicá tu experiencia</button></div>
     </section>
 
   @else
     <section class="wizard__panel">
       <div class="success">
-        <div class="success__icon">✓</div>
+        <div class="success__icon"><x-icon name="check" :size="32" /></div>
         <h2>{{ $created?->status === \App\Enums\ExperienceStatus::Published ? 'Tu experiencia está publicada' : 'Tu experiencia quedó en revisión' }}</h2>
-        <p style="max-width:44ch;margin:8px auto 24px;color:var(--muted)">
+        <p style="max-width:44ch;margin:8px auto 24px;color:var(--tinta-suave)">
           @if ($created?->status === \App\Enums\ExperienceStatus::Published)
             Cuando alguien reserve, te avisamos. Confirmás la reserva, recibís a tus invitados y el saldo se liquida después de la experiencia.
           @else
@@ -82,8 +82,8 @@
           @endif
         </p>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-          @if ($created)<a class="btn btn--primary" href="{{ route('experiencias.show', $created) }}">Ver mi experiencia</a>@endif
-          <a class="btn btn--outline" href="{{ route('home') }}">Ir al inicio</a>
+          @if ($created)<a class="btn btn--secondary" href="{{ route('experiencias.show', $created) }}">Mirá tu experiencia</a>@endif
+          <a class="btn btn--tertiary" href="{{ route('home') }}">Volvé al inicio</a>
         </div>
       </div>
     </section>

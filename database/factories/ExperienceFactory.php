@@ -18,7 +18,7 @@ class ExperienceFactory extends Factory
 
         return [
             'host_profile_id' => HostProfile::factory(),
-            'category_id' => fn () => Category::firstOrCreate(['slug' => 'comida'], ['name' => 'Comidas', 'icon' => '🍽️'])->id,
+            'category_id' => fn () => Category::firstOrCreate(['slug' => 'comida'], ['name' => 'Comidas', 'icon' => 'fork-knife'])->id,
             'title' => $title,
             'slug' => Str::slug($title),
             'type_label' => 'Cocina regional',

@@ -1,14 +1,14 @@
 <div class="book" id="reservar">
   @if ($booking)
     <div class="success">
-      <div class="success__icon">✓</div>
-      <h3 style="font-size:26px;margin-bottom:8px">Reserva enviada</h3>
-      <p style="color:var(--muted);margin:0">Código <strong>{{ $booking->code }}</strong>. Pediste {{ plural_es($booking->guests, 'lugar', 'lugares') }} para <strong>{{ $booking->date->starts_at->translatedFormat('D j M · H:i') }}</strong>. {{ Str::before($experience->host->display_name, ' ') }} confirma dentro de las 24 h y recién ahí se cobra.</p>
-      <p style="font-size:13px;color:var(--muted);margin-top:14px">Total a pagar al confirmar: <strong>{{ money($booking->total) }}</strong></p>
+      <div class="success__icon"><x-icon name="check" :size="32" /></div>
+      <h3 style="font-size:26px;margin-bottom:8px">Pediste tu lugar</h3>
+      <p style="color:var(--tinta-suave);margin:0">Código <strong>{{ $booking->code }}</strong>. Pediste {{ plural_es($booking->guests, 'lugar', 'lugares') }} para <strong>{{ $booking->date->starts_at->translatedFormat('D j M · H:i') }}</strong>. {{ Str::before($experience->host->display_name, ' ') }} confirma dentro de las 24 h y recién ahí se cobra.</p>
+      <p class="hint" style="margin-top:14px">Total a pagar al confirmar: <strong>{{ money($booking->total) }}</strong></p>
     </div>
   @elseif ($experience->upcomingDates->isEmpty())
     <div class="book__price">{{ money($experience->price) }} <small>por persona</small></div>
-    <p style="color:var(--muted);margin:16px 0 0">No hay fechas abiertas por ahora. Volvé a mirar en unos días.</p>
+    <p class="hint" style="margin:16px 0 0">No hay fechas abiertas por ahora. Volvé a mirar en unos días.</p>
   @else
     <form wire:submit="submit">
       <div class="book__price">{{ money($experience->price) }} <small>por persona</small></div>
@@ -48,10 +48,10 @@
       </div>
 
       <button class="btn btn--primary btn--block" type="submit" wire:loading.attr="disabled">
-        <span wire:loading.remove>{{ auth()->check() ? 'Solicitar reserva' : 'Ingresar para reservar' }}</span>
+        <span wire:loading.remove>{{ auth()->check() ? 'Reservá tu lugar' : 'Ingresá para reservar' }}</span>
         <span wire:loading>Enviando…</span>
       </button>
-      <p class="hint" style="text-align:center;margin:12px 0 0;font-size:13px;color:var(--muted)">No se cobra hasta que el anfitrión confirme.</p>
+      <p class="hint" style="text-align:center;margin:12px 0 0">No se cobra hasta que el anfitrión confirme.</p>
     </form>
   @endif
 </div>
