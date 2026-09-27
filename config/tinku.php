@@ -24,6 +24,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Interruptores (se pueden cambiar desde /admin/configuracion)
+    |--------------------------------------------------------------------------
+    |
+    | sms_verification: exigir el código por SMS para confirmar el teléfono.
+    | Apagado hasta tener un proveedor de SMS: el nivel 1 pide solo el email.
+    |
+    */
+
+    'features' => [
+        'sms_verification' => (bool) env('TINKU_SMS_VERIFICATION', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Registro de seguridad
     |--------------------------------------------------------------------------
     |

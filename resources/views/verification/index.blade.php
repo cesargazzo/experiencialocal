@@ -6,7 +6,7 @@
     @include('account.partials.nav')
 
     <div class="steps" style="grid-template-columns:repeat(3,1fr)">
-      @foreach ([1 => ['Navegar y guardar favoritas', 'Email y teléfono confirmados con código.'], 2 => ['Reservar, pagar y publicar en revisión', 'Documento validado más selfie con prueba de vida.'], 3 => ['Publicar y cobrar sin restricciones', 'Domicilio validado y revisión de un administrador.']] as $lvl => [$enables, $how])
+      @foreach ([1 => ['Navegar y guardar favoritas', $smsVerification ? 'Email y teléfono confirmados con código.' : 'Email confirmado con código.'], 2 => ['Reservar, pagar y publicar en revisión', 'Documento validado más selfie con prueba de vida.'], 3 => ['Publicar y cobrar sin restricciones', 'Domicilio validado y revisión de un administrador.']] as $lvl => [$enables, $how])
         @php $lvlEnum = \App\Enums\VerificationLevel::from($lvl); @endphp
         <div @class(['step', 'step--done' => $user->hasVerificationLevel($lvlEnum)])>
           <div class="step__num">0{{ $lvl }}</div>

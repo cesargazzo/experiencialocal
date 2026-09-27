@@ -8,6 +8,7 @@ use App\Models\Invitation;
 use App\Models\User;
 use App\Services\SecurityLog;
 use App\Services\VerificationService;
+use App\Support\PlatformSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -47,13 +48,17 @@ class RegisterController extends Controller
             $securityLog->record('invitation.accepted', $user, ['invitation_id' => $invitation->id, 'inviter_id' => $invitation->inviter_id], $user->email);
         }
 
-        // Nivel 1 arranca acá: se envían los códigos de email y teléfono.
+        // Nivel 1 arranca acá: se envía el código de email, y el de teléfono si hay SMS.
         $verifications->submit($user, VerificationType::Email);
-        $verifications->submit($user, VerificationType::Phone);
+        if (PlatformSettings::current()->smsVerification) {
+            $verifications->submit($user, VerificationType::Phone);
+        }
 
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('verificacion')->with('status', 'Cuenta creada. Confirmá tu email y tu teléfono para empezar.');
+        return redirect()->route('verificacion')->with('status', PlatformSettings::current()->smsVerification
+            ? 'Cuenta creada. Confirmá tu email y tu teléfono para empezar.'
+            : 'Cuenta creada. Confirmá tu email para empezar.');
     }
 }

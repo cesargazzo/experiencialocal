@@ -34,7 +34,7 @@
           <select id="bulk-level" name="level" class="inline-input">
             <option value="2">Validar hasta nivel 2 · Documento</option>
             <option value="3">Validar hasta nivel 3 · Identidad y domicilio</option>
-            <option value="1">Validar hasta nivel 1 · Email y teléfono</option>
+            <option value="1">Validar hasta nivel 1 · Contacto confirmado</option>
           </select>
           <label class="sr-only" for="bulk-reason">Motivo</label>
           <input id="bulk-reason" name="reason" class="inline-input" placeholder="Motivo (queda registrado)" required minlength="5" maxlength="300" style="flex:1;min-width:200px">

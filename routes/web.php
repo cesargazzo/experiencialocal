@@ -4,6 +4,7 @@ use App\Http\Controllers\Account\InvitationController;
 use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\PasswordPolicyController;
+use App\Http\Controllers\Admin\PlatformSettingsController;
 use App\Http\Controllers\Admin\SecurityLogController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
@@ -60,6 +61,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/verificaciones/{verification}/rechazar', [AdminVerificationController::class, 'reject'])->name('verificaciones.rechazar');
         Route::get('/contrasenas', [PasswordPolicyController::class, 'edit'])->name('contrasenas');
         Route::get('/seguridad', [SecurityLogController::class, 'index'])->name('seguridad');
+        Route::get('/configuracion', [PlatformSettingsController::class, 'edit'])->name('configuracion');
+        Route::put('/configuracion', [PlatformSettingsController::class, 'update'])->name('configuracion.update');
         Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios');
         Route::post('/usuarios/validar', [UserController::class, 'validateLevel'])->name('usuarios.validar');
         Route::get('/usuarios/{user}', [UserController::class, 'show'])->name('usuarios.show');

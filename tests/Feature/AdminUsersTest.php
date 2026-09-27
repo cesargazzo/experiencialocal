@@ -7,6 +7,7 @@ use App\Enums\VerificationLevel;
 use App\Models\HostProfile;
 use App\Models\SecurityEvent;
 use App\Models\User;
+use App\Services\VerificationService;
 use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -97,5 +98,23 @@ class AdminUsersTest extends TestCase
 
         $this->actingAs($admin)->post(route('admin.usuarios.suspension', $admin), ['reason' => 'prueba'])->assertStatus(422);
         $this->assertFalse($admin->fresh()->isSuspended());
+    }
+
+    #[Test]
+    public function the_sms_switch_changes_level_one_for_every_account(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $user = User::factory()->level(VerificationLevel::None)->create();
+        $user->verifications()->create(['type' => 'email', 'provider' => 'internal', 'status' => 'approved']);
+        app(VerificationService::class)->recalculateLevel($user);
+        $this->assertSame(VerificationLevel::Contact, $user->fresh()->verification_level);
+
+        $this->actingAs($admin)->get(route('admin.configuracion'))->assertOk()->assertSee('cuenta baja al nivel 0');
+        $this->actingAs($admin)->put(route('admin.configuracion.update'), ['sms_verification' => '1'])->assertSessionHas('status');
+        $this->assertSame(VerificationLevel::None, $user->fresh()->verification_level);
+        $this->assertTrue(SecurityEvent::where('type', 'settings.updated')->exists());
+
+        $this->actingAs($admin)->put(route('admin.configuracion.update'), []);
+        $this->assertSame(VerificationLevel::Contact, $user->fresh()->verification_level);
     }
 }

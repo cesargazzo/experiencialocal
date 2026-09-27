@@ -60,6 +60,7 @@ class VerificationServiceTest extends TestCase
     #[Test]
     public function levels_are_cumulative(): void
     {
+        config(['tinku.features.sms_verification' => true]);
         $user = User::factory()->level(VerificationLevel::None)->create();
 
         $email = $this->service->submit($user, VerificationType::Email);
@@ -123,5 +124,16 @@ class VerificationServiceTest extends TestCase
         $this->assertSame(VerificationLevel::Residence, $user->fresh()->verification_level);
         $this->assertSame(HostStatus::Active, $profile->fresh()->status);
         $this->assertSame(ExperienceStatus::Published, $experience->fresh()->status);
+    }
+
+    #[Test]
+    public function without_sms_the_confirmed_email_is_enough_for_level_one(): void
+    {
+        config(['tinku.features.sms_verification' => false]);
+        $user = User::factory()->level(VerificationLevel::None)->create();
+
+        $this->service->approve($this->service->submit($user, VerificationType::Email));
+
+        $this->assertSame(VerificationLevel::Contact, $user->fresh()->verification_level);
     }
 }

@@ -70,6 +70,6 @@ class WebRoutesTest extends TestCase
         $user = User::where('email', 'chiara@example.com')->firstOrFail();
         $this->assertSame('IT', $user->nationality_code);
         $this->assertSame(VerificationLevel::None, $user->verification_level);
-        $this->assertCount(2, $user->verifications);
+        $this->assertCount(1, $user->verifications, 'Sin SMS configurado, solo se pide el código de email.');
     }
 }

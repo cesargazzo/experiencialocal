@@ -12,6 +12,7 @@ use App\Exceptions\VerificationException;
 use App\Models\IdentityVerification;
 use App\Models\User;
 use App\Notifications\VerificationCodeNotification;
+use App\Support\PlatformSettings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -212,7 +213,12 @@ class VerificationService
         $has = fn (VerificationType ...$types) => collect($types)->every(fn ($t) => in_array($t->value, $approved, true));
 
         $level = VerificationLevel::None;
-        if ($has(VerificationType::Email, VerificationType::Phone)) {
+        // El teléfono cuenta para el nivel 1 solo si la verificación por SMS está activa.
+        $contactTypes = PlatformSettings::current()->smsVerification
+            ? [VerificationType::Email, VerificationType::Phone]
+            : [VerificationType::Email];
+
+        if ($has(...$contactTypes)) {
             $level = VerificationLevel::Contact;
             if ($has(VerificationType::Document, VerificationType::Liveness)) {
                 $level = VerificationLevel::Document;

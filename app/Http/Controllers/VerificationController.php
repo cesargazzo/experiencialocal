@@ -7,6 +7,7 @@ use App\Enums\VerificationType;
 use App\Exceptions\VerificationException;
 use App\Models\IdentityVerification;
 use App\Services\VerificationService;
+use App\Support\PlatformSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -26,7 +27,11 @@ class VerificationController extends Controller
         return view('verification.index', [
             'user' => $user,
             'latest' => $latest,
-            'types' => VerificationType::cases(),
+            'types' => array_values(array_filter(
+                VerificationType::cases(),
+                fn (VerificationType $type) => $type !== VerificationType::Phone || PlatformSettings::current()->smsVerification,
+            )),
+            'smsVerification' => PlatformSettings::current()->smsVerification,
         ]);
     }
 

@@ -46,6 +46,7 @@ class SecurityEvent extends Model
         'invitation.link_created' => 'Enlace de invitación',
         'invitation.accepted' => 'Invitación aceptada',
         'user.validated_manually' => 'Validación manual',
+        'settings.updated' => 'Configuración de la plataforma',
         'user.suspended' => 'Cuenta suspendida',
         'user.unsuspended' => 'Cuenta reactivada',
     ];
