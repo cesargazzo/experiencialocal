@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use App\Enums\DietaryOption;
 use App\Enums\ExperienceStatus;
+use App\Livewire\Concerns\EditsExperienceDetails;
 use App\Models\Category;
 use App\Models\Experience;
 use App\Rules\ImageSize;
@@ -12,7 +12,6 @@ use App\Services\ImageService;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -21,17 +20,18 @@ use Livewire\WithFileUploads;
 
 /**
  * El anfitrión edita su experiencia y sus fechas. Si cambia lo que se revisa
- * (texto, categoría o foto) vuelve a revisión; precio, cupos, duración y
- * opciones de comida se aplican al momento.
+ * (textos, categoría o foto) vuelve a revisión; precio, cupos, duración,
+ * dificultad, edad mínima, extras y opciones de comida se aplican al momento.
  */
 #[Layout('components.layout', ['noindex' => true])]
 #[Title('Editá tu experiencia')]
 class ManageExperience extends Component
 {
+    use EditsExperienceDetails;
     use WithFileUploads;
 
     /** Campos que pasan por la revisión de contenido. */
-    private const REVIEWED_FIELDS = ['title', 'category_id', 'type_label', 'summary', 'description'];
+    private const REVIEWED_FIELDS = ['title', 'category_id', 'type_label', 'summary', 'description', 'what_to_bring'];
 
     /** Tope de fechas que se crean de una vez. */
     public const MAX_NEW_DATES = 60;
@@ -53,9 +53,6 @@ class ManageExperience extends Component
     public int $duration_hours = 3;
 
     public ?int $max_guests = null;
-
-    /** @var list<string> */
-    public array $dietary_options = [];
 
     public ?TemporaryUploadedFile $cover = null;
 
@@ -84,7 +81,7 @@ class ManageExperience extends Component
         $this->fill($experience->only(['title', 'category_id', 'type_label', 'summary', 'description', 'max_guests']));
         $this->price = (int) $experience->price;
         $this->duration_hours = max(1, intdiv($experience->duration_minutes, 60));
-        $this->dietary_options = $experience->dietary_options?->map->value->all() ?? [];
+        $this->fillDetailsFrom($experience);
         $this->single_date = now($experience->timezone())->addWeek()->toDateString();
         $this->range_from = now($experience->timezone())->addDay()->toDateString();
         $this->range_to = now($experience->timezone())->addMonth()->toDateString();
@@ -103,17 +100,16 @@ class ManageExperience extends Component
             'price' => 'required|integer|min:1000',
             'duration_hours' => 'required|integer|min:1|max:24',
             'max_guests' => 'required|integer|min:1|max:50',
-            'dietary_options' => ['array'],
-            'dietary_options.*' => [Rule::enum(DietaryOption::class)],
             'cover' => ['nullable', ImageSize::forCollection('cover')],
-        ]);
+            ...$this->detailRules(),
+        ], $this->detailMessages());
 
         $this->experience->fill([
             ...collect($data)->only(self::REVIEWED_FIELDS)->all(),
             'price' => $data['price'],
             'duration_minutes' => $data['duration_hours'] * 60,
             'max_guests' => $data['max_guests'],
-            'dietary_options' => array_values(array_unique($data['dietary_options'])),
+            ...$this->detailAttributes(),
         ]);
 
         $needsReview = $this->cover !== null
@@ -224,7 +220,6 @@ class ManageExperience extends Component
     {
         return view('livewire.manage-experience', [
             'categories' => Category::orderBy('sort_order')->get(),
-            'dietaryOptions' => DietaryOption::cases(),
             'upcomingDates' => $this->experience->dates()->where('status', 'open')->where('starts_at', '>', now())->get(),
             'weekdayNames' => [1 => 'Lun', 2 => 'Mar', 3 => 'Mié', 4 => 'Jue', 5 => 'Vie', 6 => 'Sáb', 7 => 'Dom'],
         ]);

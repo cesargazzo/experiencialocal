@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\DietaryOption;
+use App\Enums\Difficulty;
+use App\Enums\ExperienceFeature;
 use App\Enums\ExperienceStatus;
 use App\Jobs\NotifyInterestedUsers;
 use App\Models\Concerns\Auditable;
@@ -18,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 #[Fillable([
     'host_profile_id', 'category_id', 'title', 'slug', 'type_label', 'summary', 'description', 'city', 'province_id',
     'country_code', 'price', 'currency', 'duration_minutes', 'max_guests', 'includes', 'cover_image_url', 'status', 'published_at',
-    'dietary_options', 'approved_at', 'approved_by', 'rejection_reason', 'paused_reason',
+    'dietary_options', 'difficulty', 'what_to_bring', 'min_age', 'features', 'approved_at', 'approved_by', 'rejection_reason', 'paused_reason',
 ])]
 class Experience extends Model
 {
@@ -34,6 +36,8 @@ class Experience extends Model
             'rating_avg' => 'decimal:2',
             'published_at' => 'datetime',
             'dietary_options' => AsEnumCollection::of(DietaryOption::class),
+            'difficulty' => Difficulty::class,
+            'features' => AsEnumCollection::of(ExperienceFeature::class),
             'approved_at' => 'datetime',
         ];
     }

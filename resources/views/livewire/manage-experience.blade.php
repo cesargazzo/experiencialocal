@@ -64,31 +64,20 @@
   </section>
 
   <section class="wizard__panel">
-    <h2>Precio, cupos y comida</h2>
-    <p>Estos cambios se aplican al momento. Las reservas que ya existen mantienen su precio.</p>
+    <h2>Precio, cupos y datos prácticos</h2>
+    <p>Estos cambios se aplican al momento, salvo "qué llevar", que se revisa. Las reservas que ya existen mantienen su precio.</p>
     <div class="grid-3">
       <div class="field"><label for="price">Precio por persona</label><input id="price" type="number" min="1000" step="500" wire:model="price">@error('price')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label for="max_guests">Cupos por fecha</label><input id="max_guests" type="number" min="1" max="50" wire:model="max_guests">@error('max_guests')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label for="duration_hours">Duración (horas)</label><input id="duration_hours" type="number" min="1" max="24" wire:model="duration_hours">@error('duration_hours')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
     </div>
-    <fieldset class="field" style="border:0;padding:0">
-      <legend style="font-weight:600">Opciones de comida</legend>
-      <span class="hint">Marcá solo lo que puedas garantizar.</span>
-      <div class="choice-grid">
-        @foreach ($dietaryOptions as $option)
-          <label class="choice">
-            <input type="checkbox" wire:model="dietary_options" value="{{ $option->value }}">
-            <span style="flex-direction:column;align-items:flex-start;gap:2px"><strong>{{ $option->label() }}</strong><small class="hint" style="margin:0">{{ $option->hint() }}</small></span>
-          </label>
-        @endforeach
-      </div>
-    </fieldset>
+    @include('livewire.partials.experience-details')
 
     <h2 style="margin-top:32px">Contenido</h2>
     <p>Si cambiás el texto, la categoría o la foto, la revisamos de nuevo @if ($experience->status === \App\Enums\ExperienceStatus::Published)<strong>y deja de verse hasta que la aprobemos</strong>@endif.</p>
     <div class="field"><label for="title">Título</label><input id="title" wire:model="title">@error('title')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
     <div class="grid-2">
-      <div class="field"><label for="category_id">Categoría</label><select id="category_id" wire:model="category_id">@foreach ($categories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach</select>@error('category_id')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+      <div class="field"><label for="category_id">Categoría</label><select id="category_id" wire:model.live="category_id">@foreach ($categories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach</select>@error('category_id')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label for="type_label">Tipo</label><input id="type_label" wire:model="type_label">@error('type_label')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
     </div>
     <div class="field">

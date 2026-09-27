@@ -61,7 +61,7 @@
       <p>Definí qué incluye, precio, fecha y cupos. Después podés agregar más fechas.</p>
       <div class="field"><label>Título</label><input wire:model="title" placeholder="Cociná empanadas con Marta en su patio">@error('title')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="grid-2">
-        <div class="field"><label>Categoría</label><select wire:model="category_id"><option value="">Elegí una</option>@foreach ($categories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach</select>@error('category_id')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
+        <div class="field"><label>Categoría</label><select wire:model.live="category_id"><option value="">Elegí una</option>@foreach ($categories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach</select>@error('category_id')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
         <div class="field"><label>Tipo</label><input wire:model="type_label" placeholder="Cocina regional, Paseo de medio día…">@error('type_label')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
         <div class="field"><label>Precio por persona</label><input type="number" min="1000" step="500" wire:model.live="price" placeholder="40000">
           @php $p = $plans->firstWhere('slug', $plan); @endphp
@@ -93,19 +93,7 @@
       </div>
       <div class="field"><label>Resumen (una línea)</label><input wire:model="summary" maxlength="200" placeholder="Empanadas, cabrito y sobremesa con recetas de familia.">@error('summary')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label>Descripción</label><textarea rows="4" wire:model="description" placeholder="Qué van a vivir, qué incluye, qué tienen que traer."></textarea>@error('description')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
-      <fieldset class="field" style="border:0;padding:0">
-        <legend style="font-weight:600">Opciones de comida</legend>
-        <span class="hint">Marcá solo lo que puedas garantizar. Si no hay comida, dejalo vacío.</span>
-        <div class="choice-grid">
-          @foreach ($dietaryOptions as $option)
-            <label class="choice">
-              <input type="checkbox" wire:model="dietary_options" value="{{ $option->value }}">
-              <span style="flex-direction:column;align-items:flex-start;gap:2px"><strong>{{ $option->label() }}</strong><small class="hint" style="margin:0">{{ $option->hint() }}</small></span>
-            </label>
-          @endforeach
-        </div>
-        @error('dietary_options.*')<span class="error" style="display:block">{{ $message }}</span>@enderror
-      </fieldset>
+      @include('livewire.partials.experience-details')
       <div class="wizard__actions"><button class="btn btn--ghost" type="button" wire:click="back">Volver</button><button class="btn btn--secondary" type="button" wire:click="next">Revisá <x-icon name="arrow-right" :size="18" class="icon--arrow" /></button></div>
     </section>
 
@@ -123,7 +111,10 @@
         <div><span>Categoría</span><strong>{{ $cat?->name }}</strong></div>
         <div><span>Precio por persona</span><strong>{{ money($price ?? 0) }}</strong></div>
         <div><span>Cupos</span><strong>{{ $max_guests }} personas</strong></div>
-        @if ($dietary_options)
+        @if ($difficulty)
+          <div><span>Dificultad</span><strong>{{ \App\Enums\Difficulty::tryFrom($difficulty)?->label() }}</strong></div>
+        @endif
+        @if ($dietary_options && $this->showsFoodOptions())
           <div><span>Opciones de comida</span><strong>{{ collect($dietary_options)->map(fn ($value) => \App\Enums\DietaryOption::tryFrom($value)?->label())->filter()->join(' · ') }}</strong></div>
         @endif
         <div><span>Primera fecha</span><strong>{{ \Carbon\Carbon::parse($first_date.' '.$first_time)->translatedFormat('D j M · H:i') }}</strong></div>

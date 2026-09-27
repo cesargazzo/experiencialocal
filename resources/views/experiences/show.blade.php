@@ -59,6 +59,16 @@
           <p class="notice">No la pudimos publicar todavía. Motivo: {{ $experience->rejection_reason }}</p>
         @endif
         <div class="detail-block"><h2>La experiencia</h2><p>{{ $experience->description }}</p></div>
+        @if ($experience->difficulty || $experience->what_to_bring || $experience->min_age || $experience->features?->isNotEmpty())
+          <div class="detail-block"><h2>Bueno saber</h2>
+            <ul class="menu-list">
+              @if ($experience->difficulty)<li><strong>Dificultad {{ Str::lower($experience->difficulty->label()) }}</strong><span>{{ $experience->difficulty->hint() }}</span></li>@endif
+              @if ($experience->what_to_bring)<li><strong>{{ $experience->difficulty ? 'Qué llevar y cómo vestirse' : 'Qué llevar' }}</strong><span>{{ $experience->what_to_bring }}</span></li>@endif
+              @if ($experience->min_age)<li><strong>Desde {{ $experience->min_age }} años</strong><span>Edad mínima para participar.</span></li>@endif
+              @foreach ($experience->features ?? [] as $feature)<li><strong>{{ $feature->label() }}</strong><span></span></li>@endforeach
+            </ul>
+          </div>
+        @endif
         @if ($experience->dietary_options?->isNotEmpty())
           <div class="detail-block"><h2>Opciones de comida</h2>
             <ul class="menu-list">@foreach ($experience->dietary_options as $option)<li><strong>{{ $option->label() }}</strong><span>{{ $option->hint() }}</span></li>@endforeach</ul>

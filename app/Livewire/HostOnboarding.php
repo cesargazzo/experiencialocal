@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
-use App\Enums\DietaryOption;
 use App\Enums\ExperienceStatus;
 use App\Enums\HostStatus;
 use App\Enums\VerificationLevel;
+use App\Livewire\Concerns\EditsExperienceDetails;
 use App\Models\Category;
 use App\Models\Country;
 use App\Models\Experience;
@@ -32,6 +32,7 @@ use Livewire\WithFileUploads;
 #[Title('Registro de anfitrión')]
 class HostOnboarding extends Component
 {
+    use EditsExperienceDetails;
     use WithFileUploads;
 
     /** Foto de perfil opcional; si ya tiene una, se conserva. */
@@ -75,9 +76,6 @@ class HostOnboarding extends Component
     public string $first_date = '';
 
     public string $first_time = '20:30';
-
-    /** @var list<string> Valores de DietaryOption que el anfitrión garantiza. */
-    public array $dietary_options = [];
 
     public ?Experience $created = null;
 
@@ -123,8 +121,7 @@ class HostOnboarding extends Component
                 'first_date' => 'required|date|after:today',
                 'first_time' => 'required|date_format:H:i',
                 'cover' => ['required', ...$this->imageRules('cover')],
-                'dietary_options' => ['array'],
-                'dietary_options.*' => [Rule::enum(DietaryOption::class)],
+                ...$this->detailRules(),
             ],
             default => [],
         };
@@ -140,7 +137,7 @@ class HostOnboarding extends Component
 
     public function next(): void
     {
-        $this->validate($this->rulesForStep($this->step));
+        $this->validate($this->rulesForStep($this->step), $this->detailMessages());
         $this->step++;
     }
 
@@ -152,7 +149,7 @@ class HostOnboarding extends Component
     public function publish(): void
     {
         $this->validate($this->rulesForStep(1));
-        $this->validate($this->rulesForStep(2));
+        $this->validate($this->rulesForStep(2), $this->detailMessages());
 
         $user = auth()->user();
         $plan = Plan::where('slug', $this->plan)->firstOrFail();
@@ -199,7 +196,7 @@ class HostOnboarding extends Component
                 'duration_minutes' => $this->duration_hours * 60,
                 'max_guests' => $this->max_guests,
                 'includes' => [],
-                'dietary_options' => array_values(array_unique($this->dietary_options)),
+                ...$this->detailAttributes(),
                 // Toda experiencia nueva pasa por la revisión de contenido antes de publicarse.
                 'status' => ExperienceStatus::InReview,
                 'published_at' => null,
@@ -237,7 +234,6 @@ class HostOnboarding extends Component
             'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(),
             'categories' => Category::orderBy('sort_order')->get(),
             'countries' => Country::active()->with('provinces')->orderBy('name')->get(),
-            'dietaryOptions' => DietaryOption::cases(),
         ]);
     }
 }

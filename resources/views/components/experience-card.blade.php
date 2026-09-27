@@ -16,8 +16,9 @@
     </div>
     <h3 class="card__title"><a href="{{ route('experiencias.show', $e) }}">{{ $e->title }}</a></h3>
     <p class="card__text">{{ $e->summary }}</p>
-    @if ($e->dietary_options?->isNotEmpty())
-      <p class="card__diet">{{ $e->dietary_options->map->label()->join(' · ') }}</p>
+    @php($tags = collect([$e->difficulty ? 'Dificultad '.Str::lower($e->difficulty->label()) : null])->merge($e->dietary_options?->map->label() ?? [])->filter())
+    @if ($tags->isNotEmpty())
+      <p class="card__diet">{{ $tags->join(' · ') }}</p>
     @endif
     <div class="card__foot">
       <div class="card__host"><x-avatar :user="$e->host->user" :size="32" /><span title="{{ $e->host->display_name }}">Con {{ Str::before($e->host->display_name.' ', ' ') }}</span><x-verification-badge :level="$e->host->user->verification_level" /></div>
