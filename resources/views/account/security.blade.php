@@ -102,6 +102,28 @@
           </form>
         @endif
       </section>
+
+      <section class="wizard__panel" id="tus-datos">
+        <h2>Tus datos personales</h2>
+        <p>Podés descargar todo lo que Tinku guarda de vos: tu perfil, reservas, opiniones, mensajes, términos aceptados y accesos recientes.</p>
+        <a class="btn btn--tertiary btn--sm" href="{{ route('cuenta.datos.descargar') }}"><x-icon name="copy" :size="16" /> Descargá tus datos</a>
+
+        <details class="danger-zone" @if ($errors->deletion->any()) open @endif>
+          <summary>Eliminar tu cuenta</summary>
+          <p>Borramos tus datos personales: nombre, contacto, documento, fotos, domicilio, intereses y avisos. Tus reservas pasadas, opiniones y mensajes quedan sin tu nombre. No se puede deshacer.</p>
+          <form method="post" action="{{ route('cuenta.eliminar') }}">
+            @csrf
+            @method('delete')
+            <div class="field" style="max-width:360px"><label for="del_password">Tu contraseña</label><x-password-input name="password" id="del_password" autocomplete="current-password" /></div>
+            @if ($user->hasTwoFactor())
+              <div class="field" style="max-width:360px"><label for="del_code">Código de tu app</label><input id="del_code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" required></div>
+            @endif
+            <label class="toggle-row"><input type="checkbox" name="confirm" value="1" required><span>Entiendo que se eliminan mis datos y no se puede deshacer.</span></label>
+            @foreach ($errors->deletion->all() as $problem)<span class="error" style="display:block">{{ $problem }}</span>@endforeach
+            <div class="wizard__actions"><span></span><button class="btn btn--danger" type="submit">Eliminá mi cuenta</button></div>
+          </form>
+        </details>
+      </section>
     @endunless
   </main>
 </x-layout>

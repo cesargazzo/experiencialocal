@@ -5,6 +5,7 @@ use App\Http\Controllers\Account\InterestController;
 use App\Http\Controllers\Account\InvitationController;
 use App\Http\Controllers\Account\NotificationController;
 use App\Http\Controllers\Account\PasswordController;
+use App\Http\Controllers\Account\PersonalDataController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\TwoFactorController;
 use App\Http\Controllers\Admin\AuditLogController;
@@ -70,6 +71,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/cuenta/seguridad/doble-factor/confirmar', [TwoFactorController::class, 'confirm'])->name('cuenta.2fa.confirm');
     Route::post('/cuenta/seguridad/doble-factor/codigos', [TwoFactorController::class, 'recoveryCodes'])->name('cuenta.2fa.codes');
     Route::delete('/cuenta/seguridad/doble-factor', [TwoFactorController::class, 'destroy'])->name('cuenta.2fa.destroy');
+    Route::get('/cuenta/mis-datos', [PersonalDataController::class, 'export'])->middleware('throttle:5,1')->name('cuenta.datos.descargar');
+    Route::delete('/cuenta', [PersonalDataController::class, 'destroy'])->name('cuenta.eliminar');
     Route::get('/cuenta/avisos', [NotificationController::class, 'index'])->name('cuenta.avisos');
     Route::get('/mensajes', [MessageController::class, 'index'])->name('mensajes');
     Route::get('/mensajes/{conversation}', [MessageController::class, 'show'])->name('mensajes.show');
