@@ -24,6 +24,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Registro de seguridad
+    |--------------------------------------------------------------------------
+    |
+    | Días que se guardan los eventos. La tarea programada model:prune borra
+    | los más viejos todos los días.
+    |
+    */
+
+    'security_log_days' => (int) env('TINKU_SECURITY_LOG_DAYS', 180),
+
+    /*
+    |--------------------------------------------------------------------------
     | Indexación en buscadores
     |--------------------------------------------------------------------------
     |

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Services\SecurityLog;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 #[Description('Da o quita permiso de administración. Al darlo genera una contraseña de única vez que hay que cambiar en el primer ingreso.')]
 class MakeAdmin extends Command
 {
-    public function handle(): int
+    public function handle(SecurityLog $securityLog): int
     {
         $email = strtolower(trim($this->argument('email')));
 
@@ -31,6 +32,7 @@ class MakeAdmin extends Command
                 return self::SUCCESS;
             }
             $user->forceFill(['is_admin' => false])->save();
+            $securityLog->record('admin.revoked', $user, ['via' => 'consola'], $email, 'warning');
             $this->components->info("{$email} ya no es administradora.");
 
             return self::SUCCESS;
@@ -48,6 +50,8 @@ class MakeAdmin extends Command
 
         $user->forceFill(['is_admin' => true])->save();
         $temporary = $user->issueTemporaryPassword();
+        $securityLog->record('admin.granted', $user, ['via' => 'consola'], $email, 'warning');
+        $securityLog->record('password.temporary_issued', $user, ['expires_at' => $user->password_expires_at->toIso8601String()], $email, 'warning');
 
         $this->components->info("{$email} es administradora.");
         $this->components->twoColumnDetail('Contraseña de única vez', $temporary);

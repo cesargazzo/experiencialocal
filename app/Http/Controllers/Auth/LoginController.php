@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\SecurityLog;
 use App\Support\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, SecurityLog $securityLog): RedirectResponse
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
@@ -30,6 +31,7 @@ class LoginController extends Controller
 
         if (RateLimiter::tooManyAttempts($throttleKey, $policy->maxLoginAttempts)) {
             $minutes = (int) ceil(RateLimiter::availableIn($throttleKey) / 60);
+            $securityLog->record('login.locked', null, ['minutes_left' => $minutes], $credentials['email'], 'danger');
 
             return back()
                 ->withErrors(['email' => "Hubo demasiados intentos. Probá de nuevo en {$minutes} ".($minutes === 1 ? 'minuto.' : 'minutos.')])
@@ -38,11 +40,13 @@ class LoginController extends Controller
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             RateLimiter::hit($throttleKey, $policy->lockoutMinutes * 60);
+            $securityLog->record('login.failed', null, ['attempts' => RateLimiter::attempts($throttleKey)], $credentials['email'], 'warning');
 
             return back()->withErrors(['email' => 'El email o la contraseña no coinciden.'])->onlyInput('email');
         }
 
         if (Auth::user()->hasExpiredPassword()) {
+            $securityLog->record('login.failed', Auth::user(), ['reason' => 'contraseña de única vez vencida'], $credentials['email'], 'warning');
             Auth::logout();
 
             return back()->withErrors(['email' => 'La contraseña de única vez venció. Pedí una nueva.'])->onlyInput('email');
@@ -50,12 +54,14 @@ class LoginController extends Controller
 
         RateLimiter::clear($throttleKey);
         $request->session()->regenerate();
+        $securityLog->record('login.succeeded', Auth::user(), ['remember' => $request->boolean('remember')], $credentials['email']);
 
         return redirect()->intended(route('home'))->with('status', 'Hola de nuevo, '.Str::before(Auth::user()->name, ' ').'.');
     }
 
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, SecurityLog $securityLog): RedirectResponse
     {
+        $securityLog->record('logout', $request->user());
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

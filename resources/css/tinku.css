@@ -406,6 +406,20 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .notice { font-size: 15px; line-height: 22px; color: var(--tinta); background: var(--superficie-calida); padding: 12px 14px; border-radius: var(--radio-sm); }
 .notice a { color: var(--texto-petroleo); text-decoration: underline; }
 
+/* ---------- Tablas de administración ---------- */
+.table-wrap { overflow-x: auto; margin-top: 16px; }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+.table th { text-align: left; font-weight: 600; color: var(--tinta-suave); padding: 10px 12px; border-bottom: 1.5px solid var(--linea); white-space: nowrap; }
+.table td { padding: 12px; border-bottom: 1px solid var(--linea); vertical-align: top; }
+.table code, .pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+.pre { background: var(--superficie-calida); border-radius: var(--radio-sm); padding: 10px; white-space: pre-wrap; word-break: break-word; margin: 8px 0; }
+.badge--sev-info { background: var(--superficie-calida); color: var(--tinta); box-shadow: inset 0 0 0 1px var(--linea); }
+.badge--sev-warning { background: var(--naranja); color: var(--tinta-profunda); }
+.badge--sev-danger { background: var(--texto-coral); color: #FFFFFF; }
+.filters { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 0 12px; align-items: end; }
+.filters__actions { display: flex; gap: 8px; margin-top: var(--esp-3); }
+@media (max-width: 720px) { .filters { grid-template-columns: 1fr; } }
+
 /* ---------- Asistente de pasos ---------- */
 .wizard { max-width: 760px; margin: 0 auto; padding: 48px 0 104px; }
 .wizard__progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 28px 0 36px; }

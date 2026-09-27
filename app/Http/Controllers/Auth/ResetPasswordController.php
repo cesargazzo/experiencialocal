@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\SecurityLog;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class ResetPasswordController extends Controller
         return view('auth.reset-password', ['token' => $token, 'email' => $request->query('email')]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, SecurityLog $securityLog): RedirectResponse
     {
         $request->validate([
             'token' => ['required'],
@@ -29,8 +30,9 @@ class ResetPasswordController extends Controller
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user, string $password): void {
+            function (User $user, string $password) use ($securityLog): void {
                 $user->changePassword($password);
+                $securityLog->record('password.reset', $user, [], $user->email);
                 $user->forceFill(['remember_token' => Str::random(60)])->save();
 
                 event(new PasswordReset($user));
@@ -38,6 +40,8 @@ class ResetPasswordController extends Controller
         );
 
         if ($status !== Password::PASSWORD_RESET) {
+            $securityLog->record('password.reset_failed', null, ['result' => $status], $request->string('email')->toString(), 'warning');
+
             return back()
                 ->withInput($request->only('email'))
                 ->withErrors(['email' => 'El enlace no es válido o venció. Pedí uno nuevo.']);

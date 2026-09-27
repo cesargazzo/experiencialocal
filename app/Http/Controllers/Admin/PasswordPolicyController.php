@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Services\SecurityLog;
 use App\Support\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class PasswordPolicyController extends Controller
         return view('admin.password-policy', ['policy' => PasswordPolicy::current()]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request, SecurityLog $securityLog): RedirectResponse
     {
         $data = $request->validate([
             'min_length' => ['required', 'integer', 'min:'.PasswordPolicy::ABSOLUTE_MIN_LENGTH, 'max:64'],
@@ -28,7 +29,10 @@ class PasswordPolicyController extends Controller
             $data[$flag] = $request->boolean($flag);
         }
 
-        Setting::store(PasswordPolicy::SETTING_KEY, PasswordPolicy::fromArray($data)->toArray(), $request->user());
+        $before = PasswordPolicy::current()->toArray();
+        $after = PasswordPolicy::fromArray($data)->toArray();
+        Setting::store(PasswordPolicy::SETTING_KEY, $after, $request->user());
+        $securityLog->record('policy.updated', $request->user(), ['antes' => $before, 'después' => $after], null, 'warning');
 
         return back()->with('status', 'Guardamos la política de contraseñas. Aplica a las contraseñas nuevas.');
     }

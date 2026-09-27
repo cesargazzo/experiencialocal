@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\VerificationType;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\SecurityLog;
 use App\Services\VerificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class RegisterController extends Controller
         return view('auth.register');
     }
 
-    public function store(Request $request, VerificationService $verifications): RedirectResponse
+    public function store(Request $request, VerificationService $verifications, SecurityLog $securityLog): RedirectResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
@@ -34,6 +35,7 @@ class RegisterController extends Controller
         ]);
 
         $user = User::create([...$data, 'country_code' => $data['nationality_code']]);
+        $securityLog->record('register', $user, ['nationality' => $user->nationality_code], $user->email);
 
         // Nivel 1 arranca acá: se envían los códigos de email y teléfono.
         $verifications->submit($user, VerificationType::Email);
