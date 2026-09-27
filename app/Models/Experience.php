@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ExperienceStatus;
 use App\Jobs\NotifyInterestedUsers;
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 ])]
 class Experience extends Model
 {
+    use Auditable;
     use HasFactory;
 
     protected function casts(): array

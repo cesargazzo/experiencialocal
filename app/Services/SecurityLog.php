@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\SecurityEvent;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
@@ -25,7 +26,8 @@ class SecurityLog
         try {
             $request = request();
 
-            SecurityEvent::create([
+            // Punto de guardado: un error acá no invalida la transacción en curso.
+            DB::transaction(fn () => SecurityEvent::create([
                 'type' => $type,
                 'severity' => $severity,
                 'user_id' => $user?->getKey() ?? $request->user()?->getKey(),
@@ -35,7 +37,7 @@ class SecurityLog
                 'method' => $request->method(),
                 'path' => Str::limit($this->safePath($request->path()), 500, ''),
                 'metadata' => $metadata ?: null,
-            ]);
+            ]));
         } catch (Throwable $e) {
             Log::warning('No se pudo guardar el evento de seguridad', ['type' => $type, 'error' => $e->getMessage()]);
         }

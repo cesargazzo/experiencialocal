@@ -48,6 +48,9 @@ return [
 
     'security_log_days' => (int) env('TINKU_SECURITY_LOG_DAYS', 180),
 
+    // Días que se guarda la auditoría de cambios.
+    'audit_log_days' => (int) env('TINKU_AUDIT_LOG_DAYS', 730),
+
     /*
     |--------------------------------------------------------------------------
     | Invitaciones

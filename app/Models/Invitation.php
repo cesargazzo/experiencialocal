@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 #[Fillable(['inviter_id', 'channel', 'name', 'email', 'token_hash', 'expires_at', 'accepted_by', 'accepted_at'])]
 class Invitation extends Model
 {
+    use Auditable;
+
     /** Token en claro: solo existe en memoria justo después de crearla. */
     public ?string $plainToken = null;
 

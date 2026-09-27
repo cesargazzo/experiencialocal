@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['code', 'name', 'currency', 'default_timezone', 'phone_prefix', 'is_active'])]
 class Country extends Model
 {
+    use Auditable;
+
     protected $primaryKey = 'code';
 
     protected $keyType = 'string';

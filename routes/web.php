@@ -4,6 +4,7 @@ use App\Http\Controllers\Account\InterestController;
 use App\Http\Controllers\Account\InvitationController;
 use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Account\ProfileController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\PasswordPolicyController;
 use App\Http\Controllers\Admin\PlatformSettingsController;
 use App\Http\Controllers\Admin\SecurityLogController;
@@ -64,6 +65,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/verificaciones/{verification}/rechazar', [AdminVerificationController::class, 'reject'])->name('verificaciones.rechazar');
         Route::get('/contrasenas', [PasswordPolicyController::class, 'edit'])->name('contrasenas');
         Route::get('/seguridad', [SecurityLogController::class, 'index'])->name('seguridad');
+        Route::get('/auditoria', [AuditLogController::class, 'index'])->name('auditoria');
         Route::get('/configuracion', [PlatformSettingsController::class, 'edit'])->name('configuracion');
         Route::put('/configuracion', [PlatformSettingsController::class, 'update'])->name('configuracion.update');
         Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios');

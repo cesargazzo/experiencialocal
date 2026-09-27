@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['booking_id', 'experience_id', 'user_id', 'rating', 'body', 'host_reply', 'published_at'])]
 class Review extends Model
 {
+    use Auditable;
     use HasFactory;
 
     protected function casts(): array

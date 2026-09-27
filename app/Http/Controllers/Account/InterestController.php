@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Category;
 use App\Models\Country;
 use Illuminate\Http\RedirectResponse;
@@ -35,8 +36,13 @@ class InterestController extends Controller
         ]);
 
         $user = $request->user();
+        $before = ['categorías' => $user->interestedCategories()->pluck('categories.id')->sort()->values()->all(), 'provincias' => $user->interestedProvinces()->pluck('provinces.id')->sort()->values()->all()];
         $user->interestedCategories()->sync($data['categories'] ?? []);
         $user->interestedProvinces()->sync($data['provinces'] ?? []);
+        $after = ['categorías' => collect($data['categories'] ?? [])->map(fn ($id) => (int) $id)->sort()->values()->all(), 'provincias' => collect($data['provinces'] ?? [])->map(fn ($id) => (int) $id)->sort()->values()->all()];
+        if ($before !== $after) {
+            AuditLog::record($user, 'interests.updated', $before, $after);
+        }
         $user->forceFill(['interest_alerts' => $request->boolean('interest_alerts')])->save();
 
         return back()->with('status', $user->interest_alerts && $user->hasInterests()

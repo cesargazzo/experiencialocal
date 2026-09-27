@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\VerificationLevel;
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\SecurityEvent;
 use App\Models\User;
 use App\Services\SecurityLog;
@@ -46,6 +47,10 @@ class UserController extends Controller
             'user' => $user,
             'events' => SecurityEvent::query()->where('user_id', $user->id)->orWhere('email', $user->email)->latest('created_at')->limit(30)->get(),
             'levels' => VerificationLevel::cases(),
+            'auditLogs' => AuditLog::query()->with('user')
+                ->where(fn ($q) => $q->where('auditable_type', User::class)->where('auditable_id', (string) $user->id))
+                ->orWhere('user_id', $user->id)
+                ->latest('created_at')->latest('id')->limit(20)->get(),
         ]);
     }
 

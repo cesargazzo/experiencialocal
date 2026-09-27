@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['slug', 'name', 'tagline', 'monthly_price', 'currency', 'commission_rate', 'max_experiences', 'features', 'is_featured', 'is_active', 'sort_order'])]
 class Plan extends Model
 {
+    use Auditable;
     use HasFactory;
 
     protected function casts(): array

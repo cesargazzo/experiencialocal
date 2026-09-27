@@ -91,6 +91,12 @@
       </div>
     </section>
 
+    <section class="wizard__panel">
+      <h2>Cambios</h2>
+      <p>De esta cuenta y hechos por esta cuenta. <a class="link" href="{{ route('admin.auditoria', ['tipo' => \App\Models\User::class, 'id' => $user->id]) }}">Ver todos</a></p>
+      @include('admin.partials.audit-table', ['logs' => $auditLogs])
+    </section>
+
     @unless ($user->is(auth()->user()))
       <section class="wizard__panel">
         <h2>{{ $user->isSuspended() ? 'Reactivar la cuenta' : 'Suspender la cuenta' }}</h2>

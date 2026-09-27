@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ExperienceStatus;
 use App\Jobs\NotifyInterestedUsers;
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ use Illuminate\Support\Carbon;
 #[Fillable(['experience_id', 'starts_at', 'ends_at', 'capacity', 'booked_count', 'status'])]
 class ExperienceDate extends Model
 {
+    use Auditable;
     use HasFactory;
 
     protected function casts(): array

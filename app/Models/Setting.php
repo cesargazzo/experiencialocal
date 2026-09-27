@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Cache;
 #[Fillable(['key', 'value', 'updated_by'])]
 class Setting extends Model
 {
+    use Auditable;
+
     protected $primaryKey = 'key';
 
     protected $keyType = 'string';

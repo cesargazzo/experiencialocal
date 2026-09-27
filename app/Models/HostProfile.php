@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\HostStatus;
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class HostProfile extends Model
 {
+    use Auditable;
     use HasFactory;
+
+    /** @var list<string> */
+    protected array $auditMasked = ['address', 'payout_account'];
 
     protected function casts(): array
     {

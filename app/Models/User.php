@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\VerificationLevel;
+use App\Models\Concerns\Auditable;
 use App\Notifications\ResetPasswordNotification;
 use App\Support\PasswordPolicy;
 use Database\Factories\UserFactory;
@@ -26,6 +27,8 @@ use Illuminate\Support\Str;
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    use Auditable;
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 

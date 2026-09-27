@@ -14,7 +14,8 @@ class MakeAdminCommandTest extends TestCase
 
     private function temporaryPasswordFrom(string $output): string
     {
-        preg_match('/Contraseña de única vez\s*\.*\s*(\S+)/u', $output, $match);
+        // La contraseña puede empezar con un punto: se toma lo que sigue al espacio después del relleno.
+        preg_match('/Contraseña de única vez\s+\.+\s+(\S+)/u', $output, $match);
 
         return $match[1] ?? '';
     }

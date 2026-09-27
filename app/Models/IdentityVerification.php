@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\VerificationProvider;
 use App\Enums\VerificationStatus;
 use App\Enums\VerificationType;
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class IdentityVerification extends Model
 {
+    use Auditable;
     use HasFactory;
+
+    /** @var list<string> */
+    protected array $auditExclude = ['result'];
+
+    /** @var list<string> */
+    protected array $auditMasked = ['document_hash'];
 
     protected function casts(): array
     {
