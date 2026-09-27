@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\BookingStatus;
 use App\Exceptions\BookingException;
+use App\Models\Booking;
 use App\Models\Experience;
 use App\Models\ExperienceDate;
 use App\Models\User;
@@ -85,5 +86,24 @@ class AccountBookingsTest extends TestCase
 
         $this->actingAs(User::factory()->create())->post(route('cuenta.reservas.cancelar', $booking))->assertNotFound();
         $this->assertSame(BookingStatus::Requested, $booking->fresh()->status);
+    }
+
+    #[Test]
+    public function the_cleanup_keeps_one_booking_per_person_and_date_and_frees_the_rest(): void
+    {
+        $date = ExperienceDate::factory()->create(['starts_at' => now()->addWeek(), 'capacity' => 10, 'booked_count' => 6]);
+        $guest = User::factory()->create();
+        $base = ['experience_id' => $date->experience_id, 'experience_date_id' => $date->id, 'user_id' => $guest->id, 'guests' => 2, 'unit_price' => 1000, 'subtotal' => 2000,
+            'service_fee_rate' => 0.08, 'service_fee' => 160, 'total' => 2160, 'commission_rate' => 0.18, 'commission_amount' => 360, 'host_payout' => 1640, 'currency' => 'ARS', 'status' => 'requested'];
+        $kept = Booking::create($base);
+        $duplicates = [Booking::create($base), Booking::create($base)];
+
+        (require database_path('migrations/2026_09_27_045042_cancel_duplicate_active_bookings.php'))->up();
+
+        $this->assertSame(BookingStatus::Requested, $kept->fresh()->status);
+        foreach ($duplicates as $duplicate) {
+            $this->assertSame(BookingStatus::Cancelled, $duplicate->fresh()->status);
+        }
+        $this->assertSame(2, $date->fresh()->booked_count);
     }
 }
