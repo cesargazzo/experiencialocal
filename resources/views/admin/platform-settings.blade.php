@@ -18,6 +18,15 @@
         @if (! $settings->smsVerification && $withoutConfirmedPhone > 0)
           <p class="notice" style="margin-top:16px">Si lo encendés, {{ $withoutConfirmedPhone }} {{ $withoutConfirmedPhone === 1 ? 'cuenta baja' : 'cuentas bajan' }} al nivel 0 hasta confirmar su teléfono.</p>
         @endif
+
+        <h2 style="margin-top:32px">Mails de avisos</h2>
+        <label class="toggle-row">
+          <input type="checkbox" name="notification_emails" value="1" @checked($settings->notificationEmails)>
+          <span>
+            <strong>Mandar por mail los avisos</strong>
+            <small>Reservas, mensajes nuevos, aprobaciones, opiniones, recordatorios y coincidencias con intereses. Apagado: quedan solo en la campanita de cada cuenta. Los códigos para confirmar el email y los de recuperar la contraseña se mandan siempre.</small>
+          </span>
+        </label>
         <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit">Guardá los cambios</button></div>
       </form>
     </section>

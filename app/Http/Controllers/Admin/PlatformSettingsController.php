@@ -34,7 +34,10 @@ class PlatformSettingsController extends Controller
     public function update(Request $request, VerificationService $verifications, SecurityLog $securityLog): RedirectResponse
     {
         $before = PlatformSettings::current();
-        $after = new PlatformSettings(smsVerification: $request->boolean('sms_verification'));
+        $after = new PlatformSettings(
+            smsVerification: $request->boolean('sms_verification'),
+            notificationEmails: $request->boolean('notification_emails'),
+        );
 
         Setting::store(PlatformSettings::SETTING_KEY, $after->toArray(), $request->user());
 

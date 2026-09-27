@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Booking;
+use App\Notifications\Concerns\MailsWhenEnabled;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,6 +15,7 @@ use Illuminate\Notifications\Notification;
  */
 class BookingUpdatedNotification extends Notification implements ShouldQueue
 {
+    use MailsWhenEnabled;
     use Queueable;
 
     public const REQUESTED = 'requested';
@@ -30,24 +32,6 @@ class BookingUpdatedNotification extends Notification implements ShouldQueue
         public readonly Booking $booking,
         public readonly string $event,
     ) {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * El aviso en Tinku se guarda al momento; el mail sale por la cola.
-     *
-     * @return array<string, string>
-     */
-    public function viaConnections(): array
-    {
-        return ['database' => 'sync'];
-    }
 
     public function toMail(object $notifiable): MailMessage
     {

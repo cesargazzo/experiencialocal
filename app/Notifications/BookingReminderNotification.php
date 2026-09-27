@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Booking;
+use App\Notifications\Concerns\MailsWhenEnabled;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,28 +15,13 @@ use Illuminate\Notifications\Notification;
  */
 class BookingReminderNotification extends Notification implements ShouldQueue
 {
+    use MailsWhenEnabled;
     use Queueable;
 
     public function __construct(
         public readonly Booking $booking,
         public readonly bool $forHost = false,
     ) {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public function viaConnections(): array
-    {
-        return ['database' => 'sync'];
-    }
 
     public function toMail(object $notifiable): MailMessage
     {

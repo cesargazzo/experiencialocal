@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Experience;
 use App\Models\ExperienceDate;
+use App\Notifications\Concerns\MailsWhenEnabled;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,6 +15,7 @@ use Illuminate\Notifications\Notification;
  */
 class ExperienceMatchNotification extends Notification implements ShouldQueue
 {
+    use MailsWhenEnabled;
     use Queueable;
 
     public function __construct(
@@ -21,24 +23,6 @@ class ExperienceMatchNotification extends Notification implements ShouldQueue
         public readonly ExperienceDate $nextDate,
         public readonly string $reason = 'published',
     ) {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * El aviso en Tinku se guarda al momento; el mail sale por la cola.
-     *
-     * @return array<string, string>
-     */
-    public function viaConnections(): array
-    {
-        return ['database' => 'sync'];
-    }
 
     /**
      * @return array{title: string, body: string, url: string, icon: string}

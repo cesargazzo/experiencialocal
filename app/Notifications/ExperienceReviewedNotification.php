@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Enums\ExperienceStatus;
 use App\Models\Experience;
+use App\Notifications\Concerns\MailsWhenEnabled;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,6 +15,7 @@ use Illuminate\Notifications\Notification;
  */
 class ExperienceReviewedNotification extends Notification implements ShouldQueue
 {
+    use MailsWhenEnabled;
     use Queueable;
 
     public const APPROVED = 'approved';
@@ -28,24 +30,6 @@ class ExperienceReviewedNotification extends Notification implements ShouldQueue
         public readonly Experience $experience,
         public readonly string $outcome,
     ) {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * El aviso en Tinku se guarda al momento; el mail sale por la cola.
-     *
-     * @return array<string, string>
-     */
-    public function viaConnections(): array
-    {
-        return ['database' => 'sync'];
-    }
 
     /**
      * @return array{title: string, body: string, url: string, icon: string}

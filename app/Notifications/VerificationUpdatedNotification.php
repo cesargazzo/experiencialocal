@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Enums\VerificationLevel;
 use App\Enums\VerificationType;
+use App\Notifications\Concerns\MailsWhenEnabled;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -15,6 +16,7 @@ use Illuminate\Notifications\Notification;
  */
 class VerificationUpdatedNotification extends Notification implements ShouldQueue
 {
+    use MailsWhenEnabled;
     use Queueable;
 
     public function __construct(
@@ -31,24 +33,6 @@ class VerificationUpdatedNotification extends Notification implements ShouldQueu
     public static function rejected(VerificationLevel $level, VerificationType $type, string $reason): self
     {
         return new self($level, $type, $reason);
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * El aviso en Tinku se guarda al momento; el mail sale por la cola.
-     *
-     * @return array<string, string>
-     */
-    public function viaConnections(): array
-    {
-        return ['database' => 'sync'];
     }
 
     public function toMail(object $notifiable): MailMessage

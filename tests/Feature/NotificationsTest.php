@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Experience;
 use App\Models\User;
+use App\Notifications\ExperienceReviewedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -40,5 +42,22 @@ class NotificationsTest extends TestCase
         $this->actingAs(User::factory()->create())->get(route('cuenta.avisos'))
             ->assertOk()
             ->assertSee('No tenés avisos todavía');
+    }
+
+    #[Test]
+    public function notice_emails_are_off_by_default_and_the_admin_can_turn_them_on(): void
+    {
+        Mail::fake();
+        $experience = Experience::factory()->inReview()->create();
+        $host = $experience->host->user;
+        $admin = User::factory()->admin()->create();
+
+        $notification = new ExperienceReviewedNotification($experience, ExperienceReviewedNotification::APPROVED);
+        $this->assertSame(['database'], $notification->via($host), 'Por defecto no se mandan mails de avisos.');
+
+        $this->actingAs($admin)->get(route('admin.configuracion'))->assertSee('Mandar por mail los avisos');
+        $this->actingAs($admin)->put(route('admin.configuracion.update'), ['notification_emails' => '1'])->assertSessionHasNoErrors();
+
+        $this->assertSame(['mail', 'database'], $notification->via($host));
     }
 }

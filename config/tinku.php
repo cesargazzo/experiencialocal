@@ -34,6 +34,8 @@ return [
 
     'features' => [
         'sms_verification' => (bool) env('TINKU_SMS_VERIFICATION', false),
+        // Mails de avisos (reservas, mensajes, aprobaciones…). Apagado: quedan solo en la campanita.
+        'notification_emails' => (bool) env('TINKU_NOTIFICATION_EMAILS', false),
     ],
 
     /*
