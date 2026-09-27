@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ExperienceController as AdminExperienceController
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\Admin\PasswordPolicyController;
 use App\Http\Controllers\Admin\PlatformSettingsController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SecurityLogController;
 use App\Http\Controllers\Admin\TermsController as AdminTermsController;
 use App\Http\Controllers\Admin\UserController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HostBookingController;
 use App\Http\Controllers\HostDashboardController;
 use App\Http\Controllers\InvitationAcceptController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\VerificationController;
@@ -60,6 +62,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/cuenta/seguridad', [PasswordController::class, 'edit'])->name('cuenta.seguridad');
     Route::put('/cuenta/seguridad', [PasswordController::class, 'update'])->name('cuenta.seguridad.update');
     Route::get('/cuenta/avisos', [NotificationController::class, 'index'])->name('cuenta.avisos');
+    Route::get('/mensajes', [MessageController::class, 'index'])->name('mensajes');
+    Route::get('/mensajes/{conversation}', [MessageController::class, 'show'])->name('mensajes.show');
+    Route::get('/experiencias/{experience}/escribir', [MessageController::class, 'prompt'])->name('mensajes.escribir');
+    Route::post('/experiencias/{experience}/consulta', [MessageController::class, 'start'])->middleware('throttle:20,1')->name('mensajes.iniciar');
     Route::get('/cuenta/reservas', [AccountBookingController::class, 'index'])->name('cuenta.reservas');
     Route::post('/cuenta/reservas/{booking}/cancelar', [AccountBookingController::class, 'cancel'])->name('cuenta.reservas.cancelar');
     Route::get('/cuenta/intereses', [InterestController::class, 'edit'])->name('cuenta.intereses');
@@ -92,6 +98,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/experiencias/{experience}/reactivar', [AdminExperienceController::class, 'resume'])->name('experiencias.reactivar');
         Route::post('/experiencias/{experience}/aprobar', [AdminExperienceController::class, 'approve'])->name('experiencias.aprobar');
         Route::post('/experiencias/{experience}/rechazar', [AdminExperienceController::class, 'reject'])->name('experiencias.rechazar');
+        Route::get('/denuncias', [ReportController::class, 'index'])->name('denuncias');
+        Route::post('/denuncias/{message}/descartar', [ReportController::class, 'dismiss'])->name('denuncias.descartar');
         Route::get('/terminos', [AdminTermsController::class, 'index'])->name('terminos');
         Route::get('/terminos/nueva', [AdminTermsController::class, 'create'])->name('terminos.create');
         Route::post('/terminos', [AdminTermsController::class, 'store'])->name('terminos.store');

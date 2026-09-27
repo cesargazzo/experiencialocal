@@ -698,3 +698,23 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .field-group > legend ~ * { clear: both; }
 .field-group > legend + .hint { display: block; }
 .field label .hint { font-size: 13px; line-height: 18px; font-weight: 600; }
+
+/* Mensajes */
+.conversation-row { display: grid; grid-template-columns: 44px 1fr auto; gap: 14px; align-items: start; padding: 14px 10px; border-top: 1px solid var(--linea); color: inherit; text-decoration: none; border-radius: var(--radio-sm); }
+.conversation-row:first-child { border-top: 0; }
+.conversation-row:hover { background: var(--superficie-calida); }
+.conversation-row.is-unread { background: var(--superficie-calida); box-shadow: inset 3px 0 0 var(--coral); }
+.conversation-row__main { display: grid; gap: 2px; min-width: 0; }
+.conversation-row__preview { font-size: 15px; color: var(--tinta-suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conversation-row.is-unread .conversation-row__preview { color: var(--tinta); font-weight: 600; }
+.conversation-row__when { white-space: nowrap; }
+.thread__messages { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; max-height: 60vh; overflow-y: auto; padding: 4px; }
+.bubble { align-self: flex-start; max-width: 78%; padding: 10px 14px; border-radius: 16px 16px 16px 4px; background: var(--superficie-calida); box-shadow: inset 0 0 0 1px var(--linea); }
+.bubble--mine { align-self: flex-end; border-radius: 16px 16px 4px 16px; background: var(--petroleo); color: var(--en-petroleo); box-shadow: none; }
+.bubble__text { margin: 0; white-space: pre-line; word-break: break-word; font-size: 16px; line-height: 23px; }
+.bubble__meta { display: block; margin-top: 4px; font-size: 12px; line-height: 16px; opacity: .75; }
+.bubble__report { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.link-button { border: 0; padding: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+.thread__form textarea { width: 100%; border: 1.5px solid var(--linea); border-radius: var(--radio-sm); padding: 12px 14px; font: 400 16px/22px var(--font-texto); }
+.thread__form textarea:focus { outline: 3px solid var(--foco); outline-offset: 2px; border-color: var(--petroleo); }
+.notice .icon { display: inline-block; vertical-align: -3px; margin-right: 4px; }

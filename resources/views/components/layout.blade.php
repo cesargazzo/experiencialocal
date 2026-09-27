@@ -108,6 +108,11 @@
           @else
             <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">Quiero ser anfitrión</a>
           @endif
+          @php($unreadConversations = \App\Models\Conversation::unreadCountFor(auth()->user()))
+          <a class="bell" href="{{ route('mensajes') }}" aria-label="Mensajes{{ $unreadConversations ? ': '.$unreadConversations.' sin leer' : '' }}">
+            <x-icon name="envelope-simple" :size="22" />
+            @if ($unreadConversations)<span class="bell__count">{{ $unreadConversations > 9 ? '9+' : $unreadConversations }}</span>@endif
+          </a>
           @php($unreadNotifications = auth()->user()->unreadNotifications()->count())
           <a class="bell" href="{{ route('cuenta.avisos') }}" aria-label="Avisos{{ $unreadNotifications ? ': '.$unreadNotifications.' sin leer' : '' }}">
             <x-icon name="bell" :size="22" />
