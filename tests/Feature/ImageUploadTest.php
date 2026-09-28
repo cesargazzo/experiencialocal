@@ -163,4 +163,27 @@ class ImageUploadTest extends TestCase
         $this->assertSame('failed', $media->fresh()->status);
         $this->assertNull($user->fresh()->avatar);
     }
+
+    #[Test]
+    public function scripts_disguised_as_images_never_reach_the_temporary_folder(): void
+    {
+        $user = User::factory()->create();
+        $svg = UploadedFile::fake()->createWithContent('foto.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
+        $php = UploadedFile::fake()->createWithContent('foto.jpg.php', '<?php system($_GET["c"]);');
+
+        foreach ([$svg, $php] as $file) {
+            Livewire::actingAs($user)->test(ProfilePhoto::class)
+                ->set('photo', $file)
+                ->assertHasErrors(['photo' => 'La foto tiene que ser JPG, PNG o WebP. Si es del iPhone (HEIC), exportala como JPG.']);
+        }
+
+        $this->assertSame([], Storage::disk('local')->allFiles('livewire-tmp'));
+        $this->assertNull($user->fresh()->avatar);
+    }
+
+    #[Test]
+    public function private_originals_have_no_public_route(): void
+    {
+        $this->assertFalse(app('router')->has('storage.local'));
+    }
 }

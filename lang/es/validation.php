@@ -168,6 +168,12 @@ return [
         'email' => [
             'unique' => 'Ya hay una cuenta con ese email. Probá ingresar.',
         ],
+        // Fotos que rechaza la subida temporal de Livewire antes de guardarlas.
+        'files.*' => [
+            'mimes' => 'La foto tiene que ser JPG, PNG o WebP. Si es del iPhone (HEIC), exportala como JPG.',
+            'max' => 'La foto pesa más de 12 MB.',
+            'file' => 'No pudimos recibir la foto. Probá de nuevo.',
+        ],
     ],
 
     /*

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\BlockIndexingWhenDisabled;
+use App\Http\Middleware\BlockProbingClients;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureAdminHasTwoFactor;
 use App\Http\Middleware\EnsureIsAdmin;
@@ -25,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Antes que todo: una IP bloqueada por rastrear no llega ni a abrir sesión.
+        $middleware->prepend(BlockProbingClients::class);
+
         $middleware->web(append: [
             SetSecurityHeaders::class,
             BlockIndexingWhenDisabled::class,
@@ -57,7 +61,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 $e->getStatusCode() === 403 => $log->record('access.forbidden', null, [], null, 'warning'),
                 $e->getStatusCode() === 419 => $log->record('session.expired', null, [], null, 'info'),
                 $e->getStatusCode() === 429 => $log->record('request.throttled', null, [], $request->input('email'), 'warning'),
-                $e->getStatusCode() === 404 && $log->isProbe($request->path()) => $log->record('probe.suspicious', null, [], null, 'danger'),
+                $e->getStatusCode() === 404 && $log->isProbe($request->path()) => BlockProbingClients::recordProbe($request, $log),
                 default => null,
             };
 

@@ -97,4 +97,20 @@ class SecurityLogTest extends TestCase
 
         $this->assertSame(1, SecurityEvent::count());
     }
+
+    #[Test]
+    public function an_ip_that_keeps_probing_is_blocked_for_an_hour(): void
+    {
+        foreach (['/wp-login.php', '/.env', '/phpmyadmin', '/.git/config'] as $path) {
+            $this->get($path)->assertNotFound();
+        }
+        $this->get(route('home'))->assertOk();
+
+        $this->get('/xmlrpc.php')->assertNotFound();
+        $this->get(route('home'))->assertForbidden();
+        $this->assertTrue(SecurityEvent::where('type', 'probe.banned')->exists());
+
+        $this->travel(61)->minutes();
+        $this->get(route('home'))->assertOk();
+    }
 }

@@ -56,6 +56,7 @@ class SecurityEvent extends Model
         'request.throttled' => 'Demasiados pedidos',
         'session.expired' => 'Sesión o formulario vencido',
         'probe.suspicious' => 'Rastreo sospechoso',
+        'probe.banned' => 'IP bloqueada por rastrear',
         'error.server' => 'Error del servidor',
         'invitation.sent' => 'Invitación por email',
         'invitation.link_created' => 'Enlace de invitación',

@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Privado de verdad: sin rutas /storage/{path} firmadas para leer o subir.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
