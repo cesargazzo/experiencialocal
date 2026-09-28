@@ -111,4 +111,23 @@ class TwoFactorTest extends TestCase
         $this->actingAs($user)->delete(route('cuenta.2fa.destroy'), ['password' => 'Segura2026x', 'code' => Totp::code($secret, Totp::currentStep())]);
         $this->assertFalse($user->fresh()->hasTwoFactor());
     }
+
+    #[Test]
+    public function turned_off_for_the_platform_it_is_not_asked_and_the_setup_is_kept(): void
+    {
+        config(['tinku.two_factor' => false]);
+        $secret = Totp::generateSecret();
+        $user = User::factory()->create(['email' => 'ana@tinku.test', 'password' => 'Segura2026x', 'two_factor_secret' => $secret, 'two_factor_confirmed_at' => now()]);
+
+        $this->post(route('login'), ['email' => 'ana@tinku.test', 'password' => 'Segura2026x'])->assertRedirect(route('home'));
+        $this->assertAuthenticatedAs($user);
+
+        $admin = User::factory()->admin()->create(['two_factor_secret' => null, 'two_factor_confirmed_at' => null]);
+        $this->actingAs($admin)->get(route('admin.usuarios'))->assertOk();
+        $this->actingAs($admin)->get(route('cuenta.seguridad'))->assertOk()->assertDontSee('id="doble-factor"', false);
+        $this->actingAs($admin)->post(route('cuenta.2fa.start'), ['password' => 'password'])->assertNotFound();
+
+        config(['tinku.two_factor' => true]);
+        $this->assertTrue($user->fresh()->hasTwoFactor());
+    }
 }

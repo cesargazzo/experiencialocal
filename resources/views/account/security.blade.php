@@ -45,6 +45,7 @@
 
     @unless ($forced)
       @php($user = auth()->user())
+      @if (\App\Models\User::twoFactorAvailable())
       <section class="wizard__panel" id="doble-factor">
         <h2>Doble factor</h2>
         <p>Además de la contraseña, al ingresar te pedimos un código de 6 dígitos que genera una app en tu celular (Google Authenticator, Microsoft Authenticator, 1Password, Authy…). Si alguien consigue tu contraseña, igual no puede entrar.
@@ -102,6 +103,7 @@
           </form>
         @endif
       </section>
+      @endif
 
       <section class="wizard__panel" id="tus-datos">
         <h2>Tus datos personales</h2>

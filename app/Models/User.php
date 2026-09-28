@@ -213,9 +213,16 @@ class User extends Authenticatable
         return $viewer?->is($this) || self::viewerSeesLastNames($viewer) ? $this->name : ($this->first_name ?: Str::before($this->name.' ', ' '));
     }
 
+    /** Si el doble factor está prendido para toda la plataforma (TINKU_TWO_FACTOR). */
+    public static function twoFactorAvailable(): bool
+    {
+        return (bool) config('tinku.two_factor');
+    }
+
+    /** Doble factor activo: la plataforma lo tiene prendido y la persona lo configuró. */
     public function hasTwoFactor(): bool
     {
-        return $this->two_factor_confirmed_at !== null && filled($this->two_factor_secret);
+        return self::twoFactorAvailable() && $this->two_factor_confirmed_at !== null && filled($this->two_factor_secret);
     }
 
     /**

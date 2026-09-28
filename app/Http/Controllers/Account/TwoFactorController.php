@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\SecurityLog;
 use App\Support\Totp;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,7 @@ class TwoFactorController extends Controller
     /** Genera un secreto nuevo, todavía sin confirmar: no se exige hasta ingresar el primer código. */
     public function start(Request $request): RedirectResponse
     {
+        abort_unless(User::twoFactorAvailable(), 404);
         $request->validateWithBag('twoFactor', ['password' => ['required', 'current_password']], ['password.current_password' => 'La contraseña no coincide.']);
 
         $request->user()->forceFill([
@@ -30,6 +32,7 @@ class TwoFactorController extends Controller
 
     public function confirm(Request $request, SecurityLog $securityLog): RedirectResponse
     {
+        abort_unless(User::twoFactorAvailable(), 404);
         $user = $request->user();
         $request->validateWithBag('twoFactor', ['code' => ['required', 'string']], ['code.required' => 'Escribí el código de 6 dígitos de la app.']);
 
@@ -49,6 +52,7 @@ class TwoFactorController extends Controller
 
     public function recoveryCodes(Request $request, SecurityLog $securityLog): RedirectResponse
     {
+        abort_unless(User::twoFactorAvailable(), 404);
         $request->validateWithBag('twoFactor', ['password' => ['required', 'current_password']], ['password.current_password' => 'La contraseña no coincide.']);
         abort_unless($request->user()->hasTwoFactor(), 404);
 
@@ -60,6 +64,7 @@ class TwoFactorController extends Controller
 
     public function destroy(Request $request, SecurityLog $securityLog): RedirectResponse
     {
+        abort_unless(User::twoFactorAvailable(), 404);
         $user = $request->user();
         $request->validateWithBag('twoFactor', ['password' => ['required', 'current_password'], 'code' => ['required', 'string']], [
             'password.current_password' => 'La contraseña no coincide.',

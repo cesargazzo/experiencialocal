@@ -69,6 +69,10 @@ class TwoFactorChallengeController extends Controller
         $id = $request->session()->get('login.2fa.id');
         $at = (int) $request->session()->get('login.2fa.at');
 
+        if (! User::twoFactorAvailable()) {
+            return null;
+        }
+
         return $id && $at > now()->subMinutes(self::TTL_MINUTES)->timestamp ? User::find($id) : null;
     }
 }

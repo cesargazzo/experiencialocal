@@ -78,7 +78,11 @@ return [
     // Apagado hasta que se decida abrir el sitio a los buscadores: se prende con TINKU_INDEXABLE=true.
     'indexable' => (bool) env('TINKU_INDEXABLE', false),
 
-    // La administración ve datos personales: exige doble factor (TOTP).
+    // Interruptor general del doble factor (TOTP). Apagado no se pide código al ingresar ni para
+    // la administración y la sección no aparece; lo ya configurado se conserva para cuando se prenda.
+    'two_factor' => (bool) env('TINKU_TWO_FACTOR', true),
+
+    // La administración ve datos personales: exige doble factor (TOTP) si el interruptor está prendido.
     'admin_requires_two_factor' => (bool) env('TINKU_ADMIN_REQUIRES_2FA', true),
 
     /*
