@@ -30,6 +30,7 @@ class SecurityEvent extends Model
         '2fa.failed' => 'Código de doble factor incorrecto',
         '2fa.recovery_used' => 'Ingreso con código de recuperación',
         '2fa.recovery_regenerated' => 'Códigos de recuperación nuevos',
+        '2fa.step_up' => 'Código confirmado en una sesión abierta',
         'login.failed' => 'Ingreso fallido',
         'login.locked' => 'Bloqueo por intentos',
         'logout' => 'Salida',

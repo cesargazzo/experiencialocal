@@ -8,6 +8,7 @@ use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Middleware\EnsureTermsAccepted;
 use App\Http\Middleware\EnsureVerificationLevel;
 use App\Http\Middleware\RecordLastSeen;
+use App\Http\Middleware\SetSecurityHeaders;
 use App\Services\SecurityLog;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
+            SetSecurityHeaders::class,
             BlockIndexingWhenDisabled::class,
             EnsureAccountIsActive::class,
             EnsurePasswordIsChanged::class,

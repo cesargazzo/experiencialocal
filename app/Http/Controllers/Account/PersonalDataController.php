@@ -7,6 +7,7 @@ use App\Models\Conversation;
 use App\Models\SecurityEvent;
 use App\Services\AccountDeletion;
 use App\Services\SecurityLog;
+use App\Services\TwoFactorGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -66,7 +67,7 @@ class PersonalDataController extends Controller
         );
     }
 
-    public function destroy(Request $request, AccountDeletion $deletion): RedirectResponse
+    public function destroy(Request $request, AccountDeletion $deletion, TwoFactorGuard $guard): RedirectResponse
     {
         $user = $request->user();
         $request->validateWithBag('deletion', [
@@ -79,8 +80,8 @@ class PersonalDataController extends Controller
             'code.required' => 'Escribí el código de tu app de autenticación.',
         ]);
 
-        if ($user->hasTwoFactor() && ! $user->verifyTwoFactorCode($request->string('code')->toString())) {
-            return back()->withErrors(['code' => 'El código no coincide.'], 'deletion');
+        if ($user->hasTwoFactor()) {
+            $guard->attempt($user, $request->string('code')->toString(), 'deletion');
         }
         if ($user->isAdmin()) {
             return back()->withErrors(['password' => 'Una cuenta administradora no se elimina desde acá: primero quitale el permiso de administración.'], 'deletion');

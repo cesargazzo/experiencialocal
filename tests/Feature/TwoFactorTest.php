@@ -123,11 +123,67 @@ class TwoFactorTest extends TestCase
         $this->assertAuthenticatedAs($user);
 
         $admin = User::factory()->admin()->create(['two_factor_secret' => null, 'two_factor_confirmed_at' => null]);
-        $this->actingAs($admin)->get(route('admin.usuarios'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.usuarios'))->assertOk()->assertSee('El doble factor está apagado');
         $this->actingAs($admin)->get(route('cuenta.seguridad'))->assertOk()->assertDontSee('id="doble-factor"', false);
         $this->actingAs($admin)->post(route('cuenta.2fa.start'), ['password' => 'password'])->assertNotFound();
 
         config(['tinku.two_factor' => true]);
         $this->assertTrue($user->fresh()->hasTwoFactor());
+    }
+
+    #[Test]
+    public function wrong_codes_lock_the_person_for_fifteen_minutes_even_with_the_right_code(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-01 12:00:00'));
+        $secret = Totp::generateSecret();
+        $user = User::factory()->create(['password' => 'Segura2026x', 'two_factor_secret' => $secret, 'two_factor_confirmed_at' => now()]);
+
+        $this->post(route('login'), ['email' => $user->email, 'password' => 'Segura2026x']);
+        foreach (range(1, 5) as $attempt) {
+            $this->post(route('login.2fa'), ['code' => '000000']);
+        }
+        $this->post(route('login.2fa'), ['code' => Totp::code($secret, Totp::currentStep())])->assertSessionHasErrors('code');
+        $this->assertGuest();
+        $this->assertTrue(SecurityEvent::where('type', 'login.locked')->exists());
+
+        $this->travel(16)->minutes();
+        $this->post(route('login'), ['email' => $user->email, 'password' => 'Segura2026x']);
+        $this->post(route('login.2fa'), ['code' => Totp::code($secret, Totp::currentStep())])->assertRedirect(route('home'));
+        $this->assertAuthenticatedAs($user);
+    }
+
+    #[Test]
+    public function an_admin_session_without_a_code_is_asked_for_it_before_entering(): void
+    {
+        $secret = Totp::generateSecret();
+        $admin = User::factory()->admin()->create(['two_factor_secret' => $secret]);
+
+        // Sesión abierta sin haber ingresado el código (por ejemplo, con "recordarme").
+        $this->be($admin);
+        $this->get(route('admin.usuarios'))->assertRedirect(route('cuenta.2fa.verify'));
+        $this->get(route('cuenta.2fa.verify'))->assertOk();
+        $this->post(route('cuenta.2fa.verify'), ['code' => '000000'])->assertSessionHasErrors('code');
+        $this->post(route('cuenta.2fa.verify'), ['code' => Totp::code($secret, Totp::currentStep())])->assertRedirect(route('admin.usuarios'));
+        $this->get(route('admin.usuarios'))->assertOk();
+    }
+
+    #[Test]
+    public function an_active_second_factor_cannot_be_replaced_without_turning_it_off_with_a_code(): void
+    {
+        $secret = Totp::generateSecret();
+        $user = User::factory()->create(['password' => 'Segura2026x', 'two_factor_secret' => $secret, 'two_factor_confirmed_at' => now()]);
+
+        $this->actingAs($user)->post(route('cuenta.2fa.start'), ['password' => 'Segura2026x'])->assertSessionHasErrorsIn('twoFactor', 'password');
+        $this->assertSame($secret, $user->fresh()->two_factor_secret);
+        $this->assertTrue($user->fresh()->hasTwoFactor());
+    }
+
+    #[Test]
+    public function every_page_is_sent_with_security_headers(): void
+    {
+        $this->get(route('login'))
+            ->assertHeader('X-Frame-Options', 'DENY')
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     }
 }

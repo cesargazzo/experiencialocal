@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -232,29 +233,35 @@ class User extends Authenticatable
      */
     public function verifyTwoFactorCode(string $code): ?string
     {
-        if (! $this->two_factor_secret) {
-            return null;
-        }
-
-        $step = Totp::verify($this->two_factor_secret, $code, $this->two_factor_last_step);
-        if ($step !== null) {
-            $this->forceFill(['two_factor_last_step' => $step])->save();
-
-            return 'totp';
-        }
-
-        $normalized = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $code) ?? '');
-        foreach ($this->two_factor_recovery_codes ?? [] as $index => $hash) {
-            if ($normalized !== '' && Hash::check($normalized, $hash)) {
-                $codes = $this->two_factor_recovery_codes;
-                unset($codes[$index]);
-                $this->forceFill(['two_factor_recovery_codes' => array_values($codes)])->save();
-
-                return 'recovery';
+        // Se bloquea la fila: dos pedidos simultáneos con el mismo código no pueden usarlo los dos.
+        return DB::transaction(function () use ($code): ?string {
+            $locked = static::query()->whereKey($this->getKey())->lockForUpdate()->first();
+            if (! $locked?->two_factor_secret) {
+                return null;
             }
-        }
 
-        return null;
+            $step = Totp::verify($locked->two_factor_secret, $code, $locked->two_factor_last_step);
+            if ($step !== null) {
+                $locked->forceFill(['two_factor_last_step' => $step])->save();
+                $this->setRawAttributes($locked->getAttributes(), true);
+
+                return 'totp';
+            }
+
+            $normalized = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $code) ?? '');
+            foreach ($locked->two_factor_recovery_codes ?? [] as $index => $hash) {
+                if ($normalized !== '' && Hash::check($normalized, $hash)) {
+                    $codes = $locked->two_factor_recovery_codes;
+                    unset($codes[$index]);
+                    $locked->forceFill(['two_factor_recovery_codes' => array_values($codes)])->save();
+                    $this->setRawAttributes($locked->getAttributes(), true);
+
+                    return 'recovery';
+                }
+            }
+
+            return null;
+        });
     }
 
     /**

@@ -65,6 +65,8 @@ class LoginController extends Controller
         RateLimiter::clear($throttleKey);
 
         if ($user->hasTwoFactor()) {
+            // Sesión nueva ya en el paso intermedio: una sesión fijada de antemano no sirve para completarlo.
+            $request->session()->regenerate();
             $request->session()->put(['login.2fa.id' => $user->id, 'login.2fa.at' => now()->timestamp, 'login.2fa.remember' => $request->boolean('remember')]);
 
             return redirect()->route('login.2fa');
