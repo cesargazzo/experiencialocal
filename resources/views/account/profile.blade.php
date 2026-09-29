@@ -93,6 +93,30 @@
       </form>
     </section>
 
+    <section class="wizard__panel" id="redes">
+      <h2>Tus redes y tu web</h2>
+      <p>Opcional. Elegí cuáles mostrar: las públicas aparecen en tu perfil para quienes tienen la identidad validada, igual que tu apellido. Las demás las ve solo el equipo de Tinku.</p>
+      <form method="post" action="{{ route('cuenta.redes.update') }}" class="social-form">
+        @csrf
+        @method('put')
+        @foreach ($socialNetworks as $network)
+          @php($saved = $user->social_links[$network->value] ?? null)
+          <div class="social-form__row">
+            <div class="field">
+              <label for="social_{{ $network->value }}">{{ $network->label() }}</label>
+              <input id="social_{{ $network->value }}" name="social[{{ $network->value }}][url]" value="{{ old("social.{$network->value}.url", $saved ? ($network === \App\Enums\SocialNetwork::Website ? $saved['url'] : $network->display($saved['url'])) : '') }}" maxlength="200" placeholder="{{ $network->placeholder() }}" autocomplete="off" @if ($network === \App\Enums\SocialNetwork::Website) inputmode="url" @endif>
+              @error("social.{$network->value}.url")<span class="error" style="display:block">{{ $message }}</span>@enderror
+            </div>
+            <label class="choice social-form__public">
+              <input type="checkbox" name="social[{{ $network->value }}][public]" value="1" @checked(old("social.{$network->value}.public", $saved['public'] ?? false))>
+              <span>Pública</span>
+            </label>
+          </div>
+        @endforeach
+        <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit">Guardá tus redes</button></div>
+      </form>
+    </section>
+
     <section class="wizard__panel" id="alimentacion">
       <h2>Tu alimentación</h2>
       <p>Marcá lo que necesitás y te avisamos en cada experiencia si el anfitrión lo cubre. Es opcional y solo lo ve el anfitrión de las experiencias que reserves.</p>

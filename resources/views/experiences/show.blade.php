@@ -121,7 +121,7 @@
           </div>
         @endif
         <div class="detail-block" id="anfitrion"><h2>Quién te recibe</h2>
-          <div class="host-card"><x-avatar :user="$experience->host->user" :size="56" /><div><strong>{{ $experience->host->publicName() }}</strong> · En Tinku desde {{ $experience->host->hosting_since?->year }}<br><x-verification-badge :level="$experience->host->user->verification_level" full /><p>{{ $experience->host->bio }}</p>
+          <div class="host-card"><x-avatar :user="$experience->host->user" :size="56" /><div><strong>{{ $experience->host->publicName() }}</strong> · En Tinku desde {{ $experience->host->hosting_since?->year }}<br><x-verification-badge :level="$experience->host->user->verification_level" full /><p>{{ $experience->host->bio }}</p><x-social-links :links="$experience->host->user->socialLinksVisibleTo()" />
             @if (auth()->id() !== $experience->host->user_id && $experience->status === \App\Enums\ExperienceStatus::Published)
               @auth
                 <form method="post" action="{{ route('mensajes.iniciar', $experience) }}">@csrf<button class="btn btn--tertiary btn--sm" type="submit"><x-icon name="envelope-simple" :size="16" /> Preguntale a {{ $experience->host->user->first_name }}</button></form>

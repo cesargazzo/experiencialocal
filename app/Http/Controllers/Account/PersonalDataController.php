@@ -30,6 +30,7 @@ class PersonalDataController extends Controller
                 'pais' => $user->country_code, 'provincia' => $user->province?->name, 'ciudad' => $user->city, 'codigo_postal' => $user->postal_code,
                 'alimentacion' => $user->dietary_needs?->map->value->all(), 'alergias' => $user->food_allergies,
                 'necesidades' => $user->required_features?->map->value->all(),
+                'redes' => $user->socialLinks()->map(fn (array $link) => ['red' => $link['network']->label(), 'enlace' => $link['url'], 'publica' => $link['public']])->all(),
                 'nivel_de_verificacion' => $user->verification_level->label(), 'alta' => $user->created_at->toIso8601String(),
                 'doble_factor' => $user->hasTwoFactor(),
             ],

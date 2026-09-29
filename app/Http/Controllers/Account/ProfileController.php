@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Account;
 
 use App\Enums\DietaryOption;
+use App\Enums\SocialNetwork;
 use App\Enums\VerificationLevel;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
@@ -25,6 +26,7 @@ class ProfileController extends Controller
             'nameLocked' => $this->identityIsLocked($user),
             'birthDateLocked' => $this->identityIsLocked($user) && $user->birth_date !== null,
             'dietaryOptions' => DietaryOption::cases(),
+            'socialNetworks' => SocialNetwork::cases(),
             'provincesByCountry' => Province::query()
                 ->whereIn('country_code', Country::active()->pluck('code'))
                 ->orderBy('name')
@@ -95,6 +97,44 @@ class ProfileController extends Controller
         ]);
 
         return back()->with('status', 'Guardamos tu alimentación.');
+    }
+
+    /** Redes y web: opcionales; cada una se muestra solo si la persona la marca como pública. */
+    public function updateSocial(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'social' => ['nullable', 'array'],
+            'social.*.url' => ['nullable', 'string', 'max:200'],
+            'social.*.public' => ['nullable', 'boolean'],
+        ]);
+
+        $links = [];
+        $errors = [];
+        foreach (SocialNetwork::cases() as $network) {
+            $input = trim((string) $request->input("social.{$network->value}.url", ''));
+            if ($input === '') {
+                continue;
+            }
+
+            $url = $network->normalize($input);
+            if ($url === null) {
+                $errors["social.{$network->value}.url"] = $network === SocialNetwork::Website
+                    ? 'Revisá la dirección de tu web (por ejemplo, tusitio.com.ar).'
+                    : "Revisá tu usuario de {$network->label()}: escribilo como {$network->placeholder()} o pegá el enlace de tu perfil.";
+
+                continue;
+            }
+
+            $links[$network->value] = ['url' => $url, 'public' => $request->boolean("social.{$network->value}.public")];
+        }
+
+        if ($errors) {
+            return back()->withErrors($errors)->withInput()->withFragment('redes');
+        }
+
+        $request->user()->update(['social_links' => $links ?: null]);
+
+        return redirect()->to(route('cuenta.perfil').'#redes')->with('status', 'Guardamos tus redes.');
     }
 
     /**

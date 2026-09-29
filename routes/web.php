@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/cuenta', [ProfileController::class, 'edit'])->name('cuenta.perfil');
     Route::put('/cuenta', [ProfileController::class, 'update'])->name('cuenta.perfil.update');
     Route::put('/cuenta/alimentacion', [ProfileController::class, 'updateDiet'])->name('cuenta.alimentacion.update');
+    Route::put('/cuenta/redes', [ProfileController::class, 'updateSocial'])->name('cuenta.redes.update');
     Route::get('/cuenta/seguridad', [PasswordController::class, 'edit'])->name('cuenta.seguridad');
     Route::put('/cuenta/seguridad', [PasswordController::class, 'update'])->name('cuenta.seguridad.update');
     Route::post('/cuenta/seguridad/doble-factor', [TwoFactorController::class, 'start'])->name('cuenta.2fa.start');

@@ -10,6 +10,7 @@
       {{ $guest->locationLabel() ?? 'Sin ciudad cargada' }}
       · en Tinku desde {{ $guest->created_at->translatedFormat('F Y') }}
     </p>
+    <x-social-links :links="$guest->socialLinksVisibleTo()" />
     <ul class="host-booking__facts">
       <li><x-icon name="sparkle" :size="16" /> {{ $booking->experience->title }}</li>
       <li><x-icon name="calendar-blank" :size="16" /> {{ Str::ucfirst($booking->date->localStart()->translatedFormat('D j M · H:i')) }}</li>

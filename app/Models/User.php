@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\BookingStatus;
 use App\Enums\DietaryOption;
 use App\Enums\ExperienceFeature;
+use App\Enums\SocialNetwork;
 use App\Enums\VerificationLevel;
 use App\Models\Concerns\Auditable;
 use App\Notifications\ResetPasswordNotification;
@@ -27,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -35,7 +37,7 @@ use Illuminate\Support\Str;
  * Una sola cuenta con varios roles: todo usuario es participante, es anfitrión
  * si tiene un HostProfile y es administrador si tiene el flag is_admin.
  */
-#[Fillable(['name', 'first_name', 'last_name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'required_features', 'nationality_code', 'locale', 'avatar_path'])]
+#[Fillable(['name', 'first_name', 'last_name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'required_features', 'social_links', 'nationality_code', 'locale', 'avatar_path'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
@@ -88,6 +90,7 @@ class User extends Authenticatable
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_confirmed_at' => 'datetime',
             'last_seen_at' => 'datetime',
+            'social_links' => 'array',
         ];
     }
 
@@ -204,6 +207,39 @@ class User extends Authenticatable
         $viewer ??= auth()->user();
 
         return (bool) $viewer?->hasVerificationLevel(VerificationLevel::Document) || (bool) $viewer?->isAdmin();
+    }
+
+    /**
+     * Redes y web cargadas, en el orden de la lista.
+     *
+     * @return Collection<int, array{network: SocialNetwork, url: string, display: string, public: bool}>
+     */
+    public function socialLinks(): Collection
+    {
+        return collect(SocialNetwork::cases())
+            ->filter(fn (SocialNetwork $network) => filled($this->social_links[$network->value]['url'] ?? null))
+            ->map(fn (SocialNetwork $network) => [
+                'network' => $network,
+                'url' => $this->social_links[$network->value]['url'],
+                'display' => $network->display($this->social_links[$network->value]['url']),
+                'public' => (bool) ($this->social_links[$network->value]['public'] ?? false),
+            ])
+            ->values();
+    }
+
+    /**
+     * Las redes marcadas como públicas. Una red muestra el nombre completo, así que
+     * siguen la misma regla que el apellido: las ven quienes tienen la identidad validada.
+     *
+     * @return Collection<int, array{network: SocialNetwork, url: string, display: string, public: bool}>
+     */
+    public function socialLinksVisibleTo(?User $viewer = null): Collection
+    {
+        $viewer ??= auth()->user();
+
+        return $viewer?->is($this) || self::viewerSeesLastNames($viewer)
+            ? $this->socialLinks()->where('public', true)->values()
+            : collect();
     }
 
     /** Nombre para mostrar a quien está mirando. */

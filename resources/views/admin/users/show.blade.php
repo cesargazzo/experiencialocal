@@ -24,6 +24,9 @@
         <div><span>Fecha de nacimiento</span><strong>{{ $user->birth_date?->format('d/m/Y') ?? '—' }}</strong></div>
         <div><span>Alta</span><strong>{{ $user->created_at->timezone(config('tinku.timezone'))->format('d/m/Y H:i') }}</strong></div>
         <div><span>Invitada por</span><strong>{{ $user->invitedBy?->name ?? '—' }}</strong></div>
+        @if ($user->socialLinks()->isNotEmpty())
+          <div><span>Redes y web</span><x-social-links :links="$user->socialLinks()" :show-privacy="true" /></div>
+        @endif
         @if ($user->isSuspended())
           <div><span>Suspendida</span><strong>{{ $user->suspended_at->timezone(config('tinku.timezone'))->format('d/m/Y H:i') }} · {{ $user->suspension_reason }}</strong></div>
         @endif
