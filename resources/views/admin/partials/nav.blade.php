@@ -13,5 +13,5 @@
   <a @class(['chip', 'is-active' => request()->routeIs('admin.configuracion')]) href="{{ route('admin.configuracion') }}">Configuración</a>
 </nav>
 @unless (\App\Models\User::twoFactorAvailable())
-  <p class="notice" role="alert"><x-icon name="shield-check" :size="16" /> <strong>El doble factor está apagado</strong> (TINKU_TWO_FACTOR=false): la administración no pide código. Prendelo antes de salir a producción.</p>
+  <p class="notice" role="alert" style="margin:0 0 var(--esp-3)"><x-icon name="shield-check" :size="16" /> <strong>El doble factor está apagado</strong> (TINKU_TWO_FACTOR=false): la administración no pide código. Prendelo antes de salir a producción.</p>
 @endunless

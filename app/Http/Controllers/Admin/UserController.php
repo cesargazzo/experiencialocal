@@ -25,10 +25,11 @@ class UserController extends Controller
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:120'],
             'dni' => ['nullable', 'string', 'max:40'],
-            'nivel' => ['nullable', Rule::in(['0', '1', '2', '3'])],
+            'nivel' => ['nullable', Rule::in(['0', '1', '2', '3', 'verificada'])],
             'rol' => ['nullable', Rule::in(['admin', 'anfitrion', 'suspendida'])],
             'provincia' => ['nullable', 'integer', 'exists:provinces,id'],
             'alta' => ['nullable', Rule::in(array_keys(self::SIGNUP_PERIODS))],
+            'ingreso' => ['nullable', Rule::in([...array_keys(self::LOGIN_PERIODS), 'nunca'])],
             'orden' => ['nullable', Rule::in(array_keys(self::SORTS))],
             'cumple' => ['nullable', Rule::in(['hoy', 'semana'])],
         ]);
@@ -40,7 +41,8 @@ class UserController extends Controller
             ->with(['avatar', 'hostProfile', 'province'])
             ->when($filters['q'] ?? null, fn ($q, $term) => $q->where(fn ($w) => $w->where('name', 'ilike', "%{$term}%")->orWhere('email', 'ilike', "%{$term}%")))
             ->when($filters['dni'] ?? null, fn ($q, $number) => $q->whereHas('verifications', fn ($v) => $v->whereIn('document_hash', $this->documentHashesFor($number))))
-            ->when(isset($filters['nivel']), fn ($q) => $q->where('verification_level', (int) $filters['nivel']))
+            ->when(($filters['nivel'] ?? null) === 'verificada', fn ($q) => $q->where('verification_level', '>=', VerificationLevel::Document->value))
+            ->when(isset($filters['nivel']) && $filters['nivel'] !== 'verificada', fn ($q) => $q->where('verification_level', (int) $filters['nivel']))
             ->when(($filters['rol'] ?? null) === 'admin', fn ($q) => $q->where('is_admin', true))
             ->when(($filters['rol'] ?? null) === 'anfitrion', fn ($q) => $q->has('hostProfile'))
             ->when(($filters['rol'] ?? null) === 'suspendida', fn ($q) => $q->whereNotNull('suspended_at'))
@@ -48,8 +50,10 @@ class UserController extends Controller
             ->when(($filters['cumple'] ?? null) === 'hoy', fn ($q) => $q->birthdayBetween($today, $today))
             ->when(($filters['cumple'] ?? null) === 'semana', fn ($q) => $q->birthdayBetween(...$week))
             ->when($filters['alta'] ?? null, fn ($q, $period) => $q->where('created_at', '>=', now()->subDays(self::SIGNUP_PERIODS[$period]['days'])))
+            ->when(($filters['ingreso'] ?? null) === 'nunca', fn ($q) => $q->whereNull('last_login_at')->whereNull('last_seen_at'))
+            ->when(isset(self::LOGIN_PERIODS[$filters['ingreso'] ?? '']), fn ($q) => $q->activeSince(now()->subDays(self::LOGIN_PERIODS[$filters['ingreso']]['days'])))
             ->when(
-                ($filters['orden'] ?? 'alta') === 'ingreso',
+                ($filters['orden'] ?? (isset($filters['ingreso']) ? 'ingreso' : 'alta')) === 'ingreso',
                 fn ($q) => $q->orderByRaw('last_login_at desc nulls last'),
                 fn ($q) => ($filters['orden'] ?? null) === 'nombre' ? $q->orderBy('name') : $q->latest(),
             )
@@ -63,7 +67,9 @@ class UserController extends Controller
             'levels' => VerificationLevel::cases(),
             'provinces' => Province::query()->orderBy('name')->get(['id', 'name']),
             'signupPeriods' => self::SIGNUP_PERIODS,
+            'loginPeriods' => self::LOGIN_PERIODS,
             'sorts' => self::SORTS,
+            'kpis' => $this->kpis($filters),
             'today' => $today,
             'weekStart' => $week[0],
             'sharedDocuments' => app(VerificationService::class)->accountsSharingDocuments(),
@@ -80,6 +86,47 @@ class UserController extends Controller
         'mes' => ['label' => 'Últimos 30 días', 'days' => 30],
         'trimestre' => ['label' => 'Últimos 90 días', 'days' => 90],
     ];
+
+    /** @var array<string, array{label: string, days: int}> */
+    private const LOGIN_PERIODS = [
+        'hoy' => ['label' => 'Últimas 24 horas', 'days' => 1],
+        '5dias' => ['label' => 'Últimos 5 días', 'days' => 5],
+        'mes' => ['label' => 'Últimos 30 días', 'days' => 30],
+    ];
+
+    /**
+     * Números de arriba. Cada uno es un atajo a la lista filtrada.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return list<array{label: string, value: int, query: array<string, string>, active: bool}>
+     */
+    private function kpis(array $filters): array
+    {
+        $since = now()->subDays(self::LOGIN_PERIODS['5dias']['days']);
+        $counts = User::query()->toBase()
+            ->selectRaw('count(*) as total')
+            ->selectRaw('count(*) filter (where last_login_at >= ? or last_seen_at >= ?) as active', [$since, $since])
+            ->selectRaw('count(*) filter (where created_at >= ?) as recent', [now()->subDays(self::SIGNUP_PERIODS['semana']['days'])])
+            ->selectRaw('count(*) filter (where verification_level >= ?) as verified', [VerificationLevel::Document->value])
+            ->selectRaw('count(*) filter (where exists (select 1 from host_profiles where host_profiles.user_id = users.id)) as hosts')
+            ->selectRaw('count(*) filter (where suspended_at is not null) as suspended')
+            ->first();
+
+        $active = array_filter($filters, fn ($value) => $value !== null && $value !== '');
+        $tile = fn (string $label, int $value, array $query): array => [
+            'label' => $label, 'value' => $value, 'query' => $query,
+            'active' => $query !== [] && array_intersect_assoc($active, $query) === $query,
+        ];
+
+        return [
+            [...$tile('Cuentas', (int) $counts->total, []), 'active' => $active === []],
+            $tile('Ingresaron en los últimos 5 días', (int) $counts->active, ['ingreso' => '5dias']),
+            $tile('Nuevas en los últimos 7 días', (int) $counts->recent, ['alta' => 'semana']),
+            $tile('Con identidad verificada', (int) $counts->verified, ['nivel' => 'verificada']),
+            $tile('Anfitriones', (int) $counts->hosts, ['rol' => 'anfitrion']),
+            $tile('Suspendidas', (int) $counts->suspended, ['rol' => 'suspendida']),
+        ];
+    }
 
     /** @var array<string, string> */
     private const SORTS = [

@@ -220,6 +220,12 @@ class User extends Authenticatable
         return (bool) config('tinku.two_factor');
     }
 
+    /** Ingresó o anduvo por el sitio desde esa fecha (con "recordarme" no hay ingreso nuevo, pero sí actividad). */
+    public function scopeActiveSince(Builder $query, CarbonInterface $since): Builder
+    {
+        return $query->where(fn (Builder $inner) => $inner->where('last_login_at', '>=', $since)->orWhere('last_seen_at', '>=', $since));
+    }
+
     /** Doble factor activo: la plataforma lo tiene prendido y la persona lo configuró. */
     public function hasTwoFactor(): bool
     {

@@ -230,4 +230,25 @@ class AdminUsersTest extends TestCase
         $this->assertSame('Tu cuenta está validada: Identidad y domicilio validados', $notice->data['title']);
         $this->actingAs($user)->get(route('home'))->assertSee('Avisos: 1 sin leer');
     }
+
+    #[Test]
+    public function the_kpis_count_accounts_and_the_login_one_filters_the_last_five_days(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-01 12:00:00'));
+        $admin = User::factory()->admin()->create(['name' => 'Equipo Tinku', 'last_login_at' => now()->subDays(30), 'last_seen_at' => null]);
+        User::factory()->create(['name' => 'Entró Ayer', 'last_login_at' => now()->subDay()]);
+        User::factory()->create(['name' => 'Recordada Activa', 'last_login_at' => now()->subDays(20), 'last_seen_at' => now()->subDays(2)]);
+        User::factory()->create(['name' => 'Hace Mucho', 'last_login_at' => now()->subDays(9), 'last_seen_at' => now()->subDays(9)]);
+
+        $response = $this->actingAs($admin)->get(route('admin.usuarios'))->assertOk();
+        $kpis = collect($response->viewData('kpis'))->keyBy('label');
+        $this->assertSame(4, $kpis['Cuentas']['value']);
+        // Entró Ayer, Recordada Activa (con "recordarme") y quien está mirando la página.
+        $this->assertSame(3, $kpis['Ingresaron en los últimos 5 días']['value']);
+        $response->assertSee(route('admin.usuarios', ['ingreso' => '5dias']), false);
+
+        $this->actingAs($admin)->get(route('admin.usuarios', ['ingreso' => '5dias']))
+            ->assertOk()->assertSeeInOrder(['Entró Ayer', 'Recordada Activa'])->assertDontSee('Hace Mucho')
+            ->assertViewHas('kpis', fn (array $kpis) => collect($kpis)->firstWhere('label', 'Ingresaron en los últimos 5 días')['active']);
+    }
 }

@@ -4,6 +4,15 @@
     <h1 class="title">Usuarios.</h1>
     @include('admin.partials.nav')
 
+    <nav class="kpis" aria-label="Resumen de cuentas">
+      @foreach ($kpis as $kpi)
+        <a @class(['kpi', 'is-active' => $kpi['active']]) href="{{ route('admin.usuarios', $kpi['query']) }}" @if ($kpi['active']) aria-current="true" @endif>
+          <span class="kpi__val">{{ number_format($kpi['value'], 0, ',', '.') }}</span>
+          <span class="kpi__lbl">{{ $kpi['label'] }}</span>
+        </a>
+      @endforeach
+    </nav>
+
     @if ($sharedDocuments->isNotEmpty())
       <section class="wizard__panel" role="alert">
         <h2>Documentos en más de una cuenta</h2>
@@ -48,6 +57,7 @@
         <div class="field"><label for="nivel">Nivel</label>
           <select id="nivel" name="nivel">
             <option value="">Todos</option>
+            <option value="verificada" @selected(($filters['nivel'] ?? null) === 'verificada')>2 o más · Identidad verificada</option>
             @foreach ($levels as $level)<option value="{{ $level->value }}" @selected(($filters['nivel'] ?? null) === (string) $level->value)>{{ $level->value }} · {{ $level->label() }}</option>@endforeach
           </select>
         </div>
@@ -71,6 +81,13 @@
             @foreach ($signupPeriods as $key => $period)<option value="{{ $key }}" @selected(($filters['alta'] ?? null) === $key)>{{ $period['label'] }}</option>@endforeach
           </select>
         </div>
+        <div class="field"><label for="ingreso">Ingresaron</label>
+          <select id="ingreso" name="ingreso">
+            <option value="">Cuando sea</option>
+            @foreach ($loginPeriods as $key => $period)<option value="{{ $key }}" @selected(($filters['ingreso'] ?? null) === $key)>{{ $period['label'] }}</option>@endforeach
+            <option value="nunca" @selected(($filters['ingreso'] ?? null) === 'nunca')>Nunca</option>
+          </select>
+        </div>
         <div class="field"><label for="cumple">Cumpleaños</label>
           <select id="cumple" name="cumple">
             <option value="">Todos</option>
@@ -80,7 +97,7 @@
         </div>
         <div class="field"><label for="orden">Orden</label>
           <select id="orden" name="orden">
-            @foreach ($sorts as $key => $label)<option value="{{ $key }}" @selected(($filters['orden'] ?? 'alta') === $key)>{{ $label }}</option>@endforeach
+            @foreach ($sorts as $key => $label)<option value="{{ $key }}" @selected(($filters['orden'] ?? (isset($filters['ingreso']) ? 'ingreso' : 'alta')) === $key)>{{ $label }}</option>@endforeach
           </select>
         </div>
         <div class="filters__actions"><button class="btn btn--secondary btn--sm" type="submit">Filtrá</button><a class="btn btn--ghost btn--sm" href="{{ route('admin.usuarios') }}">Limpiá</a></div>
