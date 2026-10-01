@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 #[Fillable([
     'code', 'experience_date_id', 'experience_id', 'user_id', 'guests', 'unit_price', 'subtotal', 'service_fee_rate',
     'service_fee', 'total', 'commission_rate', 'commission_amount', 'host_payout', 'currency', 'status', 'guest_note', 'dietary_needs', 'food_allergies',
-    'payment_provider', 'payment_reference', 'confirmed_at', 'declined_at', 'cancelled_at', 'paid_at', 'completed_at', 'refunded_at', 'reminders_sent',
+    'payment_provider', 'payment_reference', 'confirmed_at', 'declined_at', 'cancelled_at', 'paid_at', 'completed_at', 'no_show_at', 'refunded_at', 'reminders_sent',
     'cancellation_policy', 'refund_percent',
 ])]
 class Booking extends Model
@@ -49,6 +49,7 @@ class Booking extends Model
             'cancelled_at' => 'datetime',
             'paid_at' => 'datetime',
             'completed_at' => 'datetime',
+            'no_show_at' => 'datetime',
             'refunded_at' => 'datetime',
         ];
     }
@@ -99,5 +100,16 @@ class Booking extends Model
         }
 
         return $this->cancellationPolicy()->refundPercent(max(0, now()->diffInHours($this->date->starts_at, false)));
+    }
+
+    /** El anfitrión puede marcar que no vino desde que empieza la experiencia y por unas horas, si no dejó opinión. */
+    public function canBeMarkedNoShow(): bool
+    {
+        $startsAt = $this->date->starts_at;
+
+        return in_array($this->status, [BookingStatus::Confirmed, BookingStatus::Completed], true)
+            && $startsAt->isPast()
+            && now()->lte($startsAt->copy()->addHours(config('tinku.no_shows.mark_window_hours')))
+            && ! $this->review()->exists();
     }
 }

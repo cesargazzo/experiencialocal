@@ -31,4 +31,15 @@ class HostBookingController extends Controller
 
         return back()->with('status', 'Rechazaste la reserva. Le avisamos y no se le cobra nada.');
     }
+
+    public function noShow(Request $request, Booking $booking, BookingService $bookings): RedirectResponse
+    {
+        try {
+            $bookings->markNoShow($booking, $request->user());
+        } catch (BookingException $e) {
+            return back()->withErrors(['booking' => $e->getMessage()]);
+        }
+
+        return back()->with('status', 'Marcaste que '.str($booking->user->name)->before(' ').' no vino. Le avisamos y puede pedirnos que lo revisemos.');
+    }
 }

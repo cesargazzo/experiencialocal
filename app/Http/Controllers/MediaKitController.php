@@ -91,7 +91,7 @@ class MediaKitController extends Controller
             'people' => User::query()->whereNull('anonymized_at')->count(),
             'visits' => (int) DB::table('experience_daily_views')->where('day', '>=', now()->subDays(30)->toDateString())->sum('views'),
             'favorites' => DB::table('favorites')->count(),
-            'bookings' => Booking::query()->whereIn('status', [BookingStatus::Confirmed, BookingStatus::Completed])->count(),
+            'bookings' => Booking::query()->whereIn('status', [BookingStatus::Confirmed, ...BookingStatus::settled()])->count(),
             'reviews' => Review::query()->whereNotNull('published_at')->count(),
             'rating' => round((float) Review::query()->whereNotNull('published_at')->avg('rating'), 1),
         ];

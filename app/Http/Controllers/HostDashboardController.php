@@ -36,6 +36,25 @@ class HostDashboardController extends Controller
             ->get()
             ->sortBy(fn (Booking $booking) => $booking->date->starts_at);
 
+        // Las que ya empezaron y todavía se pueden cerrar: si la persona no vino, el anfitrión lo marca acá.
+        $toClose = Booking::query()
+            ->whereIn('experience_id', $experiences->pluck('id'))
+            ->whereIn('status', [BookingStatus::Confirmed, BookingStatus::Completed])
+            ->whereDoesntHave('review')
+            ->whereHas('date', fn ($q) => $q->where('starts_at', '<=', now())->where('starts_at', '>=', now()->subHours(config('tinku.no_shows.mark_window_hours'))))
+            ->with(['user.avatar', 'date', 'experience.province'])
+            ->get()
+            ->sortByDesc(fn (Booking $booking) => $booking->date->starts_at)
+            ->values();
+
+        $noShows = Booking::query()
+            ->whereIn('user_id', $bookings->pluck('user_id'))
+            ->where('status', BookingStatus::NoShow)
+            ->where('no_show_at', '>=', now()->subMonths(config('tinku.no_shows.months')))
+            ->selectRaw('user_id, count(*) as total')->groupBy('user_id')
+            ->pluck('total', 'user_id')
+            ->map(fn ($total) => (int) $total);
+
         $reviews = Review::query()
             ->whereIn('experience_id', $experiences->pluck('id'))
             ->whereNotNull('published_at')
@@ -48,6 +67,8 @@ class HostDashboardController extends Controller
             'reviews' => $reviews,
             'pendingBookings' => $bookings->where('status', BookingStatus::Requested)->values(),
             'confirmedBookings' => $bookings->where('status', BookingStatus::Confirmed)->values(),
+            'bookingsToClose' => $toClose,
+            'noShows' => $noShows,
             'profile' => $profile,
             'experiences' => $experiences,
             'canCreateAnother' => $profile->canPublishAnother(),

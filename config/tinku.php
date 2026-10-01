@@ -66,6 +66,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Reservas a las que no se presentaron
+    |--------------------------------------------------------------------------
+    |
+    | El anfitrión puede marcar "no vino" desde que empieza la experiencia y
+    | durante las horas indicadas. Quien acumula el límite de ausencias en los
+    | últimos meses no puede pedir reservas nuevas hasta que Tinku lo revise.
+    |
+    */
+
+    'no_shows' => [
+        'mark_window_hours' => (int) env('TINKU_NO_SHOW_WINDOW_HOURS', 72),
+        'limit' => (int) env('TINKU_NO_SHOW_LIMIT', 3),
+        'months' => (int) env('TINKU_NO_SHOW_MONTHS', 12),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Indexación en buscadores
     |--------------------------------------------------------------------------
     |

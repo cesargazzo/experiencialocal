@@ -18,7 +18,7 @@
     <section class="wizard__panel" id="reservas">
       <h2>Reservas por confirmar</h2>
       @forelse ($pendingBookings as $booking)
-        @include('host.partials.booking', ['booking' => $booking, 'pending' => true])
+        @include('host.partials.booking', ['booking' => $booking, 'pending' => true, 'noShowCount' => $noShows[$booking->user_id] ?? 0])
       @empty
         <p class="hint">No tenés reservas esperando. Cuando alguien pida lugar, te avisamos acá y por mail.</p>
       @endforelse
@@ -26,7 +26,15 @@
       @if ($confirmedBookings->isNotEmpty())
         <h2 style="margin-top:32px">Próximas confirmadas</h2>
         @foreach ($confirmedBookings as $booking)
-          @include('host.partials.booking', ['booking' => $booking, 'pending' => false])
+          @include('host.partials.booking', ['booking' => $booking, 'pending' => false, 'noShowCount' => $noShows[$booking->user_id] ?? 0])
+        @endforeach
+      @endif
+
+      @if ($bookingsToClose->isNotEmpty())
+        <h2 style="margin-top:32px">Para cerrar</h2>
+        <p class="hint" style="margin-top:-4px">Si alguien no vino y no te avisó, marcalo dentro de las {{ config('tinku.no_shows.mark_window_hours') }} horas desde el inicio. No hay devolución y, si le pasa seguido, deja de poder reservar.</p>
+        @foreach ($bookingsToClose as $booking)
+          @include('host.partials.booking', ['booking' => $booking, 'pending' => false, 'closing' => true])
         @endforeach
       @endif
     </section>

@@ -25,13 +25,13 @@ class HostEarningsController extends Controller
         $experienceIds = $profile->experiences()->pluck('id');
         $bookings = Booking::query()
             ->whereIn('experience_id', $experienceIds)
-            ->whereIn('status', [BookingStatus::Requested, BookingStatus::Confirmed, BookingStatus::Completed])
+            ->whereIn('status', [BookingStatus::Requested, BookingStatus::Confirmed, ...BookingStatus::settled()])
             ->with(['date', 'experience', 'user'])
             ->get()
             ->sortByDesc(fn (Booking $booking) => $booking->date->starts_at)
             ->values();
 
-        $completed = $bookings->where('status', BookingStatus::Completed);
+        $completed = $bookings->whereIn('status', BookingStatus::settled());
         $upcomingConfirmed = $bookings->where('status', BookingStatus::Confirmed)->filter(fn (Booking $b) => $b->date->starts_at->isFuture());
         $requested = $bookings->where('status', BookingStatus::Requested)->filter(fn (Booking $b) => $b->date->starts_at->isFuture());
 

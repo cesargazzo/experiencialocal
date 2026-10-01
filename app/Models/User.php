@@ -436,6 +436,20 @@ class User extends Authenticatable implements HasLocalePreference
         return $this->suspended_at !== null;
     }
 
+    /** Reservas a las que no se presentó en el período que mira Tinku (config tinku.no_shows.months). */
+    public function recentNoShowsCount(): int
+    {
+        return $this->bookings()
+            ->where('status', BookingStatus::NoShow)
+            ->where('no_show_at', '>=', now()->subMonths(config('tinku.no_shows.months')))
+            ->count();
+    }
+
+    public function hasReachedNoShowLimit(): bool
+    {
+        return $this->recentNoShowsCount() >= config('tinku.no_shows.limit');
+    }
+
     /**
      * Asigna una contraseña de única vez: vence a las 24 horas y obliga a
      * elegir una nueva en el primer ingreso. Devuelve la contraseña en claro

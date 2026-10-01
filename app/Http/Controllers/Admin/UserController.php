@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\VerificationLevel;
+use App\Exceptions\BookingException;
 use App\Exceptions\VerificationException;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Booking;
 use App\Models\IdentityVerification;
 use App\Models\Province;
 use App\Models\SecurityEvent;
 use App\Models\User;
+use App\Services\BookingService;
 use App\Services\SecurityLog;
 use App\Services\VerificationService;
 use App\Support\CountryList;
@@ -159,6 +162,7 @@ class UserController extends Controller
             'user' => $user,
             'events' => SecurityEvent::query()->where('user_id', $user->id)->orWhere('email', $user->email)->latest('created_at')->limit(30)->get(),
             'levels' => VerificationLevel::cases(),
+            'bookings' => $user->bookings()->with(['date', 'experience'])->latest()->limit(20)->get(),
             'samePhone' => $user->phone_hash ? User::query()->where('phone_hash', $user->phone_hash)->whereKeyNot($user->getKey())->get(['id', 'name', 'email']) : collect(),
             'auditLogs' => AuditLog::query()->with('user')
                 ->where(fn ($q) => $q->where('auditable_type', User::class)->where('auditable_id', (string) $user->id))
@@ -249,5 +253,21 @@ class UserController extends Controller
         $securityLog->record('user.suspended', $request->user(), ['account' => $user->email, 'account_id' => $user->id, 'reason' => $data['reason']], null, 'danger');
 
         return back()->with('status', 'Suspendimos la cuenta. Pierde la sesión en su próximo paso.');
+    }
+
+    /** Una ausencia mal marcada por el anfitrión: la reserva vuelve a contar como realizada. */
+    public function revertNoShow(Request $request, User $user, Booking $booking, BookingService $bookings, SecurityLog $securityLog): RedirectResponse
+    {
+        abort_unless($booking->user_id === $user->id, 404);
+        $data = $request->validateWithBag('noShow', ['reason' => ['required', 'string', 'min:5', 'max:300']], ['reason.required' => 'Contá qué revisaste.']);
+
+        try {
+            $bookings->revertNoShow($booking);
+        } catch (BookingException $e) {
+            return back()->withErrors(['booking' => $e->getMessage()]);
+        }
+        $securityLog->record('booking.no_show_reverted', $request->user(), ['account' => $user->email, 'account_id' => $user->id, 'booking' => $booking->code, 'reason' => $data['reason']], null, 'warning');
+
+        return back()->with('status', "Revertimos la ausencia de la reserva {$booking->code}. Le avisamos.");
     }
 }

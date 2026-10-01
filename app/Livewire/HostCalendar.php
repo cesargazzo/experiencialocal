@@ -110,7 +110,7 @@ class HostCalendar extends Component
         }
 
         $selected = $this->selectedId ? $dates->firstWhere('id', $this->selectedId) : null;
-        $selected?->load(['bookings' => fn ($q) => $q->whereIn('status', [BookingStatus::Requested, BookingStatus::Confirmed, BookingStatus::Completed])->with('user')]);
+        $selected?->load(['bookings' => fn ($q) => $q->whereIn('status', [BookingStatus::Requested, BookingStatus::Confirmed, ...BookingStatus::settled()])->with('user')]);
 
         return view('livewire.host-calendar', [
             'monthLabel' => ucfirst($start->translatedFormat('F Y')),

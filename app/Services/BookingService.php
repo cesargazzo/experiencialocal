@@ -26,6 +26,12 @@ class BookingService
         if ($user->isSuspended()) {
             throw new BookingException(__('Tu cuenta está suspendida.'));
         }
+        if ($user->hasReachedNoShowLimit()) {
+            throw new BookingException(__('Por ahora no podés pedir reservas: no te presentaste a :count experiencias en los últimos :months meses. Si hubo un error, escribinos desde Ayuda.', [
+                'count' => $user->recentNoShowsCount(),
+                'months' => config('tinku.no_shows.months'),
+            ]));
+        }
         if (! $user->hasVerificationLevel(VerificationLevel::Document)) {
             throw new BookingException(__('Para reservar necesitás validar tu documento de identidad.'));
         }
@@ -141,6 +147,41 @@ class BookingService
         $isGuest
             ? $booking->experience->host->user->notify(new BookingUpdatedNotification($booking, BookingUpdatedNotification::CANCELLED_BY_GUEST))
             : $booking->user->notify(new BookingUpdatedNotification($booking, BookingUpdatedNotification::CANCELLED_BY_HOST));
+
+        return $booking;
+    }
+
+    /** El anfitrión avisa que la persona no vino: no hay devolución y cuenta para el límite de ausencias. */
+    public function markNoShow(Booking $booking, User $host): Booking
+    {
+        $this->assertHostOwns($booking, $host);
+        if (! $booking->canBeMarkedNoShow()) {
+            throw new BookingException(__('Esta reserva ya no se puede marcar como ausente.'));
+        }
+
+        $booking->forceFill([
+            'status' => BookingStatus::NoShow,
+            'no_show_at' => now(),
+            'completed_at' => null,
+            'refund_percent' => 0,
+        ])->save();
+        $booking->user->notify(new BookingUpdatedNotification($booking, BookingUpdatedNotification::NO_SHOW));
+
+        return $booking;
+    }
+
+    /** Tinku revisa una ausencia mal marcada: la reserva vuelve a contar como realizada y se puede opinar. */
+    public function revertNoShow(Booking $booking): Booking
+    {
+        $this->assertStatus($booking, BookingStatus::NoShow);
+
+        $booking->forceFill([
+            'status' => BookingStatus::Completed,
+            'no_show_at' => null,
+            'completed_at' => now(),
+            'refund_percent' => null,
+        ])->save();
+        $booking->user->notify(new BookingUpdatedNotification($booking, BookingUpdatedNotification::NO_SHOW_REVERTED));
 
         return $booking;
     }

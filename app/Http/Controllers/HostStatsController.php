@@ -39,7 +39,7 @@ class HostStatsController extends Controller
         $requests = Booking::query()->whereIn('experience_id', $ids)->where('created_at', '>=', $since)
             ->selectRaw('experience_id, count(*) as total')->groupBy('experience_id')->pluck('total', 'experience_id');
         $confirmed = Booking::query()->whereIn('experience_id', $ids)->where('created_at', '>=', $since)
-            ->whereIn('status', [BookingStatus::Confirmed, BookingStatus::Completed])
+            ->whereIn('status', [BookingStatus::Confirmed, ...BookingStatus::settled()])
             ->selectRaw('experience_id, count(*) as total')->groupBy('experience_id')->pluck('total', 'experience_id');
         $favorites = DB::table('favorites')->whereIn('experience_id', $ids)->selectRaw('experience_id, count(*) as total')->groupBy('experience_id')->pluck('total', 'experience_id');
 

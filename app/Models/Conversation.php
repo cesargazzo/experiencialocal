@@ -90,7 +90,7 @@ class Conversation extends Model
         return Booking::query()
             ->where('experience_id', $this->experience_id)
             ->where('user_id', $this->guest_id)
-            ->whereIn('status', [BookingStatus::Confirmed, BookingStatus::Completed])
+            ->whereIn('status', [BookingStatus::Confirmed, ...BookingStatus::settled()])
             ->exists();
     }
 

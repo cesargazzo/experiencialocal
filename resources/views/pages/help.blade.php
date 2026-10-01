@@ -12,6 +12,7 @@
       <details><summary>Tengo una alergia o una dieta especial</summary><p>Cargala en <a href="{{ route('cuenta.perfil') }}#alimentacion">tu perfil</a>. Al reservar te mostramos qué cubre cada experiencia y se la pasamos al anfitrión con tu reserva.</p></details>
       <details><summary>¿Cómo cancelo?</summary><p>Desde Tus reservas, con "Cancelá la reserva". Le avisamos al anfitrión y se liberan los lugares. Antes de confirmar te mostramos cuánto se te devuelve.</p></details>
       <details><summary>¿Cuánto se devuelve si cancelo?</summary><p>Depende de la política que eligió el anfitrión, que figura en cada experiencia y queda fija en tu reserva: <strong>flexible</strong> (sin costo hasta 24 horas antes), <strong>moderada</strong> (sin costo hasta 3 días antes y el 50% hasta 24 horas antes) o <strong>estricta</strong> (sin costo hasta 7 días antes y el 50% hasta 3 días antes). Si todavía no te confirmaron, no se cobró nada. Si cancela el anfitrión, se devuelve todo. Si no te presentás, no hay devolución.</p></details>
+      <details><summary>¿Y si no voy y no cancelo?</summary><p>El anfitrión te esperó y guardó tu lugar, así que no hay devolución y la reserva queda como "No se presentó". Si te pasa {{ config('tinku.no_shows.limit') }} veces en {{ config('tinku.no_shows.months') }} meses, no vas a poder pedir reservas nuevas hasta que lo revisemos. Si fuiste o hubo un problema, escribinos (abajo) con el código de la reserva y lo revisamos.</p></details>
       <details><summary>¿Cómo dejo una opinión?</summary><p>Después de la experiencia te llega "¿Cómo te fue?". Opinan solo quienes fueron, una vez por reserva.</p></details>
     </section>
 
@@ -20,6 +21,8 @@
       <details><summary>¿Qué necesito para ser anfitrión?</summary><p>Validar tu documento. Con eso cargás tu experiencia y la revisamos antes de publicarla. Para publicar sin restricciones también validamos tu domicilio.</p></details>
       <details><summary>¿Por qué mi experiencia está "en revisión"?</summary><p>Revisamos cada experiencia nueva y cada cambio de texto o foto, para cuidar a todos. Te avisamos cuando está aprobada. Mientras tanto la podés editar desde <a href="{{ route('anfitrion.panel') }}">tu espacio de anfitrión</a>.</p></details>
       <details><summary>¿Cómo cargo fechas?</summary><p>En tu experiencia, sección Fechas: una suelta o varias de una vez, eligiendo los días de la semana y un rango.</p></details>
+      <details><summary>¿Qué hago si alguien no vino?</summary><p>En <a href="{{ route('anfitrion.panel') }}#reservas">tu panel</a>, sección "Para cerrar", marcá "No vino" dentro de las {{ config('tinku.no_shows.mark_window_hours') }} horas desde el inicio. No se le devuelve nada y, si le pasa seguido, deja de poder reservar. Usalo solo si no vino ni avisó: la persona puede pedirnos que lo revisemos.</p></details>
+      <details><summary>¿Puedo elegir hasta cuándo se cancela sin costo?</summary><p>Sí. En tu experiencia, sección "Precio, cupos y datos prácticos", elegí la política: flexible, moderada o estricta. Rige para las reservas nuevas.</p></details>
       <details><summary>¿Cuánto cobra Tinku?</summary><p>Depende de tu plan: mirá los <a href="{{ route('home') }}#planes">planes</a>. En el alta te mostramos cuánto recibís por persona.</p></details>
     </section>
 

@@ -5,6 +5,9 @@
     <p class="host-booking__who">
       <strong>{{ $guest->name }}</strong>
       <x-verification-badge :level="$guest->verification_level" full />
+      @if (($noShowCount ?? 0) > 0)
+        <span class="badge badge--espera">{{ $noShowCount === 1 ? 'No se presentó 1 vez' : "No se presentó {$noShowCount} veces" }} en el último año</span>
+      @endif
     </p>
     <p class="hint" style="margin:2px 0 0">
       {{ $guest->locationLabel() ?? 'Sin ciudad cargada' }}
@@ -30,7 +33,11 @@
     @if ($pending)
       <div class="host-booking__actions">
         <form method="post" action="{{ route('anfitrion.reservas.confirmar', $booking) }}">@csrf<button class="btn btn--primary btn--sm">Confirmá</button></form>
-        <form method="post" action="{{ route('anfitrion.reservas.rechazar', $booking) }}" onsubmit="return confirm('¿Rechazás la reserva de {{ Str::before($guest->name.' ', ' ') }}? Le avisamos y no se le cobra nada.')">@csrf<button class="btn btn--tertiary btn--sm">Rechazá</button></form>
+        <form method="post" action="{{ route('anfitrion.reservas.rechazar', $booking) }}" onsubmit="return confirm(@js('¿Rechazás la reserva de '.Str::before($guest->name.' ', ' ').'? Le avisamos y no se le cobra nada.'))">@csrf<button class="btn btn--tertiary btn--sm">Rechazá</button></form>
+      </div>
+    @elseif (($closing ?? false) && $booking->canBeMarkedNoShow())
+      <div class="host-booking__actions">
+        <form method="post" action="{{ route('anfitrion.reservas.no-vino', $booking) }}" onsubmit="return confirm(@js('¿Confirmás que '.Str::before($guest->name.' ', ' ').' no vino ni avisó? No se le devuelve nada y puede pedirnos que lo revisemos.'))">@csrf<button class="btn btn--tertiary btn--sm">No vino</button></form>
       </div>
     @endif
   </div>

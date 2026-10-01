@@ -48,7 +48,7 @@
                   <td style="text-align:right;white-space:nowrap">{{ money($booking->subtotal) }}</td>
                   <td style="text-align:right;white-space:nowrap">− {{ money($booking->commission_amount) }}</td>
                   <td style="text-align:right;white-space:nowrap"><strong>{{ money($booking->host_payout) }}</strong></td>
-                  <td>@if ($booking->status === \App\Enums\BookingStatus::Completed)<span class="badge badge--ok">Realizada</span>@else<span class="badge badge--nivel-1">Confirmada</span>@endif</td>
+                  <td>@if ($booking->status === \App\Enums\BookingStatus::Completed)<span class="badge badge--ok">Realizada</span>@elseif ($booking->status === \App\Enums\BookingStatus::NoShow)<span class="badge badge--espera">No se presentó</span>@else<span class="badge badge--nivel-1">Confirmada</span>@endif</td>
                 </tr>
               @endforeach
             </tbody>

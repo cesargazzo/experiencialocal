@@ -5,7 +5,7 @@
       \App\Enums\BookingStatus::Requested => 'badge--espera',
       \App\Enums\BookingStatus::Confirmed => 'badge--ok',
       \App\Enums\BookingStatus::Completed => 'badge--nivel-2',
-      \App\Enums\BookingStatus::Declined, \App\Enums\BookingStatus::Cancelled => 'badge--error',
+      \App\Enums\BookingStatus::Declined, \App\Enums\BookingStatus::Cancelled, \App\Enums\BookingStatus::NoShow => 'badge--error',
       default => 'badge--nivel-1',
   };
 @endphp
@@ -33,6 +33,9 @@
     @endif
     @if ($booking->status === \App\Enums\BookingStatus::Cancelled && $booking->refund_percent !== null && $booking->confirmed_at)
       <p class="hint" style="margin:8px 0 0">{{ $booking->refund_percent > 0 ? __('Se te devuelve el :percent% de lo que pagaste.', ['percent' => $booking->refund_percent]) : __('Por la política de cancelación no hubo devolución.') }}</p>
+    @endif
+    @if ($booking->status === \App\Enums\BookingStatus::NoShow)
+      <p class="hint" style="margin:8px 0 0">{{ __('El anfitrión marcó que no fuiste, así que no hay devolución.') }} <a href="{{ route('ayuda') }}">{{ __('¿Fuiste o hubo un problema? Escribinos y lo revisamos.') }}</a></p>
     @endif
     @if ($booking->review)
       <p class="host-booking__note" style="margin:10px 0 0"><strong>{{ __('Tu opinión:') }}</strong> <x-stars :rating="$booking->review->rating" /> {{ Str::limit($booking->review->body, 140) }}</p>

@@ -48,6 +48,34 @@
       @endforelse
     </section>
 
+    <section class="wizard__panel" id="reservas">
+      <h2>Reservas</h2>
+      @php($noShowCount = $user->recentNoShowsCount())
+      <p class="hint">
+        No se presentó a {{ plural_es($noShowCount, 'experiencia', 'experiencias') }} en los últimos {{ config('tinku.no_shows.months') }} meses.
+        @if ($user->hasReachedNoShowLimit())<strong>Llegó al límite de {{ config('tinku.no_shows.limit') }}: no puede pedir reservas nuevas.</strong> Revertí las ausencias mal marcadas para habilitarla.@endif
+      </p>
+      @error('booking')<p class="notice" role="alert">{{ $message }}</p>@enderror
+      @forelse ($bookings as $booking)
+        <div class="summary">
+          <div>
+            <span>{{ $booking->date->localStart()->format('d/m/Y H:i') }} · {{ $booking->code }} · <a href="{{ route('experiencias.show', $booking->experience) }}">{{ $booking->experience->title }}</a></span>
+            <strong>{{ $booking->status->label() }}@if ($booking->no_show_at) · marcado el {{ $booking->no_show_at->timezone(config('tinku.timezone'))->format('d/m/Y H:i') }}@endif</strong>
+          </div>
+        </div>
+        @if ($booking->status === \App\Enums\BookingStatus::NoShow && auth()->user()->can('team.users.suspend'))
+          <form method="post" action="{{ route('admin.usuarios.reservas.revertir-ausencia', [$user, $booking]) }}" class="inline-form" style="display:flex;gap:8px;align-items:flex-end;margin:4px 0 12px">
+            @csrf
+            <div class="field" style="flex:1;margin:0"><label for="revert-{{ $booking->id }}">Qué revisaste</label><input id="revert-{{ $booking->id }}" name="reason" required minlength="5" maxlength="300" placeholder="Ej.: el anfitrión confirmó que sí fue"></div>
+            <button class="btn btn--secondary btn--sm" type="submit">Revertí la ausencia</button>
+          </form>
+        @endif
+      @empty
+        <p class="hint">No hizo reservas.</p>
+      @endforelse
+      @error('reason', 'noShow')<span class="error" style="display:block">{{ $message }}</span>@enderror
+    </section>
+
     @can('team.users.verify')
     <section class="wizard__panel">
       <h2>Validar a mano</h2>

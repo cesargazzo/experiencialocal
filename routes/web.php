@@ -123,6 +123,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/anfitrion/estadisticas', HostStatsController::class)->name('anfitrion.estadisticas');
     Route::post('/anfitrion/reservas/{booking}/confirmar', [HostBookingController::class, 'confirm'])->name('anfitrion.reservas.confirmar');
     Route::post('/anfitrion/reservas/{booking}/rechazar', [HostBookingController::class, 'decline'])->name('anfitrion.reservas.rechazar');
+    Route::post('/anfitrion/reservas/{booking}/no-vino', [HostBookingController::class, 'noShow'])->name('anfitrion.reservas.no-vino');
     Route::get('/anfitrion/experiencias/{experience}', ManageExperience::class)->name('anfitrion.experiencias.editar');
     Route::get('/anfitrion/registro', HostOnboarding::class)->middleware('verified.level:2')->name('anfitrion.registro');
 
@@ -141,6 +142,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/usuarios/{user}/verificaciones/{verification}/revocar', [UserController::class, 'revokeVerification'])->name('usuarios.verificaciones.revocar');
         });
         Route::post('/usuarios/{user}/suspension', [UserController::class, 'toggleSuspension'])->middleware('can:team.users.suspend')->name('usuarios.suspension');
+        Route::post('/usuarios/{user}/reservas/{booking}/revertir-ausencia', [UserController::class, 'revertNoShow'])->middleware('can:team.users.suspend')->name('usuarios.reservas.revertir-ausencia');
 
         Route::middleware('can:team.experiences.moderate')->group(function () {
             Route::get('/experiencias', [AdminExperienceController::class, 'index'])->name('experiencias');
