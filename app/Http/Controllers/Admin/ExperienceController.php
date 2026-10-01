@@ -26,7 +26,7 @@ class ExperienceController extends Controller
         ]);
 
         $inReview = Experience::query()
-            ->with(['host.user', 'category', 'province', 'cover', 'latestCoverUpload'])
+            ->with(['host.user', 'category', 'province', 'cover', 'latestCoverUpload', 'latestModeration'])
             ->where('status', ExperienceStatus::InReview)
             ->oldest('updated_at')
             ->get();
@@ -59,7 +59,7 @@ class ExperienceController extends Controller
 
     public function show(Experience $experience): View
     {
-        $experience->load(['host.user', 'category', 'province', 'cover', 'latestCoverUpload', 'approver', 'upcomingDates']);
+        $experience->load(['host.user', 'category', 'province', 'cover', 'latestCoverUpload', 'approver', 'upcomingDates', 'latestModeration']);
 
         return view('admin.experience', [
             'experience' => $experience,

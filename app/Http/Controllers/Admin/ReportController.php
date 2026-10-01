@@ -32,9 +32,19 @@ class ReportController extends Controller
 
     public function dismiss(Request $request, Message $message, SecurityLog $securityLog): RedirectResponse
     {
-        $message->forceFill(['reported_at' => null, 'report_reason' => null, 'reported_by' => null])->save();
+        // Estaba bien: se descarta la denuncia y, si la revisión automática lo había retenido, se libera.
+        $message->forceFill(['reported_at' => null, 'report_reason' => null, 'reported_by' => null, 'hidden_at' => null])->save();
         $securityLog->record('admin.report_dismissed', $request->user(), ['message_id' => $message->id]);
 
         return back()->with('status', 'Descartamos la denuncia.');
+    }
+
+    /** Correspondía: el mensaje queda oculto para quien lo recibió y sale de la lista. */
+    public function hide(Request $request, Message $message, SecurityLog $securityLog): RedirectResponse
+    {
+        $message->forceFill(['reported_at' => null, 'hidden_at' => $message->hidden_at ?? now()])->save();
+        $securityLog->record('admin.report_upheld', $request->user(), ['message_id' => $message->id], null, 'warning');
+
+        return back()->with('status', 'El mensaje quedó oculto.');
     }
 }

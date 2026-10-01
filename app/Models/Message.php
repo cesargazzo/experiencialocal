@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasModerationReviews;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,9 +11,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Mensaje de una conversación. El texto se guarda cifrado con la clave de la
  * aplicación y no pasa por la auditoría.
  */
-#[Fillable(['conversation_id', 'sender_id', 'body', 'contact_redacted', 'reported_at', 'reported_by', 'report_reason'])]
+#[Fillable(['conversation_id', 'sender_id', 'body', 'contact_redacted', 'reported_at', 'reported_by', 'report_reason', 'hidden_at'])]
 class Message extends Model
 {
+    use HasModerationReviews;
+
     public const UPDATED_AT = null;
 
     public const REDACTED = '[dato de contacto oculto]';
@@ -23,6 +26,7 @@ class Message extends Model
             'body' => 'encrypted',
             'contact_redacted' => 'boolean',
             'reported_at' => 'datetime',
+            'hidden_at' => 'datetime',
         ];
     }
 

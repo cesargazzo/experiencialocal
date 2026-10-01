@@ -28,6 +28,9 @@
         <span class="hint">JPG, PNG o WebP de al menos 200 × 200 px.</span>
       @endif
       @error('photo')<span class="error" style="display:block">{{ $message }}</span>@enderror
+      @if (! $waiting && $user->latestAvatarUpload?->status === 'rejected')
+        <span class="error" style="display:block">Tu última foto no cumple las normas de Tinku y no se muestra. Probá con otra en la que se te vea a vos.</span>
+      @endif
     </div>
   </div>
 </section>

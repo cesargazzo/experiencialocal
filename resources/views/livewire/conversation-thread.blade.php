@@ -10,11 +10,16 @@
     @forelse ($messages as $message)
       @php($mine = $message->sender_id === $me->id)
       <div @class(['bubble', 'bubble--mine' => $mine]) wire:key="message-{{ $message->id }}">
-        <p class="bubble__text">{{ $message->body }}</p>
+        @if ($message->hidden_at && ! $mine)
+          <p class="bubble__text hint"><em>Retuvimos este mensaje para revisarlo. Si está todo bien, lo vas a ver acá.</em></p>
+        @else
+          <p class="bubble__text">{{ $message->body }}</p>
+          @if ($message->hidden_at)<p class="hint" style="margin:4px 0 0"><em>Lo retuvimos para revisarlo: la otra persona todavía no lo ve.</em></p>@endif
+        @endif
         <small class="bubble__meta">
           {{ $mine ? 'Vos' : $message->sender->publicName() }} · {{ $message->created_at->timezone(config('tinku.timezone'))->format('d/m H:i') }}
           @if ($message->contact_redacted) · se ocultaron datos de contacto @endif
-          @if (! $mine)
+          @if (! $mine && ! $message->hidden_at)
             @if ($message->reported_at)
               · denunciado
             @else

@@ -43,6 +43,8 @@ class SecurityEvent extends Model
         'admin.granted' => 'Permiso de administración',
         'admin.revoked' => 'Permiso de administración quitado',
         'team.role_changed' => 'Cambio de rol en el equipo',
+        'moderation.flagged' => 'Marcado por la revisión automática',
+        'admin.report_upheld' => 'Mensaje denunciado ocultado',
         'policy.updated' => 'Política de contraseñas',
         'verification.approved' => 'Verificación aprobada',
         'verification.revoked' => 'Verificación revocada',

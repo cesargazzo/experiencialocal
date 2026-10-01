@@ -35,6 +35,11 @@ return [
         ],
     ],
 
+    'anthropic' => [
+        // Clave de la API de Claude para la revisión automática de contenido.
+        'key' => env('ANTHROPIC_API_KEY'),
+    ],
+
     'google_analytics' => [
         // ID de medición de Google Analytics 4, por ejemplo G-XXXXXXXXXX. Vacío: no se carga.
         'id' => env('GOOGLE_ANALYTICS_ID'),

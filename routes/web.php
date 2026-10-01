@@ -138,6 +138,7 @@ Route::middleware('auth')->group(function () {
         Route::middleware('can:team.reports.handle')->group(function () {
             Route::get('/denuncias', [ReportController::class, 'index'])->name('denuncias');
             Route::post('/denuncias/{message}/descartar', [ReportController::class, 'dismiss'])->name('denuncias.descartar');
+            Route::post('/denuncias/{message}/ocultar', [ReportController::class, 'hide'])->name('denuncias.ocultar');
         });
 
         Route::middleware('can:team.security.view')->group(function () {

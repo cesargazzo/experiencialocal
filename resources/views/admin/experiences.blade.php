@@ -29,6 +29,9 @@
               <x-admin-user-link :user="$experience->host->user" :label="$experience->host->display_name" />
               <x-verification-badge :level="$experience->host->user->verification_level" />
             </p>
+@if ($ai = $experience->latestModeration)
+              <p class="ai-review"><span class="badge {{ $ai->verdict->badgeClass() }}">{{ $ai->verdict->label() }}</span> @if ($ai->reason){{ $ai->reason }}@endif @if ($ai->categories)<small class="hint">({{ implode(', ', $ai->categories) }})</small>@endif</p>
+            @endif
             <p style="margin:0 0 6px"><strong>{{ $experience->summary }}</strong></p>
             <details><summary>Descripción</summary><p style="white-space:pre-line">{{ $experience->description }}</p></details>
             @if ($experience->dietary_options?->isNotEmpty())

@@ -6,8 +6,10 @@ use App\Enums\DietaryOption;
 use App\Enums\Difficulty;
 use App\Enums\ExperienceFeature;
 use App\Enums\ExperienceStatus;
+use App\Jobs\ModerateContent;
 use App\Jobs\NotifyInterestedUsers;
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasModerationReviews;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
@@ -27,6 +29,7 @@ class Experience extends Model
 {
     use Auditable;
     use HasFactory;
+    use HasModerationReviews;
 
     protected function casts(): array
     {
@@ -46,12 +49,23 @@ class Experience extends Model
         ];
     }
 
+    /** @var list<string> Textos que revisa la IA. */
+    public const MODERATED_FIELDS = ['title', 'type_label', 'summary', 'description', 'what_to_bring'];
+
     protected static function booted(): void
     {
         // Al publicarse, se avisa a quienes tienen intereses que coinciden.
         static::saved(function (Experience $experience): void {
-            if ($experience->status === ExperienceStatus::Published && ($experience->wasRecentlyCreated || $experience->wasChanged('status'))) {
+            // wasRecentlyCreated sigue en true en los guardados siguientes de la misma instancia: solo cuenta el alta.
+            $justCreated = $experience->wasRecentlyCreated && $experience->getChanges() === [];
+
+            if ($experience->status === ExperienceStatus::Published && ($justCreated || $experience->wasChanged('status'))) {
                 NotifyInterestedUsers::dispatch($experience, 'published')->afterCommit()->delay(now()->addMinute());
+            }
+
+            // Revisión automática con IA cada vez que entra a revisión o cambia el texto mientras espera.
+            if ($experience->status === ExperienceStatus::InReview && ($justCreated || $experience->wasChanged(['status', ...self::MODERATED_FIELDS]))) {
+                ModerateContent::experience($experience);
             }
         });
     }

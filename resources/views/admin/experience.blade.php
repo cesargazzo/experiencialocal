@@ -8,6 +8,10 @@
       <a href="{{ route('experiencias.show', $experience) }}">Mirá la ficha</a>
     </p>
 
+    @if ($ai = $experience->latestModeration)
+      <p class="ai-review"><span class="badge {{ $ai->verdict->badgeClass() }}">{{ $ai->verdict->label() }}</span> @if ($ai->reason){{ $ai->reason }}@endif <small class="hint">· {{ $ai->created_at->diffForHumans() }}</small></p>
+    @endif
+
     @if ($experience->paused_reason)
       <p class="notice">Pausada. Motivo: {{ $experience->paused_reason }}</p>
     @elseif ($experience->rejection_reason)

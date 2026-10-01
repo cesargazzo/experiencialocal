@@ -215,6 +215,7 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--font-titulos); font-weight: 700; 
 .kpi:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
 .kpi.is-active { background: var(--petroleo); color: var(--en-petroleo); box-shadow: none; }
 .kpi.is-active .kpi__lbl { color: var(--en-petroleo); }
+.ai-review { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; margin: 0 0 8px; font-size: 14px; line-height: 20px; }
 .team-matrix td:not(:first-child), .team-matrix th:not(:first-child) { text-align: center; }
 .team-matrix .icon { display: inline-block; color: var(--texto-petroleo); }
 .team-matrix td:first-child { min-width: 200px; }

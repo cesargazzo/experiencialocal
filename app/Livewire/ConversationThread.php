@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Jobs\ModerateContent;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Notifications\NewMessageNotification;
@@ -59,7 +60,8 @@ class ConversationThread extends Component
         $recipientHadUnread = $this->conversation->hasUnreadFor($recipient);
 
         DB::transaction(function () use ($user, $text, $redacted): void {
-            $this->conversation->messages()->create(['sender_id' => $user->id, 'body' => $text, 'contact_redacted' => $redacted]);
+            $message = $this->conversation->messages()->create(['sender_id' => $user->id, 'body' => $text, 'contact_redacted' => $redacted]);
+            ModerateContent::message($message);
             $this->conversation->forceFill(['last_message_at' => now()])->save();
             $this->conversation->markReadBy($user);
         });

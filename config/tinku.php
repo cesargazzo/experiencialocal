@@ -78,6 +78,15 @@ return [
     // Apagado hasta que se decida abrir el sitio a los buscadores: se prende con TINKU_INDEXABLE=true.
     'indexable' => (bool) env('TINKU_INDEXABLE', false),
 
+    /*
+    | Revisión automática con IA (Claude) de experiencias, fotos y mensajes.
+    | Apagada por defecto: se prende con TINKU_AI_MODERATION=true y ANTHROPIC_API_KEY.
+    */
+    'moderation' => [
+        'enabled' => (bool) env('TINKU_AI_MODERATION', false),
+        'model' => env('TINKU_AI_MODEL', 'claude-opus-5-5'),
+    ],
+
     // Interruptor general del doble factor (TOTP). Apagado no se pide código al ingresar ni para
     // la administración y la sección no aparece; lo ya configurado se conserva para cuando se prenda.
     'two_factor' => (bool) env('TINKU_TWO_FACTOR', true),

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasModerationReviews;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
 class Media extends Model
 {
     use Auditable;
+    use HasModerationReviews;
 
     /** @var list<string> */
     protected array $auditExclude = ['variants', 'size'];
