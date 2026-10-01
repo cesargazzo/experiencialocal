@@ -94,6 +94,7 @@
         <span wire:loading>{{ __('Enviando…') }}</span>
       </button>
       <p class="hint" style="text-align:center;margin:12px 0 0">{{ __('No se cobra hasta que el anfitrión confirme.') }}</p>
+      <p class="hint" style="text-align:center;margin:4px 0 0">{{ __('Cancelación :policy:', ['policy' => Str::lower($experience->cancellation_policy->label())]) }} {{ $experience->cancellation_policy->lines()[0] }}</p>
     </form>
   @endif
 </div>

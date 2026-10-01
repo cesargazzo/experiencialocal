@@ -90,6 +90,16 @@
       <div class="field"><label for="max_guests">Cupos por fecha</label><input id="max_guests" type="number" min="1" max="50" wire:model="max_guests">@error('max_guests')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
       <div class="field"><label for="duration_hours">Duración (horas)</label><input id="duration_hours" type="number" min="1" max="24" wire:model="duration_hours">@error('duration_hours')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
     </div>
+    <fieldset class="field" style="border:0;padding:0;margin:24px 0 0">
+      <legend style="font-weight:600;margin-bottom:4px">Política de cancelación</legend>
+      <span class="hint" style="display:block;margin-bottom:8px">Quien reserva la ve antes de pedir. Si la cambiás, rige para las reservas nuevas: las que ya existen mantienen la que aceptaron.</span>
+      <div style="display:grid;gap:8px">
+        @foreach (\App\Enums\CancellationPolicy::cases() as $policy)
+          <label class="choice" style="align-items:flex-start"><input type="radio" wire:model="cancellation_policy" value="{{ $policy->value }}" style="margin-top:1px"> <span style="display:block"><strong>{{ $policy->label() }}{{ $policy === \App\Enums\CancellationPolicy::Moderate ? ' (la más elegida)' : '' }}</strong><br><small style="color:var(--tinta-suave)">{{ $policy->summary() }}</small></span></label>
+        @endforeach
+      </div>
+      @error('cancellation_policy')<span class="error" style="display:block">{{ $message }}</span>@enderror
+    </fieldset>
     @include('livewire.partials.experience-details')
 
     <h2 style="margin-top:32px">Contenido</h2>

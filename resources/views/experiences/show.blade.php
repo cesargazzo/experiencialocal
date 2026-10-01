@@ -170,7 +170,7 @@
         <div class="detail-block"><h2>{{ __('Condiciones') }}</h2>
           <ul>
             <li>{{ __('El pago se realiza dentro de Tinku y se cobra recién cuando el anfitrión confirma.') }}</li>
-            <li>{{ __('Cancelación gratuita hasta 48 horas antes. Después, se retiene el 50%.') }}</li>
+            <li><strong>{{ __('Cancelación :policy:', ['policy' => Str::lower($experience->cancellation_policy->label())]) }}</strong> {{ $experience->cancellation_policy->summary() }} {{ __('Si cancela el anfitrión, se te devuelve todo.') }}</li>
             <li>{{ __('La dirección exacta se comparte solo con reservas confirmadas.') }}</li>
             <li>{{ __('Avisá alergias o restricciones alimentarias al reservar.') }}</li>
           </ul>

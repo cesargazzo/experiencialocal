@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\BookingStatus;
+use App\Enums\CancellationPolicy;
 use App\Enums\DietaryOption;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -17,6 +18,7 @@ use Illuminate\Support\Str;
     'code', 'experience_date_id', 'experience_id', 'user_id', 'guests', 'unit_price', 'subtotal', 'service_fee_rate',
     'service_fee', 'total', 'commission_rate', 'commission_amount', 'host_payout', 'currency', 'status', 'guest_note', 'dietary_needs', 'food_allergies',
     'payment_provider', 'payment_reference', 'confirmed_at', 'declined_at', 'cancelled_at', 'paid_at', 'completed_at', 'refunded_at', 'reminders_sent',
+    'cancellation_policy', 'refund_percent',
 ])]
 class Booking extends Model
 {
@@ -31,6 +33,8 @@ class Booking extends Model
         return [
             'status' => BookingStatus::class,
             'reminders_sent' => 'array',
+            'cancellation_policy' => CancellationPolicy::class,
+            'refund_percent' => 'integer',
             'dietary_needs' => AsEnumCollection::of(DietaryOption::class),
             'unit_price' => 'decimal:2',
             'subtotal' => 'decimal:2',
@@ -79,5 +83,21 @@ class Booking extends Model
     public function canBeReviewed(): bool
     {
         return $this->status === BookingStatus::Completed && ! $this->review()->exists();
+    }
+
+    /** La política que aceptó al reservar (las reservas anteriores a las políticas quedaron como moderadas). */
+    public function cancellationPolicy(): CancellationPolicy
+    {
+        return $this->cancellation_policy ?? CancellationPolicy::Moderate;
+    }
+
+    /** Qué porcentaje se le devolvería a quien reservó si cancela ahora. Mientras no está confirmada no se cobró nada. */
+    public function guestRefundPercentNow(): int
+    {
+        if ($this->status !== BookingStatus::Confirmed) {
+            return 100;
+        }
+
+        return $this->cancellationPolicy()->refundPercent(max(0, now()->diffInHours($this->date->starts_at, false)));
     }
 }

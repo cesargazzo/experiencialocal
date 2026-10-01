@@ -10,7 +10,8 @@
       <details><summary>¿Puedo preguntarle algo al anfitrión antes de reservar?</summary><p>Sí. En cada experiencia, en "Quién te recibe", tocá "Preguntale a…". Los mensajes son privados y hasta que haya una reserva confirmada ocultamos teléfonos, mails y enlaces.</p></details>
       <details><summary>¿Dónde es exactamente?</summary><p>En la experiencia ves la zona aproximada. La dirección exacta y cómo llegar aparecen en Tus reservas cuando el anfitrión confirma, y te la recordamos el día anterior.</p></details>
       <details><summary>Tengo una alergia o una dieta especial</summary><p>Cargala en <a href="{{ route('cuenta.perfil') }}#alimentacion">tu perfil</a>. Al reservar te mostramos qué cubre cada experiencia y se la pasamos al anfitrión con tu reserva.</p></details>
-      <details><summary>¿Cómo cancelo?</summary><p>Desde Tus reservas, con "Cancelá la reserva". Le avisamos al anfitrión y se liberan los lugares.</p></details>
+      <details><summary>¿Cómo cancelo?</summary><p>Desde Tus reservas, con "Cancelá la reserva". Le avisamos al anfitrión y se liberan los lugares. Antes de confirmar te mostramos cuánto se te devuelve.</p></details>
+      <details><summary>¿Cuánto se devuelve si cancelo?</summary><p>Depende de la política que eligió el anfitrión, que figura en cada experiencia y queda fija en tu reserva: <strong>flexible</strong> (sin costo hasta 24 horas antes), <strong>moderada</strong> (sin costo hasta 3 días antes y el 50% hasta 24 horas antes) o <strong>estricta</strong> (sin costo hasta 7 días antes y el 50% hasta 3 días antes). Si todavía no te confirmaron, no se cobró nada. Si cancela el anfitrión, se devuelve todo. Si no te presentás, no hay devolución.</p></details>
       <details><summary>¿Cómo dejo una opinión?</summary><p>Después de la experiencia te llega "¿Cómo te fue?". Opinan solo quienes fueron, una vez por reserva.</p></details>
     </section>
 

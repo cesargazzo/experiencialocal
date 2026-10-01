@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CancellationPolicy;
 use App\Enums\DietaryOption;
 use App\Enums\Difficulty;
 use App\Enums\ExperienceFeature;
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 #[Fillable([
     'host_profile_id', 'category_id', 'title', 'slug', 'type_label', 'summary', 'description', 'city', 'province_id',
     'meeting_address', 'latitude', 'longitude', 'address_normalized_at',
-    'country_code', 'price', 'currency', 'duration_minutes', 'max_guests', 'includes', 'cover_image_url', 'status', 'published_at',
+    'country_code', 'price', 'currency', 'duration_minutes', 'max_guests', 'cancellation_policy', 'includes', 'cover_image_url', 'status', 'published_at',
     'dietary_options', 'difficulty', 'what_to_bring', 'min_age', 'features', 'approved_at', 'approved_by', 'rejection_reason', 'paused_reason',
 ])]
 class Experience extends Model
@@ -31,6 +32,11 @@ class Experience extends Model
     use Auditable;
     use HasFactory;
     use HasModerationReviews;
+
+    /** @var array<string, mixed> */
+    protected $attributes = [
+        'cancellation_policy' => 'moderate',
+    ];
 
     protected function casts(): array
     {
@@ -42,6 +48,7 @@ class Experience extends Model
             'published_at' => 'datetime',
             'dietary_options' => AsEnumCollection::of(DietaryOption::class),
             'difficulty' => Difficulty::class,
+            'cancellation_policy' => CancellationPolicy::class,
             'features' => AsEnumCollection::of(ExperienceFeature::class),
             'approved_at' => 'datetime',
             'latitude' => 'float',

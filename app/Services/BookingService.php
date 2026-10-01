@@ -82,6 +82,7 @@ class BookingService
                 'host_payout' => round($subtotal - $commission, 2),
                 'currency' => $experience->currency,
                 'status' => BookingStatus::Requested,
+                'cancellation_policy' => $experience->cancellation_policy,
                 'guest_note' => $note,
                 'dietary_needs' => $user->dietary_needs?->map->value->all() ?: null,
                 'food_allergies' => $user->food_allergies,
@@ -132,7 +133,9 @@ class BookingService
             throw new BookingException(__('Esta reserva ya no se puede cancelar.'));
         }
 
-        $this->release($booking, BookingStatus::Cancelled, 'cancelled_at');
+        // Si cancela quien reservó rige la política que aceptó al reservar; si cancela el anfitrión o Tinku, se devuelve todo.
+        $refundPercent = $isGuest ? $booking->guestRefundPercentNow() : 100;
+        $this->release($booking, BookingStatus::Cancelled, 'cancelled_at', ['refund_percent' => $refundPercent]);
 
         // Se avisa a la otra parte.
         $isGuest
@@ -150,12 +153,15 @@ class BookingService
         return $booking;
     }
 
-    private function release(Booking $booking, BookingStatus $status, string $timestampField): Booking
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function release(Booking $booking, BookingStatus $status, string $timestampField, array $attributes = []): Booking
     {
-        return DB::transaction(function () use ($booking, $status, $timestampField) {
+        return DB::transaction(function () use ($booking, $status, $timestampField, $attributes) {
             $date = ExperienceDate::query()->whereKey($booking->experience_date_id)->lockForUpdate()->firstOrFail();
             $date->decrement('booked_count', min($booking->guests, $date->booked_count));
-            $booking->forceFill(['status' => $status, $timestampField => now()])->save();
+            $booking->forceFill(['status' => $status, $timestampField => now(), ...$attributes])->save();
 
             return $booking;
         });

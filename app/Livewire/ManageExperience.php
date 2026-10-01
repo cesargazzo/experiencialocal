@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\CancellationPolicy;
 use App\Enums\ExperienceStatus;
 use App\Livewire\Concerns\EditsExperienceDetails;
 use App\Models\Category;
@@ -13,6 +14,7 @@ use App\Services\ImageService;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -55,6 +57,8 @@ class ManageExperience extends Component
 
     public ?int $max_guests = null;
 
+    public string $cancellation_policy = 'moderate';
+
     public ?TemporaryUploadedFile $cover = null;
 
     /** @var list<TemporaryUploadedFile> Fotos nuevas para la galería. */
@@ -95,6 +99,7 @@ class ManageExperience extends Component
         $this->fill($experience->only(['title', 'category_id', 'type_label', 'summary', 'description', 'max_guests']));
         $this->price = (int) $experience->price;
         $this->duration_hours = max(1, intdiv($experience->duration_minutes, 60));
+        $this->cancellation_policy = $experience->cancellation_policy->value;
         $this->fillDetailsFrom($experience);
         $this->meeting_address = $experience->meeting_address ?? '';
         $this->latitude = $experience->latitude;
@@ -118,6 +123,7 @@ class ManageExperience extends Component
             'price' => 'required|integer|min:1000',
             'duration_hours' => 'required|integer|min:1|max:24',
             'max_guests' => 'required|integer|min:1|max:50',
+            'cancellation_policy' => ['required', Rule::enum(CancellationPolicy::class)],
             'cover' => ['nullable', ImageSize::forCollection('cover')],
             ...$this->detailRules(),
         ], $this->detailMessages());
@@ -127,6 +133,7 @@ class ManageExperience extends Component
             'price' => $data['price'],
             'duration_minutes' => $data['duration_hours'] * 60,
             'max_guests' => $data['max_guests'],
+            'cancellation_policy' => $data['cancellation_policy'],
             ...$this->detailAttributes(),
         ]);
 
