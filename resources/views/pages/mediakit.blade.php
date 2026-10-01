@@ -15,13 +15,11 @@
 <x-layout :title="__('Mediakit para anunciantes')" :description="__('Quiénes usan Tinku y cómo tu marca puede acompañar experiencias con gente local.')">
   <main class="container mediakit">
     <section class="mediakit__hero">
-      <img class="print-only mediakit__print-logo" src="{{ asset('brand/tinku-principal.svg') }}" alt="Tinku">
       <p class="eyebrow">{{ __('Mediakit') }}</p>
       <h1 class="title">{!! __('Llegá a quienes viajan <span class="hl">para conocer de verdad</span>.') !!}</h1>
       <p class="lead">{{ __('Tinku conecta a personas que viajan con anfitriones locales que las reciben en su casa, su cocina o su lugar. Cada cuenta tiene la identidad validada y cada experiencia la revisa una persona del equipo.') }}</p>
-      <div class="mediakit__actions no-print">
+      <div class="mediakit__actions">
         <a class="btn btn--primary" href="#contacto">{{ __('Quiero anunciar') }}</a>
-        <button type="button" class="btn btn--tertiary" onclick="window.print()"><x-icon name="arrow-right" :size="16" /> {{ __('Descargá el mediakit en PDF') }}</button>
       </div>
     </section>
 
@@ -106,7 +104,7 @@
       </ul>
     </section>
 
-    <section class="mediakit__section wizard__panel no-print" id="contacto">
+    <section class="mediakit__section wizard__panel" id="contacto">
       <h2>{{ __('Contanos qué querés hacer') }}</h2>
       <p>{{ __('Te respondemos con una propuesta y la tarifa según el alcance.') }}</p>
       <form method="post" action="{{ route('mediakit.store') }}">
@@ -133,7 +131,5 @@
         <div class="wizard__actions"><span></span><button class="btn btn--primary" type="submit">{{ __('Enviá la consulta') }}</button></div>
       </form>
     </section>
-
-    <p class="mediakit__print-contact print-only">{{ __('Para anunciar escribinos desde :url', ['url' => route('mediakit')]) }}</p>
   </main>
 </x-layout>
