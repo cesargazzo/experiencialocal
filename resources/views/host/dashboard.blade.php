@@ -2,6 +2,7 @@
   <main class="container wizard" style="max-width:920px">
     <p class="eyebrow">Anfitrión</p>
     <h1 class="title">Hola, <span class="hl">{{ Str::before($profile->display_name.' ', ' ') }}</span>.</h1>
+    @include('host.partials.nav')
 
     @unless ($profile->isActive())
       <p class="notice">

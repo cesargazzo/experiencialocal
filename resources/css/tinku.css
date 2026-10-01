@@ -266,6 +266,36 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--font-titulos); font-weight: 700; 
 .team-matrix td:not(:first-child), .team-matrix th:not(:first-child) { text-align: center; }
 .team-matrix .icon { display: inline-block; color: var(--texto-petroleo); }
 .team-matrix td:first-child { min-width: 200px; }
+.calendar__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.calendar__head h2 { margin: 0; }
+.calendar__arrow { width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer; background: var(--superficie-calida); color: var(--tinta); font-size: 26px; line-height: 1; box-shadow: inset 0 0 0 1px var(--linea); }
+.calendar__arrow:hover { background: var(--linea); }
+.calendar { display: grid; gap: 4px; }
+.calendar__row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.calendar__row--names span { font: 600 13px/18px var(--font-texto); color: var(--tinta-suave); text-align: center; }
+.calendar__day { min-height: 96px; border-radius: var(--radio-sm); box-shadow: inset 0 0 0 1px var(--linea); padding: 6px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.calendar__day.is-other { opacity: .45; }
+.calendar__day.is-today { box-shadow: inset 0 0 0 2px var(--petroleo); }
+.calendar__num { font: 600 13px/16px var(--font-texto); color: var(--tinta-suave); }
+.calendar__item { text-align: left; border: 0; cursor: pointer; border-radius: 6px; padding: 4px 6px; font: 500 12px/15px var(--font-texto); background: #E3F4F1; color: var(--tinta); border-left: 3px solid var(--verde-agua); overflow: hidden; }
+.calendar__item small { display: block; color: var(--tinta-suave); }
+.calendar__item.has-pending { background: #FFF0DC; border-left-color: var(--naranja); }
+.calendar__item.is-full { background: #E6EEF3; border-left-color: var(--petroleo); }
+.calendar__item.is-closed { background: var(--superficie-calida); border-left-color: var(--tinta-suave); text-decoration: line-through; text-decoration-color: rgba(20, 34, 54, .35); }
+.calendar__item.is-selected { outline: 2px solid var(--petroleo); }
+.calendar__legend { margin: 12px 0 0; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: -1px; }
+.dot--open { background: var(--verde-agua); } .dot--pending { background: var(--naranja); } .dot--full { background: var(--petroleo); } .dot--closed { background: var(--tinta-suave); }
+.calendar__bookings { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+@media (max-width: 720px) {
+  .calendar__day { min-height: 56px; padding: 3px; }
+  /* En el celular cada fecha es una marca de color; el detalle aparece abajo al tocarla. */
+  .calendar__item { font-size: 0; padding: 0; height: 12px; border-left: 0; border-radius: 6px; background: var(--verde-agua); }
+  .calendar__item.has-pending { background: var(--naranja); }
+  .calendar__item.is-full { background: var(--petroleo); }
+  .calendar__item.is-closed { background: var(--tinta-suave); }
+}
+.kpis--static .kpi:hover { box-shadow: inset 0 0 0 1px var(--linea); transform: none; }
 .kpi__val { font: 700 32px/1 var(--font-titulos); letter-spacing: -0.02em; }
 .kpi__lbl { color: var(--tinta-suave); font-size: 14px; line-height: 19px; }
 

@@ -31,6 +31,8 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HostBookingController;
 use App\Http\Controllers\HostDashboardController;
+use App\Http\Controllers\HostEarningsController;
+use App\Http\Controllers\HostStatsController;
 use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PageController;
@@ -38,6 +40,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\VerificationController;
+use App\Livewire\HostCalendar;
 use App\Livewire\HostOnboarding;
 use App\Livewire\ManageExperience;
 use Illuminate\Support\Facades\Route;
@@ -107,6 +110,9 @@ Route::middleware('auth')->group(function () {
 
     // Publicar exige documento validado (nivel 2). Cobrar sin restricciones exige nivel 3.
     Route::get('/anfitrion', [HostDashboardController::class, 'index'])->name('anfitrion.panel');
+    Route::get('/anfitrion/calendario', HostCalendar::class)->name('anfitrion.calendario');
+    Route::get('/anfitrion/ganancias', HostEarningsController::class)->name('anfitrion.ganancias');
+    Route::get('/anfitrion/estadisticas', HostStatsController::class)->name('anfitrion.estadisticas');
     Route::post('/anfitrion/reservas/{booking}/confirmar', [HostBookingController::class, 'confirm'])->name('anfitrion.reservas.confirmar');
     Route::post('/anfitrion/reservas/{booking}/rechazar', [HostBookingController::class, 'decline'])->name('anfitrion.reservas.rechazar');
     Route::get('/anfitrion/experiencias/{experience}', ManageExperience::class)->name('anfitrion.experiencias.editar');
