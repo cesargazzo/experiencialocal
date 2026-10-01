@@ -10,9 +10,9 @@
 ])
 @php
     $environmentLabel = match (app()->environment()) {
-        'staging' => 'Entorno de prueba',
-        'local' => 'Entorno local',
-        default => 'Entorno '.app()->environment(),
+        'staging' => __('Entorno de prueba'),
+        'local' => __('Entorno local'),
+        default => __('Entorno :name', ['name' => app()->environment()]),
     };
     $fullTitle = $title ? $title.' · Tinku' : 'Tinku · Viví el lugar con su gente';
     $description = Str::limit(trim(preg_replace('/\s+/', ' ', $description)), 158);
@@ -23,7 +23,7 @@
     $analyticsId = config('services.google_analytics.id');
 @endphp
 <!doctype html>
-<html lang="es-AR">
+<html lang="{{ config('tinku.locales.'.app()->getLocale().'.html', 'es-AR') }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,7 +35,7 @@
 
   {{-- Open Graph: LinkedIn, Facebook, WhatsApp --}}
   <meta property="og:site_name" content="Tinku">
-  <meta property="og:locale" content="es_AR">
+  <meta property="og:locale" content="{{ config('tinku.locales.'.app()->getLocale().'.og', 'es_AR') }}">
   <meta property="og:type" content="{{ $type }}">
   <meta property="og:title" content="{{ $title ?? 'Tinku · Viví el lugar con su gente' }}">
   <meta property="og:description" content="{{ $description }}">
@@ -85,43 +85,43 @@
 </head>
 <body>
   @unless (app()->isProduction())
-    <div class="proto-banner"><strong>{{ $environmentLabel }}</strong> Las experiencias, precios y registros son demostrativos.</div>
+    <div class="proto-banner"><strong>{{ $environmentLabel }}</strong> {{ __('Las experiencias, precios y registros son demostrativos.') }}</div>
   @endunless
 
   <header class="header">
     <div class="container header__inner">
       <a class="brand" href="{{ route('home') }}">
-        <img src="{{ asset('brand/tinku-horizontal.svg') }}" alt="Tinku, inicio" width="114" height="40">
+        <img src="{{ asset('brand/tinku-horizontal.svg') }}" alt="{{ __('Tinku, inicio') }}" width="114" height="40">
       </a>
-      <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false"><x-icon name="list" :size="24" /></button>
-      <nav @class(['nav', 'nav--auth' => auth()->check()]) aria-label="Principal">
-        <a href="{{ route('home') }}#experiencias">Experiencias</a>
-        <a href="{{ route('home') }}#como-ganas">Cómo ganás</a>
-        <a href="{{ route('home') }}#planes">Planes</a>
+      <button class="nav-toggle" type="button" aria-label="{{ __('Abrir menú') }}" aria-expanded="false"><x-icon name="list" :size="24" /></button>
+      <nav @class(['nav', 'nav--auth' => auth()->check()]) aria-label="{{ __('Principal') }}">
+        <a href="{{ route('home') }}#experiencias">{{ __('Experiencias') }}</a>
+        <a href="{{ route('home') }}#como-ganas">{{ __('Cómo ganás') }}</a>
+        <a href="{{ route('home') }}#planes">{{ __('Planes') }}</a>
         @auth
           @if (auth()->user()->isHost())
             @php($pendingHostBookings = auth()->user()->pendingHostBookingsCount())
             <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.panel') }}{{ $pendingHostBookings ? '#reservas' : '' }}">
-              Mi espacio de anfitrión
-              @if ($pendingHostBookings)<span class="btn__count" aria-label="{{ plural_es($pendingHostBookings, 'reserva por confirmar', 'reservas por confirmar') }}">{{ $pendingHostBookings }}</span>@endif
+              {{ __('Mi espacio de anfitrión') }}
+              @if ($pendingHostBookings)<span class="btn__count" aria-label="{{ plural_es($pendingHostBookings, __('reserva por confirmar'), __('reservas por confirmar')) }}">{{ $pendingHostBookings }}</span>@endif
             </a>
           @else
-            <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">Quiero ser anfitrión</a>
+            <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">{{ __('Quiero ser anfitrión') }}</a>
           @endif
           @php($unreadConversations = \App\Models\Conversation::unreadCountFor(auth()->user()))
-          <a class="bell" href="{{ route('mensajes') }}" aria-label="Mensajes{{ $unreadConversations ? ': '.$unreadConversations.' sin leer' : '' }}">
+          <a class="bell" href="{{ route('mensajes') }}" aria-label="{{ $unreadConversations ? __('Mensajes: :count sin leer', ['count' => $unreadConversations]) : __('Mensajes') }}">
             <x-icon name="envelope-simple" :size="22" />
             @if ($unreadConversations)<span class="bell__count">{{ $unreadConversations > 9 ? '9+' : $unreadConversations }}</span>@endif
           </a>
           @php($unreadNotifications = auth()->user()->unreadNotifications()->count())
-          <a class="bell" href="{{ route('cuenta.avisos') }}" aria-label="Avisos{{ $unreadNotifications ? ': '.$unreadNotifications.' sin leer' : '' }}">
+          <a class="bell" href="{{ route('cuenta.avisos') }}" aria-label="{{ $unreadNotifications ? __('Avisos: :count sin leer', ['count' => $unreadNotifications]) : __('Avisos') }}">
             <x-icon name="bell" :size="22" />
             @if ($unreadNotifications)<span class="bell__count">{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</span>@endif
           </a>
           <x-profile-menu />
         @else
-          <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">Quiero ser anfitrión</a>
-          <a href="{{ route('login') }}">Ingresar</a>
+          <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.registro') }}">{{ __('Quiero ser anfitrión') }}</a>
+          <a href="{{ route('login') }}">{{ __('Ingresar') }}</a>
         @endauth
       </nav>
     </div>
@@ -133,8 +133,8 @@
       <div class="birthday-banner" role="status" x-data="{ open: true }" x-init="try { open = localStorage.getItem(@js($birthdayKey)) !== '1' } catch (e) {}" x-show="open" x-cloak>
         <div class="container birthday-banner__inner">
           <x-icon name="sparkle" :size="22" />
-          <p><strong>¡Feliz cumpleaños, {{ Str::before(auth()->user()->name.' ', ' ') }}!</strong> Que tengas un gran día. Gracias por ser parte de Tinku.</p>
-          <button type="button" class="birthday-banner__close" aria-label="Cerrar el saludo" x-on:click="open = false; try { localStorage.setItem(@js($birthdayKey), '1') } catch (e) {}"><x-icon name="x" :size="18" /></button>
+          <p><strong>{{ __('¡Feliz cumpleaños, :name!', ['name' => Str::before(auth()->user()->name.' ', ' ')]) }}</strong> {{ __('Que tengas un gran día. Gracias por ser parte de Tinku.') }}</p>
+          <button type="button" class="birthday-banner__close" aria-label="{{ __('Cerrar el saludo') }}" x-on:click="open = false; try { localStorage.setItem(@js($birthdayKey), '1') } catch (e) {}"><x-icon name="x" :size="18" /></button>
         </div>
       </div>
     @endif
@@ -145,19 +145,28 @@
     <div class="container">
       <div class="footer__grid">
         <div>
-          <a href="{{ route('home') }}"><img class="footer__logo" src="{{ asset('brand/tinku-principal.svg') }}" alt="Tinku. Viví el lugar con su gente." width="132" height="146"></a>
-          <p style="margin-top:20px">Tinku significa encuentro en quechua y aymara. Conocé un lugar a través de la gente que lo habita.</p>
+          <a href="{{ route('home') }}"><img class="footer__logo" src="{{ asset('brand/tinku-principal.svg') }}" alt="{{ __('Tinku. Viví el lugar con su gente.') }}" width="132" height="146"></a>
+          <p style="margin-top:20px">{{ __('Tinku significa encuentro en quechua y aymara. Conocé un lugar a través de la gente que lo habita.') }}</p>
         </div>
-        <div><h4>Explorar</h4><ul>
+        <div><h4>{{ __('Explorar') }}</h4><ul>
           @foreach (\App\Models\Category::orderBy('sort_order')->get() as $c)
             <li><a href="{{ route('home', ['cat' => $c->slug]) }}#experiencias">{{ $c->name }}</a></li>
           @endforeach
         </ul></div>
-        <div><h4>Anfitriones</h4><ul><li><a href="{{ route('anfitrion.registro') }}">Publicar una experiencia</a></li><li><a href="{{ route('home') }}#planes">Planes</a></li><li><a href="{{ route('home') }}#como-ganas">Cómo ganás</a></li><li><a href="{{ route('terminos') }}">Términos y condiciones</a></li></ul></div>
-        <div><h4>Tinku</h4><ul><li><a href="{{ route('verificacion') }}">Verificación de identidad</a></li><li><a href="{{ route('seguridad') }}">Seguridad</a></li><li><a href="{{ route('ayuda') }}">Ayuda</a></li></ul></div>
+        <div><h4>{{ __('Anfitriones') }}</h4><ul><li><a href="{{ route('anfitrion.registro') }}">{{ __('Publicar una experiencia') }}</a></li><li><a href="{{ route('home') }}#planes">{{ __('Planes') }}</a></li><li><a href="{{ route('home') }}#como-ganas">{{ __('Cómo ganás') }}</a></li><li><a href="{{ route('terminos') }}">{{ __('Términos y condiciones') }}</a></li></ul></div>
+        <div><h4>Tinku</h4><ul><li><a href="{{ route('verificacion') }}">{{ __('Verificación de identidad') }}</a></li><li><a href="{{ route('seguridad') }}">{{ __('Seguridad') }}</a></li><li><a href="{{ route('ayuda') }}">{{ __('Ayuda') }}</a></li></ul></div>
       </div>
       <div class="footer__bottom">
         <span>© {{ date('Y') }} Tinku</span>
+        <form method="post" action="{{ route('idioma') }}" class="locale-switch">
+          @csrf
+          <label for="locale-switch" class="sr-only">{{ __('Idioma') }}</label>
+          <x-icon name="globe" :size="16" />
+          <select id="locale-switch" name="locale" onchange="this.form.submit()">
+            @foreach (config('tinku.locales') as $code => $locale)<option value="{{ $code }}" @selected(app()->getLocale() === $code) lang="{{ $locale['html'] }}">{{ $locale['name'] }}</option>@endforeach
+          </select>
+          <noscript><button type="submit">OK</button></noscript>
+        </form>
       </div>
     </div>
   </footer>

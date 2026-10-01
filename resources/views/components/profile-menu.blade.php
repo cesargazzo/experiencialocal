@@ -22,21 +22,21 @@
         <x-verification-badge :level="$user->verification_level" full />
       </div>
     </div>
-    <a href="{{ route('cuenta.perfil') }}"><x-icon name="user-circle" :size="18" /> Perfil y foto</a>
-    <a href="{{ route('mensajes') }}"><x-icon name="envelope-simple" :size="18" /> Mensajes</a>
-    <a href="{{ route('cuenta.avisos') }}"><x-icon name="bell" :size="18" /> Avisos</a>
-    <a href="{{ route('cuenta.reservas') }}"><x-icon name="calendar-blank" :size="18" /> Mis reservas</a>
-    <a href="{{ route('cuenta.favoritas') }}"><x-icon name="heart-fill" :size="18" /> Favoritas</a>
-    <a href="{{ route('cuenta.intereses') }}"><x-icon name="heart" :size="18" /> Intereses y avisos</a>
-    <a href="{{ route('cuenta.seguridad') }}"><x-icon name="shield-check" :size="18" /> Seguridad y contraseña</a>
-    <a href="{{ route('verificacion') }}"><x-icon name="seal-check" :size="18" /> Verificación de identidad</a>
-    <a href="{{ route('cuenta.invitaciones') }}"><x-icon name="paper-plane-tilt" :size="18" /> Invitá a alguien</a>
+    <a href="{{ route('cuenta.perfil') }}"><x-icon name="user-circle" :size="18" /> {{ __('Perfil y foto') }}</a>
+    <a href="{{ route('mensajes') }}"><x-icon name="envelope-simple" :size="18" /> {{ __('Mensajes') }}</a>
+    <a href="{{ route('cuenta.avisos') }}"><x-icon name="bell" :size="18" /> {{ __('Avisos') }}</a>
+    <a href="{{ route('cuenta.reservas') }}"><x-icon name="calendar-blank" :size="18" /> {{ __('Mis reservas') }}</a>
+    <a href="{{ route('cuenta.favoritas') }}"><x-icon name="heart-fill" :size="18" /> {{ __('Favoritas') }}</a>
+    <a href="{{ route('cuenta.intereses') }}"><x-icon name="heart" :size="18" /> {{ __('Intereses y avisos') }}</a>
+    <a href="{{ route('cuenta.seguridad') }}"><x-icon name="shield-check" :size="18" /> {{ __('Seguridad y contraseña') }}</a>
+    <a href="{{ route('verificacion') }}"><x-icon name="seal-check" :size="18" /> {{ __('Verificación de identidad') }}</a>
+    <a href="{{ route('cuenta.invitaciones') }}"><x-icon name="paper-plane-tilt" :size="18" /> {{ __('Invitá a alguien') }}</a>
     @if ($user->isTeamMember())
-      <a href="{{ route('admin.inicio') }}"><x-icon name="gear" :size="18" /> Administración</a>
+      <a href="{{ route('admin.inicio') }}"><x-icon name="gear" :size="18" /> {{ __('Administración') }}</a>
     @endif
     <form method="post" action="{{ route('logout') }}">
       @csrf
-      <button type="submit"><x-icon name="sign-out" :size="18" /> Salir</button>
+      <button type="submit"><x-icon name="sign-out" :size="18" /> {{ __('Salir') }}</button>
     </form>
   </div>
 </div>

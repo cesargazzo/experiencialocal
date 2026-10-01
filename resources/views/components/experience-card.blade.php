@@ -9,21 +9,21 @@
   <div class="card__body">
     <div class="card__meta">
       @if ($e->reviews_count > 0)
-        <span><x-stars :rating="$e->rating_avg" /> <span class="rating">{{ number_format($e->rating_avg, 1, ',', '.') }}</span> · {{ plural_es($e->reviews_count, 'opinión', 'opiniones') }}</span>
+        <span><x-stars :rating="$e->rating_avg" /> <span class="rating">{{ number_format($e->rating_avg, 1, ',', '.') }}</span> · {{ plural_es($e->reviews_count, __('opinión'), __('opiniones')) }}</span>
       @else
-        <span class="is-new">Nueva en Tinku</span>
+        <span class="is-new">{{ __('Nueva en Tinku') }}</span>
       @endif
-      <span>Hasta {{ $e->max_guests }} personas</span>
+      <span>{{ __('Hasta :count personas', ['count' => $e->max_guests]) }}</span>
     </div>
     <h3 class="card__title"><a href="{{ route('experiencias.show', $e) }}">{{ $e->title }}</a></h3>
     <p class="card__text">{{ $e->summary }}</p>
-    @php($tags = collect([$e->difficulty ? 'Dificultad '.Str::lower($e->difficulty->label()) : null])->merge($e->dietary_options?->map->label() ?? [])->filter())
+    @php($tags = collect([$e->difficulty ? __('Dificultad :level', ['level' => Str::lower($e->difficulty->label())]) : null])->merge($e->dietary_options?->map->label() ?? [])->filter())
     @if ($tags->isNotEmpty())
       <p class="card__diet">{{ $tags->join(' · ') }}</p>
     @endif
     <div class="card__foot">
-      <div class="card__host"><x-avatar :user="$e->host->user" :size="32" /><span title="{{ $e->host->publicName() }}">Con {{ $e->host->user->first_name }}</span><x-verification-badge :level="$e->host->user->verification_level" /></div>
-      <div class="price">{{ money($e->price) }} <small>por persona</small></div>
+      <div class="card__host"><x-avatar :user="$e->host->user" :size="32" /><span title="{{ $e->host->publicName() }}">{{ __('Con :name', ['name' => $e->host->user->first_name]) }}</span><x-verification-badge :level="$e->host->user->verification_level" /></div>
+      <div class="price">{{ money($e->price) }} <small>{{ __('por persona') }}</small></div>
     </div>
   </div>
 </article>
