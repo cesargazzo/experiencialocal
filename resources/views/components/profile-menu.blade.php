@@ -26,6 +26,7 @@
     <a href="{{ route('mensajes') }}"><x-icon name="envelope-simple" :size="18" /> Mensajes</a>
     <a href="{{ route('cuenta.avisos') }}"><x-icon name="bell" :size="18" /> Avisos</a>
     <a href="{{ route('cuenta.reservas') }}"><x-icon name="calendar-blank" :size="18" /> Mis reservas</a>
+    <a href="{{ route('cuenta.favoritas') }}"><x-icon name="heart-fill" :size="18" /> Favoritas</a>
     <a href="{{ route('cuenta.intereses') }}"><x-icon name="heart" :size="18" /> Intereses y avisos</a>
     <a href="{{ route('cuenta.seguridad') }}"><x-icon name="shield-check" :size="18" /> Seguridad y contraseña</a>
     <a href="{{ route('verificacion') }}"><x-icon name="seal-check" :size="18" /> Verificación de identidad</a>

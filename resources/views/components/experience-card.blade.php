@@ -5,6 +5,7 @@
     <span class="card__tag"><x-icon :name="$e->category->icon" :size="14" /> {{ $e->type_label }}</span>
     <span class="card__dur"><x-icon name="clock" :size="16" /> {{ $e->durationLabel() }} · {{ $e->city }}</span>
   </a>
+  <x-favorite-button :experience="$e" class="card__fav" />
   <div class="card__body">
     <div class="card__meta">
       @if ($e->reviews_count > 0)

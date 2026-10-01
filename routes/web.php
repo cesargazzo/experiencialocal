@@ -27,6 +27,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HostBookingController;
 use App\Http\Controllers\HostDashboardController;
@@ -83,6 +84,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/cuenta/mis-datos', [PersonalDataController::class, 'export'])->middleware('throttle:5,1')->name('cuenta.datos.descargar');
     Route::delete('/cuenta', [PersonalDataController::class, 'destroy'])->name('cuenta.eliminar');
     Route::get('/cuenta/avisos', [NotificationController::class, 'index'])->name('cuenta.avisos');
+    Route::get('/cuenta/favoritas', [FavoriteController::class, 'index'])->name('cuenta.favoritas');
+    Route::post('/experiencias/{experience}/favorita', [FavoriteController::class, 'toggle'])->middleware('throttle:60,1')->name('favoritas.toggle');
     Route::get('/mensajes', [MessageController::class, 'index'])->name('mensajes');
     Route::get('/mensajes/{conversation}', [MessageController::class, 'show'])->name('mensajes.show');
     Route::get('/experiencias/{experience}/escribir', [MessageController::class, 'prompt'])->name('mensajes.escribir');

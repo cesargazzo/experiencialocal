@@ -108,6 +108,18 @@ class User extends Authenticatable
         $this->notify(new ResetPasswordNotification($token));
     }
 
+    /** Experiencias guardadas para más adelante. */
+    public function favoriteExperiences(): BelongsToMany
+    {
+        return $this->belongsToMany(Experience::class, 'favorites')->withPivot('created_at');
+    }
+
+    /** Si la guardó. Se consulta una sola vez por pedido aunque haya muchas tarjetas. */
+    public function hasFavorited(Experience $experience): bool
+    {
+        return in_array($experience->getKey(), once(fn (): array => $this->favoriteExperiences()->pluck('experiences.id')->all()), true);
+    }
+
     public function interestedCategories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class);

@@ -48,6 +48,12 @@
               <span><x-icon name="map-pin" :size="16" /> {{ $experience->placeLabel() }}</span>
               @if ($experience->status !== \App\Enums\ExperienceStatus::Published)<span class="meta--status">{{ $experience->statusLabel() }}</span>@endif
             </div>
+            @if ($experience->isPublished())
+              <div class="detail-hero__actions">
+                <x-favorite-button :experience="$experience" :with-label="true" />
+                <x-share-buttons :url="route('experiencias.show', $experience)" :title="$experience->title" />
+              </div>
+            @endif
           </div>
         </div>
       </div>

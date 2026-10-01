@@ -34,6 +34,7 @@ class PersonalDataController extends Controller
                 'nivel_de_verificacion' => $user->verification_level->label(), 'alta' => $user->created_at->toIso8601String(),
                 'doble_factor' => $user->hasTwoFactor(),
             ],
+            'favoritas' => $user->favoriteExperiences()->get()->map(fn ($e) => ['experiencia' => $e->title, 'desde' => $e->pivot->created_at]),
             'intereses' => [
                 'categorias' => $user->interestedCategories->pluck('name'), 'provincias' => $user->interestedProvinces->pluck('name'),
                 'avisos_por_email' => $user->interest_alerts,

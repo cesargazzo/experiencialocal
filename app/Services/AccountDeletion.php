@@ -62,6 +62,8 @@ class AccountDeletion
                 ]);
             }
 
+            $user->favoriteExperiences()->detach();
+
             // Directo en la tabla: la auditoría no tiene que guardar los datos que se están borrando.
             DB::table('users')->where('id', $user->id)->update([
                 'name' => 'Cuenta eliminada', 'first_name' => 'Cuenta', 'last_name' => 'eliminada',

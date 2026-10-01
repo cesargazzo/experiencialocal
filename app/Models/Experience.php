@@ -210,6 +210,11 @@ class Experience extends Model
         };
     }
 
+    public function isPublished(): bool
+    {
+        return $this->status === ExperienceStatus::Published;
+    }
+
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', ExperienceStatus::Published);

@@ -283,6 +283,13 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--font-titulos); font-weight: 700; 
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--esp-4); }
 .card { position: relative; background: var(--superficie); border-radius: var(--radio-md); box-shadow: inset 0 0 0 1px var(--linea); overflow: hidden; display: flex; flex-direction: column; transition: transform .2s ease, box-shadow .2s ease; }
 .card:hover { transform: translateY(-4px); box-shadow: inset 0 0 0 1px var(--linea), var(--sombra); }
+.card__fav { position: absolute; top: 12px; right: 12px; z-index: 2; }
+.fav__button { display: inline-flex; align-items: center; gap: 6px; border: 0; cursor: pointer; background: var(--superficie); color: var(--tinta); border-radius: var(--radio-pill); padding: 8px; box-shadow: 0 2px 8px rgba(13, 23, 39, .18); font: 600 14px/18px var(--font-texto); }
+.fav__button > span { display: inline-flex; }
+.fav--labeled .fav__button { padding: 8px 14px 8px 10px; }
+.fav__button.is-saved { color: var(--magenta); }
+.fav__button:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+.share { display: flex; gap: 6px; flex-wrap: wrap; }
 .card__media { position: relative; aspect-ratio: 4 / 3; background: var(--superficie-calida) center / cover no-repeat; display: block; }
 .card__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13, 23, 39, 0) 55%, rgba(13, 23, 39, 0.62)); }
 .card__tag { position: absolute; left: 14px; top: 14px; z-index: 1; background: var(--superficie); color: var(--tinta); font: 600 13px/16px var(--font-texto); padding: 7px 12px; border-radius: var(--radio-pill); display: inline-flex; gap: 6px; align-items: center; }
@@ -404,6 +411,8 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .detail-hero__img::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13, 23, 39, 0.05), rgba(13, 23, 39, 0.85)); }
 .detail-hero__content { position: relative; padding: 48px; }
 .detail-hero .eyebrow { background: var(--superficie); box-shadow: none; }
+.detail-hero__actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+.detail-hero__actions .share .btn { background: var(--superficie); }
 .detail-hero h1 { font-size: clamp(32px, 4.4vw, 52px); line-height: 1.08; letter-spacing: -0.02em; max-width: 20ch; margin: 0 0 16px; }
 .detail-hero .meta { display: flex; gap: 8px; flex-wrap: wrap; font: 600 14px/20px var(--font-texto); }
 .detail-hero .meta span { background: rgba(255, 255, 255, 0.16); padding: 6px 12px; border-radius: var(--radio-pill); display: inline-flex; gap: 6px; align-items: center; }
