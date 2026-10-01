@@ -55,7 +55,8 @@
 
     @auth
       @php($canEdit = auth()->user()->can('update', $experience))
-      @if ($canEdit || auth()->user()->isAdmin())
+      @php($canModerate = auth()->user()->hasTeamPermission(\App\Enums\TeamPermission::ModerateExperiences))
+      @if ($canEdit || $canModerate)
         <div class="container">
           <div class="owner-bar">
             <span class="badge {{ $experience->statusBadgeClass() }}">{{ $experience->statusLabel() }}</span>
@@ -75,7 +76,7 @@
                     Así la ve la gente.
                 @endswitch
               @else
-                Estás viendo esta experiencia como administrador.
+                Estás viendo esta experiencia como parte del equipo.
               @endif
             </span>
             <span class="owner-bar__actions">
@@ -83,7 +84,7 @@
                 <a class="btn btn--secondary btn--sm" href="{{ route('anfitrion.experiencias.editar', $experience) }}">Editala</a>
                 <a class="btn btn--ghost btn--sm" href="{{ route('anfitrion.experiencias.editar', $experience) }}#fechas"><x-icon name="calendar-blank" :size="16" /> Fechas</a>
               @endif
-              @if (auth()->user()->isAdmin())
+              @if ($canModerate)
                 <a class="btn btn--tertiary btn--sm" href="{{ route('admin.experiencias.show', $experience) }}">Ver en admin</a>
               @endif
             </span>

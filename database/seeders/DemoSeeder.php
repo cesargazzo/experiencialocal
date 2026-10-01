@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enums\BookingStatus;
 use App\Enums\ExperienceStatus;
 use App\Enums\HostStatus;
+use App\Enums\TeamRole;
 use App\Enums\VerificationLevel;
 use App\Enums\VerificationProvider;
 use App\Enums\VerificationStatus;
@@ -33,7 +34,7 @@ class DemoSeeder extends Seeder
         }
 
         $admin = User::updateOrCreate(['email' => 'admin@tinku.test'], [
-            'name' => 'Equipo Tinku', 'password' => 'password', 'is_admin' => true, 'country_code' => 'AR',
+            'name' => 'Equipo Tinku', 'password' => 'password', 'team_role' => TeamRole::Admin, 'country_code' => 'AR',
             'email_verified_at' => now(), 'verification_level' => VerificationLevel::Residence,
         ]);
 

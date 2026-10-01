@@ -12,7 +12,7 @@
             <p class="hint" style="margin:0 0 6px">
               Denunciado {{ $report->reported_at->diffForHumans() }} · en {{ $report->conversation->experience->title }}
             </p>
-            <p style="margin:0 0 6px"><strong>Escribió:</strong> <a href="{{ route('admin.usuarios.show', $report->sender) }}">{{ $report->sender->name }}</a> ({{ $report->sender->email }})</p>
+            <p style="margin:0 0 6px"><strong>Escribió:</strong> <x-admin-user-link :user="$report->sender" :with-email="true" /></p>
             <blockquote class="host-booking__note" style="margin:0 0 6px;white-space:pre-line">{{ $report->body }}</blockquote>
             <p style="margin:0 0 10px"><strong>Motivo:</strong> {{ $report->report_reason }}</p>
             <form method="post" action="{{ route('admin.denuncias.descartar', $report) }}">@csrf<button class="btn btn--ghost btn--sm">Descartar la denuncia</button></form>

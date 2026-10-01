@@ -86,7 +86,7 @@ class TwoFactorController extends Controller
         $user->forceFill(['two_factor_secret' => null, 'two_factor_recovery_codes' => null, 'two_factor_confirmed_at' => null, 'two_factor_last_step' => null])->save();
         $securityLog->record('2fa.disabled', $user, [], null, 'warning');
 
-        return redirect()->to(route('cuenta.seguridad').'#doble-factor')->with('status', $user->isAdmin()
+        return redirect()->to(route('cuenta.seguridad').'#doble-factor')->with('status', $user->isTeamMember()
             ? 'Desactivaste el doble factor. Para volver a la administración vas a tener que activarlo.'
             : 'Desactivaste el doble factor.');
     }

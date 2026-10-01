@@ -8,7 +8,7 @@
         <p class="hint" style="margin:4px 0 0">{{ $user->email }} · {{ $user->phone ?? 'sin teléfono' }}</p>
         <p style="margin:8px 0 0;display:flex;gap:6px;flex-wrap:wrap">
           <x-verification-badge :level="$user->verification_level" full />
-          @if ($user->is_admin)<span class="badge badge--nivel-1">Admin</span>@endif
+          @if ($user->team_role)<span class="badge badge--nivel-1">Equipo · {{ $user->team_role->label() }}</span>@endif
           @if ($user->hostProfile)<span class="badge badge--nivel-1">Anfitrión · {{ $user->hostProfile->plan->name }}</span>@endif
           @if ($user->isSuspended())<span class="badge badge--error">Suspendida</span>@endif
         </p>
@@ -42,6 +42,7 @@
       @endforelse
     </section>
 
+    @can('team.users.verify')
     <section class="wizard__panel">
       <h2>Validar a mano</h2>
       <p>Aprueba las verificaciones que falten hasta el nivel elegido. El motivo queda en el registro de seguridad.</p>
@@ -73,6 +74,7 @@
         <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit" @disabled($user->verification_level->value >= 3)>Validá</button></div>
       </form>
     </section>
+    @endcan
 
     <section class="wizard__panel">
       <h2>Verificaciones</h2>
@@ -89,7 +91,7 @@
                 <td>{{ $v->reviewer?->name ?? '—' }}</td>
                 <td style="white-space:nowrap">{{ ($v->reviewed_at ?? $v->submitted_at)?->timezone(config('tinku.timezone'))->format('d/m/Y H:i') }}</td>
                 <td>
-                  @if ($v->status === \App\Enums\VerificationStatus::Approved)
+                  @if ($v->status === \App\Enums\VerificationStatus::Approved && auth()->user()->can('team.users.verify'))
                     <details class="revoke"><summary>Revocar</summary>
                       <form method="post" action="{{ route('admin.usuarios.verificaciones.revocar', [$user, $v]) }}" style="display:flex;gap:6px;margin-top:6px">@csrf<input name="reason" class="inline-input" minlength="5" maxlength="300" placeholder="Motivo" aria-label="Motivo de la revocación" required><button class="btn btn--tertiary btn--sm">Revocá</button></form>
                     </details>
@@ -104,6 +106,7 @@
       </div>
     </section>
 
+    @can('team.security.view')
     <section class="wizard__panel">
       <h2>Actividad de seguridad</h2>
       <div class="table-wrap">
@@ -123,14 +126,42 @@
         </table>
       </div>
     </section>
+    @endcan
 
+    @can('team.security.view')
     <section class="wizard__panel">
       <h2>Cambios</h2>
       <p>De esta cuenta y hechos por esta cuenta. <a class="link" href="{{ route('admin.auditoria', ['tipo' => \App\Models\User::class, 'id' => $user->id]) }}">Ver todos</a></p>
       @include('admin.partials.audit-table', ['logs' => $auditLogs])
     </section>
+    @endcan
 
-    @unless ($user->is(auth()->user()))
+    @can('team.platform.manage')
+      <section class="wizard__panel" id="equipo">
+        <h2>Rol en el equipo</h2>
+        <p>Quien tiene un rol entra a la administración y ve solo las secciones de su rol. Hace falta la identidad validada y el doble factor.</p>
+        @if ($user->is(auth()->user()))
+          <p class="hint">Tu propio rol lo cambia otra persona con administración total.</p>
+        @else
+          <form method="post" action="{{ route('admin.usuarios.rol', $user) }}">
+            @csrf
+            @method('put')
+            <div class="field"><label for="team_role">Rol</label>
+              <select id="team_role" name="team_role">
+                <option value="">Sin rol (no es del equipo)</option>
+                @foreach (\App\Enums\TeamRole::cases() as $role)
+                  <option value="{{ $role->value }}" @selected($user->team_role === $role)>{{ $role->label() }} — {{ $role->description() }}</option>
+                @endforeach
+              </select>
+              @error('team_role')<span class="error" style="display:block">{{ $message }}</span>@enderror
+            </div>
+            <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit">Guardá el rol</button></div>
+          </form>
+        @endif
+      </section>
+    @endcan
+
+    @if (! $user->is(auth()->user()) && auth()->user()->can('team.users.suspend'))
       <section class="wizard__panel">
         <h2>{{ $user->isSuspended() ? 'Reactivar la cuenta' : 'Suspender la cuenta' }}</h2>
         <p>{{ $user->isSuspended() ? 'Vuelve a poder ingresar y reservar.' : 'Pierde la sesión, no puede ingresar ni reservar. Se puede revertir.' }}</p>
@@ -142,6 +173,6 @@
           <div class="wizard__actions"><span></span><button class="btn {{ $user->isSuspended() ? 'btn--secondary' : 'btn--tertiary' }}" type="submit">{{ $user->isSuspended() ? 'Reactivá la cuenta' : 'Suspendé la cuenta' }}</button></div>
         </form>
       </section>
-    @endunless
+    @endif
   </main>
 </x-layout>

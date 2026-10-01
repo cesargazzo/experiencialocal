@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\ExperienceStatus;
 use App\Enums\HostStatus;
+use App\Enums\TeamPermission;
 use App\Enums\VerificationLevel;
 use App\Enums\VerificationProvider;
 use App\Enums\VerificationStatus;
@@ -121,7 +122,7 @@ class VerificationService
     /** Aprueba una verificación (webhook del proveedor o decisión de un administrador). */
     public function approve(IdentityVerification $verification, ?User $reviewer = null, array $result = []): IdentityVerification
     {
-        if ($verification->type->level() === VerificationLevel::Residence && ($reviewer === null || ! $reviewer->isAdmin())) {
+        if ($verification->type->level() === VerificationLevel::Residence && ($reviewer === null || ! $reviewer->hasTeamPermission(TeamPermission::VerifyIdentity))) {
             throw new VerificationException('El nivel 3 solo lo aprueba un administrador.');
         }
 
@@ -156,7 +157,7 @@ class VerificationService
             $level = $this->recalculateLevel($verification->user);
 
             // Lo que rechaza o revoca una persona del equipo se avisa con el motivo.
-            if ($reviewer?->isAdmin()) {
+            if ($reviewer?->isTeamMember()) {
                 $verification->user->notify(VerificationUpdatedNotification::rejected($level, $verification->type, $reason));
             }
 
@@ -175,8 +176,8 @@ class VerificationService
      */
     public function grantLevelManually(User $user, VerificationLevel $level, User $admin, string $reason, ?string $documentCountry = null, ?string $documentNumber = null): VerificationLevel
     {
-        if (! $admin->isAdmin()) {
-            throw new VerificationException('Solo un administrador puede validar a mano.');
+        if (! $admin->hasTeamPermission(TeamPermission::VerifyIdentity)) {
+            throw new VerificationException('Solo el equipo de verificación puede validar a mano.');
         }
 
         // Validar el documento a mano exige saber qué documento es, para que no se repita en otra cuenta.
@@ -322,8 +323,8 @@ class VerificationService
      */
     public function revoke(IdentityVerification $verification, string $reason, User $admin): IdentityVerification
     {
-        if (! $admin->isAdmin()) {
-            throw new VerificationException('Solo un administrador puede revocar una verificación.');
+        if (! $admin->hasTeamPermission(TeamPermission::VerifyIdentity)) {
+            throw new VerificationException('Solo el equipo de verificación puede revocar una verificación.');
         }
         if ($verification->status !== VerificationStatus::Approved) {
             throw new VerificationException('Solo se revoca una verificación aprobada.');

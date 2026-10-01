@@ -28,7 +28,7 @@ class MakeAdminCommandTest extends TestCase
         $temporary = $this->temporaryPasswordFrom(Artisan::output());
 
         $user = User::where('email', 'equipo@tinku.com')->firstOrFail();
-        $this->assertTrue($user->is_admin);
+        $this->assertTrue($user->isAdmin());
         $this->assertTrue($user->must_change_password);
         $this->assertTrue($user->password_expires_at->between(now()->addHours(23), now()->addHours(25)));
         $this->assertGreaterThanOrEqual(16, strlen($temporary));
@@ -66,10 +66,10 @@ class MakeAdminCommandTest extends TestCase
         $user = User::factory()->create(['email' => 'marta@example.com']);
 
         $this->artisan('tinku:admin', ['email' => 'marta@example.com'])->assertSuccessful();
-        $this->assertTrue($user->fresh()->is_admin);
+        $this->assertTrue($user->fresh()->isAdmin());
 
         $this->artisan('tinku:admin', ['email' => 'marta@example.com', '--revoke' => true])->assertSuccessful();
-        $this->assertFalse($user->fresh()->is_admin);
+        $this->assertFalse($user->fresh()->isTeamMember());
     }
 
     #[Test]

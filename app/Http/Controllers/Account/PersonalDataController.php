@@ -84,7 +84,7 @@ class PersonalDataController extends Controller
         if ($user->hasTwoFactor()) {
             $guard->attempt($user, $request->string('code')->toString(), 'deletion');
         }
-        if ($user->isAdmin()) {
+        if ($user->isTeamMember()) {
             return back()->withErrors(['password' => 'Una cuenta administradora no se elimina desde acá: primero quitale el permiso de administración.'], 'deletion');
         }
         if ($blockers = $deletion->blockers($user)) {

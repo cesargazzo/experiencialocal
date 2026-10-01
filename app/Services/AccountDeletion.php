@@ -68,7 +68,7 @@ class AccountDeletion
                 'email' => 'eliminada-'.$user->id.'-'.Str::lower(Str::random(8)).'@tinku.invalid',
                 'phone' => null, 'birth_date' => null, 'nationality_code' => null, 'country_code' => null, 'province_id' => null,
                 'city' => null, 'postal_code' => null, 'avatar_path' => null, 'dietary_needs' => null, 'food_allergies' => null, 'social_links' => null,
-                'required_features' => null, 'interest_alerts' => false, 'is_admin' => false,
+                'required_features' => null, 'interest_alerts' => false, 'team_role' => null,
                 'password' => Hash::make(Str::random(64)), 'remember_token' => null,
                 'two_factor_secret' => null, 'two_factor_recovery_codes' => null, 'two_factor_confirmed_at' => null,
                 'email_verified_at' => null, 'phone_verified_at' => null,

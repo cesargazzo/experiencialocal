@@ -43,7 +43,7 @@ class UserController extends Controller
             ->when($filters['dni'] ?? null, fn ($q, $number) => $q->whereHas('verifications', fn ($v) => $v->whereIn('document_hash', $this->documentHashesFor($number))))
             ->when(($filters['nivel'] ?? null) === 'verificada', fn ($q) => $q->where('verification_level', '>=', VerificationLevel::Document->value))
             ->when(isset($filters['nivel']) && $filters['nivel'] !== 'verificada', fn ($q) => $q->where('verification_level', (int) $filters['nivel']))
-            ->when(($filters['rol'] ?? null) === 'admin', fn ($q) => $q->where('is_admin', true))
+            ->when(($filters['rol'] ?? null) === 'admin', fn ($q) => $q->whereNotNull('team_role'))
             ->when(($filters['rol'] ?? null) === 'anfitrion', fn ($q) => $q->has('hostProfile'))
             ->when(($filters['rol'] ?? null) === 'suspendida', fn ($q) => $q->whereNotNull('suspended_at'))
             ->when($filters['provincia'] ?? null, fn ($q, $provinceId) => $q->where('province_id', $provinceId))

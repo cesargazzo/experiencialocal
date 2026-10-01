@@ -4,7 +4,7 @@
     <h1 class="title" style="margin-bottom:8px">{{ $experience->title }}</h1>
     <p style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 24px">
       <span class="badge {{ $experience->statusBadgeClass() }}">{{ $experience->statusLabel() }}</span>
-      <span class="hint">Con <a href="{{ route('admin.usuarios.show', $experience->host->user) }}">{{ $experience->host->display_name }}</a> · {{ $experience->placeLabel() }} · {{ money($experience->price) }} por persona</span>
+      <span class="hint">Con <x-admin-user-link :user="$experience->host->user" :label="$experience->host->display_name" /> · {{ $experience->placeLabel() }} · {{ money($experience->price) }} por persona</span>
       <a href="{{ route('experiencias.show', $experience) }}">Mirá la ficha</a>
     </p>
 
@@ -64,7 +64,7 @@
               @foreach ($bookings as $booking)
                 <tr>
                   <td>{{ $booking->code }}</td>
-                  <td><a href="{{ route('admin.usuarios.show', $booking->user) }}">{{ $booking->user->name }}</a></td>
+                  <td><x-admin-user-link :user="$booking->user" /></td>
                   <td style="white-space:nowrap">{{ $booking->date->localStart()->translatedFormat('D j M Y · H:i') }}</td>
                   <td>{{ $booking->guests }}</td>
                   <td>{{ $booking->status->label() }}</td>

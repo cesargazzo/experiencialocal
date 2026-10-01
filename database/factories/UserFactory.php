@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TeamRole;
 use App\Enums\VerificationLevel;
 use App\Models\User;
 use App\Support\Totp;
@@ -35,10 +36,16 @@ class UserFactory extends Factory
         return $this->state(fn () => ['verification_level' => $level]);
     }
 
+    /** Una persona del equipo con un rol acotado (con identidad validada y doble factor). */
+    public function team(TeamRole $role): static
+    {
+        return $this->admin()->state(fn () => ['team_role' => $role]);
+    }
+
     public function admin(): static
     {
         return $this->state(fn () => [
-            'is_admin' => true,
+            'team_role' => TeamRole::Admin,
             'verification_level' => VerificationLevel::Residence,
             // Los admins tienen doble factor: la administración lo exige.
             'two_factor_secret' => Totp::generateSecret(),

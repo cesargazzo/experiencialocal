@@ -9,6 +9,7 @@ use App\Http\Controllers\Account\PersonalDataController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Account\TwoFactorController;
 use App\Http\Controllers\Account\TwoFactorStepUpController;
+use App\Http\Controllers\Admin\AdminHomeController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ExperienceController as AdminExperienceController;
 use App\Http\Controllers\Admin\LogController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Admin\PasswordPolicyController;
 use App\Http\Controllers\Admin\PlatformSettingsController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SecurityLogController;
+use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\TermsController as AdminTermsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
@@ -108,38 +110,57 @@ Route::middleware('auth')->group(function () {
     Route::get('/anfitrion/registro', HostOnboarding::class)->middleware('verified.level:2')->name('anfitrion.registro');
 
     Route::prefix('admin')->middleware(['admin', 'admin.2fa'])->name('admin.')->group(function () {
-        Route::get('/verificaciones', [AdminVerificationController::class, 'index'])->name('verificaciones');
-        Route::post('/verificaciones/{verification}/aprobar', [AdminVerificationController::class, 'approve'])->name('verificaciones.aprobar');
-        Route::post('/verificaciones/{verification}/rechazar', [AdminVerificationController::class, 'reject'])->name('verificaciones.rechazar');
-        Route::get('/experiencias', [AdminExperienceController::class, 'index'])->name('experiencias');
-        Route::post('/experiencias/direcciones/normalizar', [AdminExperienceController::class, 'normalizePending'])->name('experiencias.direcciones');
-        Route::get('/experiencias/{experience}', [AdminExperienceController::class, 'show'])->name('experiencias.show');
-        Route::post('/experiencias/{experience}/normalizar', [AdminExperienceController::class, 'normalizeAddress'])->name('experiencias.normalizar');
-        Route::post('/experiencias/{experience}/pausar', [AdminExperienceController::class, 'pause'])->name('experiencias.pausar');
-        Route::post('/experiencias/{experience}/reactivar', [AdminExperienceController::class, 'resume'])->name('experiencias.reactivar');
-        Route::post('/experiencias/{experience}/aprobar', [AdminExperienceController::class, 'approve'])->name('experiencias.aprobar');
-        Route::post('/experiencias/{experience}/rechazar', [AdminExperienceController::class, 'reject'])->name('experiencias.rechazar');
-        Route::get('/denuncias', [ReportController::class, 'index'])->name('denuncias');
-        Route::post('/denuncias/{message}/descartar', [ReportController::class, 'dismiss'])->name('denuncias.descartar');
-        Route::get('/terminos', [AdminTermsController::class, 'index'])->name('terminos');
-        Route::get('/terminos/nueva', [AdminTermsController::class, 'create'])->name('terminos.create');
-        Route::post('/terminos', [AdminTermsController::class, 'store'])->name('terminos.store');
-        Route::get('/terminos/{terms}/editar', [AdminTermsController::class, 'edit'])->name('terminos.edit');
-        Route::put('/terminos/{terms}', [AdminTermsController::class, 'update'])->name('terminos.update');
-        Route::post('/terminos/{terms}/publicar', [AdminTermsController::class, 'publish'])->name('terminos.publicar');
-        Route::get('/terminos/{terms}/aceptaciones', [AdminTermsController::class, 'acceptances'])->name('terminos.aceptaciones');
-        Route::get('/contrasenas', [PasswordPolicyController::class, 'edit'])->name('contrasenas');
-        Route::get('/seguridad', [SecurityLogController::class, 'index'])->name('seguridad');
-        Route::get('/registro', [LogController::class, 'index'])->name('registro');
-        Route::get('/registro/{file}/descargar', [LogController::class, 'download'])->where('file', '[\w.-]+\.log')->name('registro.descargar');
-        Route::get('/auditoria', [AuditLogController::class, 'index'])->name('auditoria');
-        Route::get('/configuracion', [PlatformSettingsController::class, 'edit'])->name('configuracion');
-        Route::put('/configuracion', [PlatformSettingsController::class, 'update'])->name('configuracion.update');
-        Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios');
-        Route::post('/usuarios/validar', [UserController::class, 'validateLevel'])->name('usuarios.validar');
-        Route::get('/usuarios/{user}', [UserController::class, 'show'])->name('usuarios.show');
-        Route::post('/usuarios/{user}/verificaciones/{verification}/revocar', [UserController::class, 'revokeVerification'])->name('usuarios.verificaciones.revocar');
-        Route::post('/usuarios/{user}/suspension', [UserController::class, 'toggleSuspension'])->name('usuarios.suspension');
-        Route::put('/contrasenas', [PasswordPolicyController::class, 'update'])->name('contrasenas.update');
+        Route::get('/', AdminHomeController::class)->name('inicio');
+
+        Route::middleware('can:team.users.view')->group(function () {
+            Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios');
+            Route::get('/usuarios/{user}', [UserController::class, 'show'])->name('usuarios.show');
+        });
+        Route::middleware('can:team.users.verify')->group(function () {
+            Route::get('/verificaciones', [AdminVerificationController::class, 'index'])->name('verificaciones');
+            Route::post('/verificaciones/{verification}/aprobar', [AdminVerificationController::class, 'approve'])->name('verificaciones.aprobar');
+            Route::post('/verificaciones/{verification}/rechazar', [AdminVerificationController::class, 'reject'])->name('verificaciones.rechazar');
+            Route::post('/usuarios/validar', [UserController::class, 'validateLevel'])->name('usuarios.validar');
+            Route::post('/usuarios/{user}/verificaciones/{verification}/revocar', [UserController::class, 'revokeVerification'])->name('usuarios.verificaciones.revocar');
+        });
+        Route::post('/usuarios/{user}/suspension', [UserController::class, 'toggleSuspension'])->middleware('can:team.users.suspend')->name('usuarios.suspension');
+
+        Route::middleware('can:team.experiences.moderate')->group(function () {
+            Route::get('/experiencias', [AdminExperienceController::class, 'index'])->name('experiencias');
+            Route::post('/experiencias/direcciones/normalizar', [AdminExperienceController::class, 'normalizePending'])->name('experiencias.direcciones');
+            Route::get('/experiencias/{experience}', [AdminExperienceController::class, 'show'])->name('experiencias.show');
+            Route::post('/experiencias/{experience}/normalizar', [AdminExperienceController::class, 'normalizeAddress'])->name('experiencias.normalizar');
+            Route::post('/experiencias/{experience}/pausar', [AdminExperienceController::class, 'pause'])->name('experiencias.pausar');
+            Route::post('/experiencias/{experience}/reactivar', [AdminExperienceController::class, 'resume'])->name('experiencias.reactivar');
+            Route::post('/experiencias/{experience}/aprobar', [AdminExperienceController::class, 'approve'])->name('experiencias.aprobar');
+            Route::post('/experiencias/{experience}/rechazar', [AdminExperienceController::class, 'reject'])->name('experiencias.rechazar');
+        });
+        Route::middleware('can:team.reports.handle')->group(function () {
+            Route::get('/denuncias', [ReportController::class, 'index'])->name('denuncias');
+            Route::post('/denuncias/{message}/descartar', [ReportController::class, 'dismiss'])->name('denuncias.descartar');
+        });
+
+        Route::middleware('can:team.security.view')->group(function () {
+            Route::get('/seguridad', [SecurityLogController::class, 'index'])->name('seguridad');
+            Route::get('/registro', [LogController::class, 'index'])->name('registro');
+            Route::get('/registro/{file}/descargar', [LogController::class, 'download'])->where('file', '[\w.-]+\.log')->name('registro.descargar');
+            Route::get('/auditoria', [AuditLogController::class, 'index'])->name('auditoria');
+        });
+
+        Route::middleware('can:team.platform.manage')->group(function () {
+            Route::get('/terminos', [AdminTermsController::class, 'index'])->name('terminos');
+            Route::get('/terminos/nueva', [AdminTermsController::class, 'create'])->name('terminos.create');
+            Route::post('/terminos', [AdminTermsController::class, 'store'])->name('terminos.store');
+            Route::get('/terminos/{terms}/editar', [AdminTermsController::class, 'edit'])->name('terminos.edit');
+            Route::put('/terminos/{terms}', [AdminTermsController::class, 'update'])->name('terminos.update');
+            Route::post('/terminos/{terms}/publicar', [AdminTermsController::class, 'publish'])->name('terminos.publicar');
+            Route::get('/terminos/{terms}/aceptaciones', [AdminTermsController::class, 'acceptances'])->name('terminos.aceptaciones');
+            Route::get('/contrasenas', [PasswordPolicyController::class, 'edit'])->name('contrasenas');
+            Route::put('/contrasenas', [PasswordPolicyController::class, 'update'])->name('contrasenas.update');
+            Route::get('/configuracion', [PlatformSettingsController::class, 'edit'])->name('configuracion');
+            Route::put('/configuracion', [PlatformSettingsController::class, 'update'])->name('configuracion.update');
+            Route::get('/equipo', [TeamController::class, 'index'])->name('equipo');
+            Route::put('/usuarios/{user}/rol', [TeamController::class, 'update'])->name('usuarios.rol');
+        });
     });
 });

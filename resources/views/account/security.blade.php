@@ -49,7 +49,7 @@
       <section class="wizard__panel" id="doble-factor">
         <h2>Doble factor</h2>
         <p>Además de la contraseña, al ingresar te pedimos un código de 6 dígitos que genera una app en tu celular (Google Authenticator, Microsoft Authenticator, 1Password, Authy…). Si alguien consigue tu contraseña, igual no puede entrar.
-          @if ($user->isAdmin())<strong>Para la administración es obligatorio.</strong>@endif
+          @if ($user->isTeamMember())<strong>Para la administración es obligatorio.</strong>@endif
         </p>
 
         @if ($codes = session('recovery_codes'))

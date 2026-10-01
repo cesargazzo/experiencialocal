@@ -65,7 +65,7 @@
           <select id="rol" name="rol">
             <option value="">Todos</option>
             <option value="anfitrion" @selected(($filters['rol'] ?? null) === 'anfitrion')>Anfitriones</option>
-            <option value="admin" @selected(($filters['rol'] ?? null) === 'admin')>Administradores</option>
+            <option value="admin" @selected(($filters['rol'] ?? null) === 'admin')>Equipo de Tinku</option>
             <option value="suspendida" @selected(($filters['rol'] ?? null) === 'suspendida')>Suspendidas</option>
           </select>
         </div>
@@ -104,12 +104,14 @@
       </form>
       <p class="hint" style="margin:4px 0 16px">{{ plural_es($users->total(), 'cuenta', 'cuentas') }}. El DNI no se guarda: se busca por el número exacto.</p>
 
+      @php($canVerify = auth()->user()->can('team.users.verify'))
       <form method="post" action="{{ route('admin.usuarios.validar') }}" x-data="{ selected: [], all: @js($users->pluck('id')) }">
         @csrf
         @if ($errors->has('users'))
           <div class="notice" role="alert">@foreach ($errors->get('users') as $problem)<p style="margin:0">{{ $problem }}</p>@endforeach</div>
         @endif
         @error('reason')<p class="error" style="display:block">{{ $message }}</p>@enderror
+        @if ($canVerify)
         <div class="bulk" x-show="selected.length > 0" x-cloak>
           <strong x-text="selected.length === 1 ? '1 cuenta elegida' : selected.length + ' cuentas elegidas'"></strong>
           <label class="sr-only" for="bulk-level">Nivel</label>
@@ -122,19 +124,20 @@
           <input id="bulk-reason" name="reason" class="inline-input" placeholder="Motivo (queda registrado)" required minlength="5" maxlength="300" style="flex:1;min-width:200px">
           <button class="btn btn--secondary btn--sm" type="submit">Validá</button>
         </div>
+        @endif
 
         <div class="table-wrap">
           <table class="table">
             <thead>
               <tr>
-                <th><input type="checkbox" aria-label="Elegir todas" x-on:change="selected = $event.target.checked ? [...all] : []" x-bind:checked="selected.length === all.length && all.length > 0"></th>
+                @if ($canVerify)<th><input type="checkbox" aria-label="Elegir todas" x-on:change="selected = $event.target.checked ? [...all] : []" x-bind:checked="selected.length === all.length && all.length > 0"></th>@endif
                 <th>Cuenta</th><th>Nivel</th><th>Rol</th><th>Alta</th><th>Último ingreso</th>
               </tr>
             </thead>
             <tbody>
               @forelse ($users as $user)
                 <tr @if ($user->isSuspended()) class="is-muted" @endif>
-                  <td><input type="checkbox" name="users[]" value="{{ $user->id }}" x-model.number="selected" aria-label="Elegir {{ $user->name }}"></td>
+                  @if ($canVerify)<td><input type="checkbox" name="users[]" value="{{ $user->id }}" x-model.number="selected" aria-label="Elegir {{ $user->name }}"></td>@endif
                   <td>
                     <a class="user-cell" href="{{ route('admin.usuarios.show', $user) }}">
                       <x-avatar :user="$user" :size="32" />
@@ -143,7 +146,7 @@
                   </td>
                   <td><x-verification-badge :level="$user->verification_level" full /></td>
                   <td>
-                    @if ($user->is_admin)<span class="badge badge--nivel-1">Admin</span>@endif
+                    @if ($user->team_role)<span class="badge badge--nivel-1">{{ $user->team_role->label() }}</span>@endif
                     @if ($user->hostProfile)<span class="badge badge--nivel-1">Anfitrión</span>@endif
                     @if ($user->isSuspended())<span class="badge badge--error">Suspendida</span>@endif
                   </td>

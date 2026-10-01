@@ -26,7 +26,7 @@
             <h3 style="margin:0"><a href="{{ route('admin.experiencias.show', $experience) }}">{{ $experience->title }}</a></h3>
             <p class="hint" style="margin:4px 0 8px">
               {{ $experience->category->name }} · {{ $experience->placeLabel() }} · {{ money($experience->price) }} · enviada {{ $experience->updated_at->diffForHumans() }}<br>
-              <a href="{{ route('admin.usuarios.show', $experience->host->user) }}">{{ $experience->host->display_name }}</a>
+              <x-admin-user-link :user="$experience->host->user" :label="$experience->host->display_name" />
               <x-verification-badge :level="$experience->host->user->verification_level" />
             </p>
             <p style="margin:0 0 6px"><strong>{{ $experience->summary }}</strong></p>
@@ -51,7 +51,7 @@
         <p>El contenido está bien. Se publican solas cuando el anfitrión valide su domicilio (nivel 3).</p>
         <div class="summary">
           @foreach ($awaitingHost as $experience)
-            <div><span><a href="{{ route('admin.experiencias.show', $experience) }}">{{ $experience->title }}</a></span><strong><a href="{{ route('admin.usuarios.show', $experience->host->user) }}">{{ $experience->host->display_name }}</a></strong></div>
+            <div><span><a href="{{ route('admin.experiencias.show', $experience) }}">{{ $experience->title }}</a></span><strong><x-admin-user-link :user="$experience->host->user" :label="$experience->host->display_name" /></strong></div>
           @endforeach
         </div>
       </section>

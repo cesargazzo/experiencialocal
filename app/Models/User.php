@@ -6,6 +6,8 @@ use App\Enums\BookingStatus;
 use App\Enums\DietaryOption;
 use App\Enums\ExperienceFeature;
 use App\Enums\SocialNetwork;
+use App\Enums\TeamPermission;
+use App\Enums\TeamRole;
 use App\Enums\VerificationLevel;
 use App\Models\Concerns\Auditable;
 use App\Notifications\ResetPasswordNotification;
@@ -35,7 +37,7 @@ use Illuminate\Support\Str;
 
 /**
  * Una sola cuenta con varios roles: todo usuario es participante, es anfitrión
- * si tiene un HostProfile y es administrador si tiene el flag is_admin.
+ * si tiene un HostProfile y es del equipo si tiene un rol (team_role).
  */
 #[Fillable(['name', 'first_name', 'last_name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'required_features', 'social_links', 'nationality_code', 'locale', 'avatar_path'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
@@ -81,7 +83,7 @@ class User extends Authenticatable
             'password_expires_at' => 'datetime',
             'password_changed_at' => 'datetime',
             'verification_level' => VerificationLevel::class,
-            'is_admin' => 'boolean',
+            'team_role' => TeamRole::class,
             'interest_alerts' => 'boolean',
             'dietary_needs' => AsEnumCollection::of(DietaryOption::class),
             'required_features' => AsEnumCollection::of(ExperienceFeature::class),
@@ -206,7 +208,7 @@ class User extends Authenticatable
     {
         $viewer ??= auth()->user();
 
-        return (bool) $viewer?->hasVerificationLevel(VerificationLevel::Document) || (bool) $viewer?->isAdmin();
+        return (bool) $viewer?->hasVerificationLevel(VerificationLevel::Document) || (bool) $viewer?->isTeamMember();
     }
 
     /**
@@ -381,9 +383,21 @@ class User extends Authenticatable
         return $this->hasMany(Review::class);
     }
 
+    /** Administración total: todos los permisos. */
     public function isAdmin(): bool
     {
-        return (bool) $this->is_admin;
+        return $this->team_role === TeamRole::Admin;
+    }
+
+    /** Tiene algún rol en el equipo, y por lo tanto entra a la administración. */
+    public function isTeamMember(): bool
+    {
+        return $this->team_role !== null;
+    }
+
+    public function hasTeamPermission(TeamPermission $permission): bool
+    {
+        return (bool) $this->team_role?->grants($permission);
     }
 
     public function isHost(): bool

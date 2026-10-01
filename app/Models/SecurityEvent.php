@@ -42,6 +42,7 @@ class SecurityEvent extends Model
         'password.temporary_issued' => 'Contraseña de única vez',
         'admin.granted' => 'Permiso de administración',
         'admin.revoked' => 'Permiso de administración quitado',
+        'team.role_changed' => 'Cambio de rol en el equipo',
         'policy.updated' => 'Política de contraseñas',
         'verification.approved' => 'Verificación aprobada',
         'verification.revoked' => 'Verificación revocada',
