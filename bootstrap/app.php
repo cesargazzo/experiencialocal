@@ -9,6 +9,7 @@ use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Middleware\EnsureTermsAccepted;
 use App\Http\Middleware\EnsureVerificationLevel;
 use App\Http\Middleware\RecordLastSeen;
+use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetSecurityHeaders;
 use App\Services\SecurityLog;
 use Illuminate\Foundation\Application;
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prepend(BlockProbingClients::class);
 
         $middleware->web(append: [
+            SetLocale::class,
             SetSecurityHeaders::class,
             BlockIndexingWhenDisabled::class,
             EnsureAccountIsActive::class,

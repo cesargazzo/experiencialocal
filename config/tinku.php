@@ -75,6 +75,13 @@ return [
     |
     */
 
+    // Idiomas de la interfaz. El primero es el de siempre; los textos que escriben los anfitriones no se traducen.
+    'locales' => [
+        'es' => ['name' => 'Español', 'html' => 'es-AR', 'og' => 'es_AR'],
+        'en' => ['name' => 'English', 'html' => 'en', 'og' => 'en_US'],
+        'pt_BR' => ['name' => 'Português', 'html' => 'pt-BR', 'og' => 'pt_BR'],
+    ],
+
     // Apagado hasta que se decida abrir el sitio a los buscadores: se prende con TINKU_INDEXABLE=true.
     'indexable' => (bool) env('TINKU_INDEXABLE', false),
 

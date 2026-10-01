@@ -29,6 +29,7 @@ use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\HostBookingController;
 use App\Http\Controllers\HostDashboardController;
 use App\Http\Controllers\HostEarningsController;
@@ -46,6 +47,7 @@ use App\Livewire\ManageExperience;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::post('/idioma', LocaleController::class)->middleware('throttle:30,1')->name('idioma');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/invitacion/{token}', InvitationAcceptController::class)->middleware('throttle:20,1')->name('invitacion.aceptar');
