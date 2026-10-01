@@ -92,13 +92,13 @@ class PasswordPolicy
     public function clientChecks(): array
     {
         return array_values(array_filter([
-            ['label' => "Al menos {$this->minLength} caracteres", 'minLength' => $this->minLength],
+            ['label' => __('Al menos :count caracteres', ['count' => $this->minLength]), 'minLength' => $this->minLength],
             $this->requireMixedCase
-                ? ['label' => 'Mayúsculas y minúsculas', 'patterns' => ['\\p{Lu}', '\\p{Ll}']]
-                : ['label' => 'Al menos una letra', 'patterns' => ['\\p{L}']],
-            $this->requireNumbers ? ['label' => 'Al menos un número', 'patterns' => ['\\p{N}']] : null,
-            $this->requireSymbols ? ['label' => 'Al menos un símbolo, como ! o #', 'patterns' => ['[\\p{Z}\\p{S}\\p{P}]']] : null,
-            $this->checkUncompromised ? ['label' => 'Que no aparezca en filtraciones conocidas (lo revisamos al guardar)', 'serverOnly' => true] : null,
+                ? ['label' => __('Mayúsculas y minúsculas'), 'patterns' => ['\\p{Lu}', '\\p{Ll}']]
+                : ['label' => __('Al menos una letra'), 'patterns' => ['\\p{L}']],
+            $this->requireNumbers ? ['label' => __('Al menos un número'), 'patterns' => ['\\p{N}']] : null,
+            $this->requireSymbols ? ['label' => __('Al menos un símbolo, como ! o #'), 'patterns' => ['[\\p{Z}\\p{S}\\p{P}]']] : null,
+            $this->checkUncompromised ? ['label' => __('Que no aparezca en filtraciones conocidas (lo revisamos al guardar)'), 'serverOnly' => true] : null,
         ]));
     }
 
@@ -110,11 +110,11 @@ class PasswordPolicy
     public function requirements(): array
     {
         return array_values(array_filter([
-            "Al menos {$this->minLength} caracteres",
-            $this->requireMixedCase ? 'Mayúsculas y minúsculas' : 'Al menos una letra',
-            $this->requireNumbers ? 'Al menos un número' : null,
-            $this->requireSymbols ? 'Al menos un símbolo, como ! o #' : null,
-            $this->checkUncompromised ? 'Que no aparezca en filtraciones conocidas' : null,
+            __('Al menos :count caracteres', ['count' => $this->minLength]),
+            $this->requireMixedCase ? __('Mayúsculas y minúsculas') : __('Al menos una letra'),
+            $this->requireNumbers ? __('Al menos un número') : null,
+            $this->requireSymbols ? __('Al menos un símbolo, como ! o #') : null,
+            $this->checkUncompromised ? __('Que no aparezca en filtraciones conocidas') : null,
         ]));
     }
 }

@@ -35,7 +35,7 @@ class LoginController extends Controller
             $securityLog->record('login.locked', null, ['minutes_left' => $minutes], $credentials['email'], 'danger');
 
             return back()
-                ->withErrors(['email' => "Hubo demasiados intentos. Probá de nuevo en {$minutes} ".($minutes === 1 ? 'minuto.' : 'minutos.')])
+                ->withErrors(['email' => __('Hubo demasiados intentos. Probá de nuevo en :time.', ['time' => plural_es($minutes, __('minuto'), __('minutos'))])])
                 ->onlyInput('email');
         }
 
@@ -44,7 +44,7 @@ class LoginController extends Controller
             RateLimiter::hit($throttleKey, $policy->lockoutMinutes * 60);
             $securityLog->record('login.failed', null, ['attempts' => RateLimiter::attempts($throttleKey)], $credentials['email'], 'warning');
 
-            return back()->withErrors(['email' => 'El email o la contraseña no coinciden.'])->onlyInput('email');
+            return back()->withErrors(['email' => __('El email o la contraseña no coinciden.')])->onlyInput('email');
         }
 
         /** @var User $user */
@@ -53,13 +53,13 @@ class LoginController extends Controller
         if ($user->isSuspended()) {
             $securityLog->record('login.failed', $user, ['reason' => 'cuenta suspendida'], $credentials['email'], 'warning');
 
-            return back()->withErrors(['email' => 'Tu cuenta está suspendida. Escribinos para revisarla.'])->onlyInput('email');
+            return back()->withErrors(['email' => __('Tu cuenta está suspendida. Escribinos para revisarla.')])->onlyInput('email');
         }
 
         if ($user->hasExpiredPassword()) {
             $securityLog->record('login.failed', $user, ['reason' => 'contraseña de única vez vencida'], $credentials['email'], 'warning');
 
-            return back()->withErrors(['email' => 'La contraseña de única vez venció. Pedí una nueva.'])->onlyInput('email');
+            return back()->withErrors(['email' => __('La contraseña de única vez venció. Pedí una nueva.')])->onlyInput('email');
         }
 
         RateLimiter::clear($throttleKey);
@@ -76,7 +76,7 @@ class LoginController extends Controller
         $request->session()->regenerate();
         $securityLog->record('login.succeeded', $user, ['remember' => $request->boolean('remember')], $credentials['email']);
 
-        return redirect()->intended(route('home'))->with('status', 'Hola de nuevo, '.Str::before($user->name, ' ').'.');
+        return redirect()->intended(route('home'))->with('status', __('Hola de nuevo, :name.', ['name' => Str::before($user->name, ' ')]));
     }
 
     public function destroy(Request $request, SecurityLog $securityLog): RedirectResponse

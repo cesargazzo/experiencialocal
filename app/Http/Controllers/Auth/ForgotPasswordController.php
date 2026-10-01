@@ -31,6 +31,6 @@ class ForgotPasswordController extends Controller
         );
 
         // Mismo mensaje exista o no la cuenta, para no revelar qué emails están registrados.
-        return back()->with('status', 'Si hay una cuenta con ese email, te mandamos un enlace para elegir una contraseña nueva.');
+        return back()->with('status', __('Si hay una cuenta con ese email, te mandamos un enlace para elegir una contraseña nueva.'));
     }
 }

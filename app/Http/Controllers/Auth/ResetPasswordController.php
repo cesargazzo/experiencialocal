@@ -44,9 +44,9 @@ class ResetPasswordController extends Controller
 
             return back()
                 ->withInput($request->only('email'))
-                ->withErrors(['email' => 'El enlace no es válido o venció. Pedí uno nuevo.']);
+                ->withErrors(['email' => __('El enlace no es válido o venció. Pedí uno nuevo.')]);
         }
 
-        return redirect()->route('login')->with('status', 'Listo, ya podés ingresar con tu contraseña nueva.');
+        return redirect()->route('login')->with('status', __('Listo, ya podés ingresar con tu contraseña nueva.'));
     }
 }

@@ -27,7 +27,7 @@
       <span class="requirement__icon requirement__icon--missing"><x-icon name="x" :size="14" /></span>
       <span class="requirement__icon requirement__icon--empty"><x-icon name="circle" :size="12" /></span>
       <span>{{ $check['label'] }}</span>
-      <span class="sr-only" x-text="{ ok: 'cumplido', missing: 'falta', empty: '', pending: '' }[state(checks[{{ $index }}])]"></span>
+      <span class="sr-only" x-text="{ ok: @js(__('cumplido')), missing: @js(__('falta')), empty: '', pending: '' }[state(checks[{{ $index }}])]"></span>
     </li>
   @endforeach
 </ul>

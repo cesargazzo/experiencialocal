@@ -17,8 +17,8 @@
     class="password-field__toggle"
     x-on:click="visible = ! visible"
     x-bind:aria-pressed="visible.toString()"
-    x-bind:aria-label="visible ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-    aria-label="Mostrar contraseña"
+    x-bind:aria-label="visible ? @js(__('Ocultar contraseña')) : @js(__('Mostrar contraseña'))"
+    aria-label="{{ __('Mostrar contraseña') }}"
     aria-controls="{{ $id }}"
   >
     <span x-show="! visible"><x-icon name="eye" :size="20" /></span>

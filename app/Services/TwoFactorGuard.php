@@ -39,7 +39,7 @@ class TwoFactorGuard
             $minutes = (int) ceil(RateLimiter::availableIn($key) / 60);
             $this->securityLog->record('login.locked', $user, ['step' => '2fa', 'minutes_left' => $minutes], $user->email, 'danger');
 
-            throw ValidationException::withMessages(['code' => "Hubo demasiados intentos. Probá de nuevo en {$minutes} ".($minutes === 1 ? 'minuto.' : 'minutos.')])->errorBag($errorBag);
+            throw ValidationException::withMessages(['code' => __('Hubo demasiados intentos. Probá de nuevo en :time.', ['time' => plural_es($minutes, __('minuto'), __('minutos'))])])->errorBag($errorBag);
         }
 
         $method = $user->verifyTwoFactorCode($code);
@@ -47,7 +47,7 @@ class TwoFactorGuard
             RateLimiter::hit($key, self::LOCK_SECONDS);
             $this->securityLog->record('2fa.failed', $user, ['attempts' => RateLimiter::attempts($key)], $user->email, 'warning');
 
-            throw ValidationException::withMessages(['code' => 'El código no coincide.'])->errorBag($errorBag);
+            throw ValidationException::withMessages(['code' => __('El código no coincide.')])->errorBag($errorBag);
         }
 
         RateLimiter::clear($key);

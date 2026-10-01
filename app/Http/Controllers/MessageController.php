@@ -35,11 +35,11 @@ class MessageController extends Controller
         $experience->load('host');
 
         if ($experience->host->user_id === $user->id) {
-            return redirect()->route('mensajes')->with('status', 'Es tu experiencia: acá ves lo que te preguntan.');
+            return redirect()->route('mensajes')->with('status', __('Es tu experiencia: acá ves lo que te preguntan.'));
         }
         abort_unless($experience->status === ExperienceStatus::Published, 404);
         if (! $user->hasVerificationLevel(VerificationLevel::Contact)) {
-            return redirect()->route('verificacion')->with('status', 'Para escribirle a un anfitrión, confirmá primero tu email.');
+            return redirect()->route('verificacion')->with('status', __('Para escribirle a un anfitrión, confirmá primero tu email.'));
         }
 
         $conversation = Conversation::firstOrCreate(

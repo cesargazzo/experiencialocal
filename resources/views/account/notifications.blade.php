@@ -1,7 +1,7 @@
-<x-layout title="Avisos" :noindex="true">
+<x-layout :title="__('Avisos')" :noindex="true">
   <main class="container wizard" style="max-width:820px">
-    <p class="eyebrow">Tu cuenta</p>
-    <h1 class="title">Tus <span class="hl">avisos</span>.</h1>
+    <p class="eyebrow">{{ __('Tu cuenta') }}</p>
+    <h1 class="title">{!! __('Tus <span class="hl">avisos</span>.') !!}</h1>
     @include('account.partials.nav')
 
     <section class="wizard__panel">
@@ -9,13 +9,13 @@
         <a @class(['notification', 'is-unread' => in_array($notification->id, $unreadIds, true)]) href="{{ $notification->data['url'] ?? '#' }}">
           <x-icon :name="$notification->data['icon'] ?? 'bell'" :size="22" />
           <span>
-            <strong>{{ $notification->data['title'] ?? 'Aviso' }}</strong>
+            <strong>{{ $notification->data['title'] ?? __('Aviso') }}</strong>
             <span>{{ $notification->data['body'] ?? '' }}</span>
             <small class="hint">{{ $notification->created_at->diffForHumans() }}</small>
           </span>
         </a>
       @empty
-        <p class="hint">No tenés avisos todavía. Acá vas a ver cuando aprueben tu experiencia, cuando haya novedades de tus reservas y lo que coincida con tus intereses.</p>
+        <p class="hint">{{ __('No tenés avisos todavía. Acá vas a ver cuando aprueben tu experiencia, cuando haya novedades de tus reservas y lo que coincida con tus intereses.') }}</p>
       @endforelse
     </section>
   </main>

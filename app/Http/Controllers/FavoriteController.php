@@ -33,6 +33,6 @@ class FavoriteController extends Controller
 
         return $request->expectsJson()
             ? response()->json(['favorite' => $saved])
-            : back()->with('status', $saved ? 'La guardaste en tus favoritas.' : 'La sacaste de tus favoritas.');
+            : back()->with('status', $saved ? __('La guardaste en tus favoritas.') : __('La sacaste de tus favoritas.'));
     }
 }

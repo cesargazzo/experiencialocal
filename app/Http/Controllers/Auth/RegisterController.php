@@ -35,8 +35,8 @@ class RegisterController extends Controller
             'terms_version_id' => ['required', 'integer', 'in:'.$terms->id],
             'accept_terms' => ['accepted'],
         ] : [], [
-            'accept_terms.accepted' => 'Para crear tu cuenta tenés que aceptar los términos y condiciones.',
-            'terms_version_id.in' => 'Los términos cambiaron mientras completabas el formulario. Revisá la versión nueva.',
+            'accept_terms.accepted' => __('Para crear tu cuenta tenés que aceptar los términos y condiciones.'),
+            'terms_version_id.in' => __('Los términos cambiaron mientras completabas el formulario. Revisá la versión nueva.'),
         ]);
 
         $data = $request->validate([
@@ -48,8 +48,8 @@ class RegisterController extends Controller
             'nationality_code' => ['required', Rule::in(CountryList::codes())],
             'password' => ['required', 'confirmed', Password::defaults()],
         ], [
-            'birth_date.before_or_equal' => 'Tenés que tener al menos '.config('tinku.min_age').' años para usar Tinku.',
-            'birth_date.after' => 'Revisá la fecha de nacimiento.',
+            'birth_date.before_or_equal' => __('Tenés que tener al menos :age años para usar Tinku.', ['age' => config('tinku.min_age')]),
+            'birth_date.after' => __('Revisá la fecha de nacimiento.'),
         ]);
 
         $user = User::create([...$data, 'country_code' => $data['nationality_code']]);
@@ -75,7 +75,7 @@ class RegisterController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('verificacion')->with('status', PlatformSettings::current()->smsVerification
-            ? 'Cuenta creada. Confirmá tu email y tu teléfono para empezar.'
-            : 'Cuenta creada. Confirmá tu email para empezar.');
+            ? __('Cuenta creada. Confirmá tu email y tu teléfono para empezar.')
+            : __('Cuenta creada. Confirmá tu email para empezar.'));
     }
 }

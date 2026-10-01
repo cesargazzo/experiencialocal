@@ -29,15 +29,15 @@ class TwoFactorChallengeController extends Controller
     {
         $user = $this->pendingUser($request);
         if (! $user) {
-            return redirect()->route('login')->withErrors(['email' => 'Pasó demasiado tiempo. Ingresá de nuevo.']);
+            return redirect()->route('login')->withErrors(['email' => __('Pasó demasiado tiempo. Ingresá de nuevo.')]);
         }
         if ($user->isSuspended()) {
             $request->session()->forget(['login.2fa.id', 'login.2fa.at', 'login.2fa.remember']);
 
-            return redirect()->route('login')->withErrors(['email' => 'Tu cuenta está suspendida. Escribinos para revisarla.']);
+            return redirect()->route('login')->withErrors(['email' => __('Tu cuenta está suspendida. Escribinos para revisarla.')]);
         }
 
-        $request->validate(['code' => ['required', 'string', 'max:20']], ['code.required' => 'Escribí el código.']);
+        $request->validate(['code' => ['required', 'string', 'max:20']], ['code.required' => __('Escribí el código.')]);
         $method = $guard->attempt($user, $request->string('code')->toString());
 
         $remember = (bool) $request->session()->pull('login.2fa.remember', false);
@@ -48,8 +48,8 @@ class TwoFactorChallengeController extends Controller
         $securityLog->record('login.succeeded', $user, ['remember' => $remember, 'two_factor' => $method], $user->email);
 
         return redirect()->intended(route('home'))->with('status', $method === 'recovery'
-            ? 'Usaste un código de recuperación. Te quedan '.count($user->two_factor_recovery_codes ?? []).'.'
-            : 'Hola de nuevo, '.Str::before($user->name, ' ').'.');
+            ? __('Usaste un código de recuperación. Te quedan :count.', ['count' => count($user->two_factor_recovery_codes ?? [])])
+            : __('Hola de nuevo, :name.', ['name' => Str::before($user->name, ' ')]));
     }
 
     private function pendingUser(Request $request): ?User

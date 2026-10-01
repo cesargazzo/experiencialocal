@@ -17,6 +17,6 @@
     },
   }"
 >
-  <span class="match__bad" x-show="second !== '' && first !== second" x-cloak><x-icon name="x" :size="14" /> Las contraseñas no coinciden.</span>
-  <span class="match__ok" x-show="second !== '' && first === second" x-cloak><x-icon name="check" :size="14" /> Las contraseñas coinciden.</span>
+  <span class="match__bad" x-show="second !== '' && first !== second" x-cloak><x-icon name="x" :size="14" /> {{ __('Las contraseñas no coinciden.') }}</span>
+  <span class="match__ok" x-show="second !== '' && first === second" x-cloak><x-icon name="check" :size="14" /> {{ __('Las contraseñas coinciden.') }}</span>
 </p>

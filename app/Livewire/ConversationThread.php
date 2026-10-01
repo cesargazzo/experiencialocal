@@ -42,11 +42,11 @@ class ConversationThread extends Component
     {
         $user = auth()->user();
         $this->authorize('send', $this->conversation);
-        $this->validate(['body' => ['required', 'string', 'max:2000']], ['body.required' => 'Escribí tu mensaje.', 'body.max' => 'El mensaje puede tener hasta 2000 caracteres.']);
+        $this->validate(['body' => ['required', 'string', 'max:2000']], ['body.required' => __('Escribí tu mensaje.'), 'body.max' => __('El mensaje puede tener hasta 2000 caracteres.')]);
 
         $key = 'mensajes:'.$user->id;
         if (RateLimiter::tooManyAttempts($key, self::HOURLY_LIMIT)) {
-            $this->addError('body', 'Mandaste muchos mensajes seguidos. Probá de nuevo en un rato.');
+            $this->addError('body', __('Mandaste muchos mensajes seguidos. Probá de nuevo en un rato.'));
 
             return;
         }
@@ -72,7 +72,7 @@ class ConversationThread extends Component
         }
 
         $this->reset('body');
-        $this->notice = $redacted ? 'Ocultamos datos de contacto de tu mensaje. Cuando la reserva esté confirmada vas a poder compartirlos.' : null;
+        $this->notice = $redacted ? __('Ocultamos datos de contacto de tu mensaje. Cuando la reserva esté confirmada vas a poder compartirlos.') : null;
     }
 
     /** Se llama cada tanto desde la vista: marca como leído lo que llegó. */
@@ -90,14 +90,14 @@ class ConversationThread extends Component
     public function report(SecurityLog $securityLog): void
     {
         $this->authorize('view', $this->conversation);
-        $this->validate(['reportReason' => ['required', 'string', 'min:5', 'max:300']], ['reportReason.required' => 'Contanos qué pasó.', 'reportReason.min' => 'Contanos un poco más.']);
+        $this->validate(['reportReason' => ['required', 'string', 'min:5', 'max:300']], ['reportReason.required' => __('Contanos qué pasó.'), 'reportReason.min' => __('Contanos un poco más.')]);
 
         $message = $this->conversation->messages()->whereKey($this->reportingId)->where('sender_id', '!=', auth()->id())->firstOrFail();
         $message->forceFill(['reported_at' => now(), 'reported_by' => auth()->id(), 'report_reason' => $this->reportReason])->save();
         $securityLog->record('message.reported', auth()->user(), ['message_id' => $message->id, 'conversation_id' => $this->conversation->id], null, 'warning');
 
         $this->reset('reportingId', 'reportReason');
-        $this->notice = 'Gracias. El equipo de Tinku va a revisar la denuncia.';
+        $this->notice = __('Gracias. El equipo de Tinku va a revisar la denuncia.');
     }
 
     public function render()
