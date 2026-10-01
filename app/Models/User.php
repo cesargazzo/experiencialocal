@@ -13,6 +13,7 @@ use App\Models\Concerns\Auditable;
 use App\Notifications\ResetPasswordNotification;
 use App\Support\CountryList;
 use App\Support\PasswordPolicy;
+use App\Support\PrivateHash;
 use App\Support\Totp;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
@@ -40,16 +41,16 @@ use Illuminate\Support\Str;
  * si tiene un HostProfile y es del equipo si tiene un rol (team_role).
  */
 #[Fillable(['name', 'first_name', 'last_name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'required_features', 'social_links', 'nationality_code', 'locale', 'avatar_path'])]
-#[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
+#[Hidden(['password', 'remember_token', 'phone', 'phone_hash', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
     use Auditable;
 
     /** @var list<string> Salud y religión: datos sensibles, no se guardan en la auditoría. */
-    protected array $auditMasked = ['dietary_needs', 'food_allergies'];
+    protected array $auditMasked = ['dietary_needs', 'food_allergies', 'phone'];
 
     /** @var list<string> Secretos del doble factor: nunca van a la auditoría. */
-    protected array $auditExclude = ['two_factor_secret', 'two_factor_recovery_codes', 'two_factor_last_step'];
+    protected array $auditExclude = ['two_factor_secret', 'two_factor_recovery_codes', 'two_factor_last_step', 'phone_hash'];
 
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -67,6 +68,11 @@ class User extends Authenticatable
                 $parts = preg_split('/\s+/u', trim((string) $user->name), 2) ?: [''];
                 $user->first_name = $parts[0];
                 $user->last_name = $parts[1] ?? null;
+            }
+
+            // El teléfono va cifrado; para buscarlo o detectar duplicados queda su huella con clave.
+            if ($user->isDirty('phone')) {
+                $user->phone_hash = filled($user->phone) ? PrivateHash::phone($user->phone) : null;
             }
         });
     }
@@ -88,6 +94,7 @@ class User extends Authenticatable
             'dietary_needs' => AsEnumCollection::of(DietaryOption::class),
             'required_features' => AsEnumCollection::of(ExperienceFeature::class),
             'last_login_at' => 'datetime',
+            'phone' => 'encrypted',
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_confirmed_at' => 'datetime',

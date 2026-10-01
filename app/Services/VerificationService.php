@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Notifications\VerificationCodeNotification;
 use App\Notifications\VerificationUpdatedNotification;
 use App\Support\PlatformSettings;
+use App\Support\PrivateHash;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -53,7 +54,7 @@ class VerificationService
         $result = null;
         if ($provider === VerificationProvider::Internal) {
             $code = (string) random_int(100000, 999999);
-            $result = ['code_hash' => Hash::make($code), 'sent_to' => $type === VerificationType::Email ? $user->email : $user->phone];
+            $result = ['code_hash' => Hash::make($code), 'sent_to' => $type === VerificationType::Email ? $user->email : PrivateHash::maskPhone($user->phone)];
             $this->deliverCode($user, $type, $code);
             if (! app()->isProduction()) {
                 $result['demo_code'] = $code; // Solo fuera de producción, para poder probar el flujo.
@@ -302,9 +303,10 @@ class VerificationService
     }
 
     /** El número de documento nunca se guarda: solo esta huella, para detectar duplicados y buscar. */
+    /** Huella con clave del documento: no se guarda el número (ver PrivateHash). */
     public static function documentHash(string $country, string $number): string
     {
-        return hash('sha256', strtoupper($country).'|'.preg_replace('/\W/', '', $number));
+        return PrivateHash::of(hash('sha256', strtoupper($country).'|'.preg_replace('/\W/', '', $number)));
     }
 
     /** País del documento ya enviado; si no hay, la nacionalidad declarada. */

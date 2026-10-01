@@ -66,7 +66,7 @@ class AccountDeletion
             DB::table('users')->where('id', $user->id)->update([
                 'name' => 'Cuenta eliminada', 'first_name' => 'Cuenta', 'last_name' => 'eliminada',
                 'email' => 'eliminada-'.$user->id.'-'.Str::lower(Str::random(8)).'@tinku.invalid',
-                'phone' => null, 'birth_date' => null, 'nationality_code' => null, 'country_code' => null, 'province_id' => null,
+                'phone' => null, 'phone_hash' => null, 'birth_date' => null, 'nationality_code' => null, 'country_code' => null, 'province_id' => null,
                 'city' => null, 'postal_code' => null, 'avatar_path' => null, 'dietary_needs' => null, 'food_allergies' => null, 'social_links' => null,
                 'required_features' => null, 'interest_alerts' => false, 'team_role' => null,
                 'password' => Hash::make(Str::random(64)), 'remember_token' => null,

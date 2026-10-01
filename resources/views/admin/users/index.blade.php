@@ -52,7 +52,7 @@
 
     <section class="wizard__panel">
       <form method="get" action="{{ route('admin.usuarios') }}" class="filters filters--users">
-        <div class="field"><label for="q">Buscar</label><input id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nombre o email"></div>
+        <div class="field"><label for="q">Buscar</label><input id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nombre, email o teléfono"></div>
         <div class="field"><label for="dni">DNI o documento</label><input id="dni" name="dni" value="{{ $filters['dni'] ?? '' }}" inputmode="numeric" autocomplete="off" placeholder="Número exacto"></div>
         <div class="field"><label for="nivel">Nivel</label>
           <select id="nivel" name="nivel">

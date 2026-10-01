@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Services\SecurityLog;
 use App\Services\VerificationService;
 use App\Support\CountryList;
+use App\Support\PrivateHash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -39,7 +40,9 @@ class UserController extends Controller
 
         $users = User::query()
             ->with(['avatar', 'hostProfile', 'province'])
-            ->when($filters['q'] ?? null, fn ($q, $term) => $q->where(fn ($w) => $w->where('name', 'ilike', "%{$term}%")->orWhere('email', 'ilike', "%{$term}%")))
+            ->when($filters['q'] ?? null, fn ($q, $term) => $q->where(fn ($w) => $w->where('name', 'ilike', "%{$term}%")->orWhere('email', 'ilike', "%{$term}%")
+                // El teléfono está cifrado: se busca por número exacto con su huella.
+                ->when(PrivateHash::phone($term), fn ($w, $phoneHash) => $w->orWhere('phone_hash', $phoneHash))))
             ->when($filters['dni'] ?? null, fn ($q, $number) => $q->whereHas('verifications', fn ($v) => $v->whereIn('document_hash', $this->documentHashesFor($number))))
             ->when(($filters['nivel'] ?? null) === 'verificada', fn ($q) => $q->where('verification_level', '>=', VerificationLevel::Document->value))
             ->when(isset($filters['nivel']) && $filters['nivel'] !== 'verificada', fn ($q) => $q->where('verification_level', (int) $filters['nivel']))
@@ -156,6 +159,7 @@ class UserController extends Controller
             'user' => $user,
             'events' => SecurityEvent::query()->where('user_id', $user->id)->orWhere('email', $user->email)->latest('created_at')->limit(30)->get(),
             'levels' => VerificationLevel::cases(),
+            'samePhone' => $user->phone_hash ? User::query()->where('phone_hash', $user->phone_hash)->whereKeyNot($user->getKey())->get(['id', 'name', 'email']) : collect(),
             'auditLogs' => AuditLog::query()->with('user')
                 ->where(fn ($q) => $q->where('auditable_type', User::class)->where('auditable_id', (string) $user->id))
                 ->orWhere('user_id', $user->id)

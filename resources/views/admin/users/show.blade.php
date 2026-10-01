@@ -15,6 +15,12 @@
       </div>
     </div>
 
+    @if ($samePhone->isNotEmpty())
+      <p class="notice" role="alert">El mismo teléfono está en otra{{ $samePhone->count() > 1 ? 's' : '' }} cuenta{{ $samePhone->count() > 1 ? 's' : '' }}:
+        @foreach ($samePhone as $other)<a href="{{ route('admin.usuarios.show', $other) }}">{{ $other->name }}</a> ({{ $other->email }})@if (! $loop->last) · @endif @endforeach
+      </p>
+    @endif
+
     <section class="wizard__panel">
       <h2>Datos</h2>
       <div class="summary">
