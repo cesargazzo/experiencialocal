@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\AdvertiserInquiryController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ExperienceController as AdminExperienceController;
 use App\Http\Controllers\Admin\LogController;
+use App\Http\Controllers\Admin\MailPreviewController;
 use App\Http\Controllers\Admin\PasswordPolicyController;
 use App\Http\Controllers\Admin\PlatformSettingsController;
 use App\Http\Controllers\Admin\ReportController;
@@ -103,6 +104,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/cuenta/reservas/{booking}/opinion', [ReviewController::class, 'store'])->name('cuenta.reservas.opinion');
     Route::post('/anfitrion/opiniones/{review}/responder', [ReviewController::class, 'reply'])->name('anfitrion.opiniones.responder');
     Route::post('/cuenta/reservas/{booking}/cancelar', [AccountBookingController::class, 'cancel'])->name('cuenta.reservas.cancelar');
+    Route::get('/cuenta/reservas/{booking}/calendario.ics', [AccountBookingController::class, 'calendar'])->name('cuenta.reservas.calendario');
     Route::get('/cuenta/intereses', [InterestController::class, 'edit'])->name('cuenta.intereses');
     Route::put('/cuenta/intereses', [InterestController::class, 'update'])->name('cuenta.intereses.update');
     Route::middleware('verified.level:1')->group(function () {
@@ -175,6 +177,7 @@ Route::middleware('auth')->group(function () {
             Route::put('/contrasenas', [PasswordPolicyController::class, 'update'])->name('contrasenas.update');
             Route::get('/configuracion', [PlatformSettingsController::class, 'edit'])->name('configuracion');
             Route::put('/configuracion', [PlatformSettingsController::class, 'update'])->name('configuracion.update');
+            Route::get('/configuracion/mails/{type}', MailPreviewController::class)->name('mails.preview');
             Route::get('/equipo', [TeamController::class, 'index'])->name('equipo');
             Route::get('/anunciantes', [AdvertiserInquiryController::class, 'index'])->name('anunciantes');
             Route::put('/anunciantes/{inquiry}', [AdvertiserInquiryController::class, 'update'])->name('anunciantes.update');

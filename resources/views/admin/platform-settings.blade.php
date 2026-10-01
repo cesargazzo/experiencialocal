@@ -27,6 +27,11 @@
             <small>Reservas, mensajes nuevos, aprobaciones, opiniones, recordatorios y coincidencias con intereses. Apagado: quedan solo en la campanita de cada cuenta. Los códigos para confirmar el email y los de recuperar la contraseña se mandan siempre.</small>
           </span>
         </label>
+        <p class="hint" style="margin:12px 0 0">Mirá cómo quedan antes de prenderlos (no se manda nada):
+          @foreach (\App\Http\Controllers\Admin\MailPreviewController::TYPES as $key => $label)
+            <a class="link" href="{{ route('admin.mails.preview', $key) }}" target="_blank" rel="noopener">{{ $label }}</a>@if (! $loop->last) · @endif
+          @endforeach
+        </p>
         <div class="wizard__actions"><span></span><button class="btn btn--secondary" type="submit">Guardá los cambios</button></div>
       </form>
     </section>

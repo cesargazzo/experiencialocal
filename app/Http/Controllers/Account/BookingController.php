@@ -7,9 +7,11 @@ use App\Exceptions\BookingException;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Services\BookingService;
+use App\Support\CalendarInvite;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class BookingController extends Controller
 {
@@ -29,6 +31,18 @@ class BookingController extends Controller
         ]);
     }
 
+    /** La reserva como .ics, para sumarla al calendario del celular o de la compu. */
+    public function calendar(Request $request, Booking $booking): Response
+    {
+        abort_unless($booking->user_id === $request->user()->id, 404);
+        $booking->load(['date', 'experience.province']);
+
+        return response(CalendarInvite::forBooking($booking), 200, [
+            'Content-Type' => 'text/calendar; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="tinku-'.$booking->code.'.ics"',
+        ]);
+    }
+
     public function cancel(Request $request, Booking $booking, BookingService $bookings): RedirectResponse
     {
         abort_unless($booking->user_id === $request->user()->id, 404);
@@ -39,6 +53,6 @@ class BookingController extends Controller
             return back()->withErrors(['booking' => $e->getMessage()]);
         }
 
-        return back()->with('status', 'Cancelaste tu reserva. Le avisamos al anfitrión.');
+        return back()->with('status', __('Cancelaste tu reserva. Le avisamos al anfitrión.'));
     }
 }

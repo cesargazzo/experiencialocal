@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 #[Fillable([
     'code', 'experience_date_id', 'experience_id', 'user_id', 'guests', 'unit_price', 'subtotal', 'service_fee_rate',
     'service_fee', 'total', 'commission_rate', 'commission_amount', 'host_payout', 'currency', 'status', 'guest_note', 'dietary_needs', 'food_allergies',
-    'payment_provider', 'payment_reference', 'confirmed_at', 'declined_at', 'cancelled_at', 'paid_at', 'completed_at', 'refunded_at', 'reminder_sent_at',
+    'payment_provider', 'payment_reference', 'confirmed_at', 'declined_at', 'cancelled_at', 'paid_at', 'completed_at', 'refunded_at', 'reminders_sent',
 ])]
 class Booking extends Model
 {
@@ -30,7 +30,7 @@ class Booking extends Model
     {
         return [
             'status' => BookingStatus::class,
-            'reminder_sent_at' => 'datetime',
+            'reminders_sent' => 'array',
             'dietary_needs' => AsEnumCollection::of(DietaryOption::class),
             'unit_price' => 'decimal:2',
             'subtotal' => 'decimal:2',

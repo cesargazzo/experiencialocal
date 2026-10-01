@@ -18,6 +18,7 @@ use App\Support\Totp;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
@@ -42,7 +43,7 @@ use Illuminate\Support\Str;
  */
 #[Fillable(['name', 'first_name', 'last_name', 'email', 'password', 'phone', 'birth_date', 'country_code', 'province_id', 'city', 'postal_code', 'dietary_needs', 'food_allergies', 'required_features', 'social_links', 'nationality_code', 'locale', 'avatar_path'])]
 #[Hidden(['password', 'remember_token', 'phone', 'phone_hash', 'two_factor_secret', 'two_factor_recovery_codes'])]
-class User extends Authenticatable
+class User extends Authenticatable implements HasLocalePreference
 {
     use Auditable;
 
@@ -101,6 +102,12 @@ class User extends Authenticatable
             'last_seen_at' => 'datetime',
             'social_links' => 'array',
         ];
+    }
+
+    /** Los avisos y mails le llegan en el idioma que eligió. */
+    public function preferredLocale(): string
+    {
+        return array_key_exists((string) $this->locale, config('tinku.locales')) ? $this->locale : 'es';
     }
 
     public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
