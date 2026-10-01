@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Storage;
  * Una imagen subida: el original privado y sus versiones optimizadas.
  */
 #[Fillable([
-    'uuid', 'collection', 'status', 'rotation', 'original_disk', 'original_path', 'original_name', 'mime_type', 'size',
+    'uuid', 'collection', 'position', 'status', 'rotation', 'original_disk', 'original_path', 'original_name', 'mime_type', 'size',
     'width', 'height', 'variants_disk', 'variants', 'alt', 'error',
 ])]
 class Media extends Model

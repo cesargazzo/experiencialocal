@@ -39,10 +39,10 @@ class ProcessMediaVariants implements ShouldQueue
     {
         $images->generateVariants($this->media);
 
-        // Con las versiones listas, la IA revisa la foto: la de perfil sola, la portada junto con su experiencia.
+        // Con las versiones listas, la IA revisa la foto: perfil y galería solas, la portada junto con su experiencia.
         $media = $this->media->fresh();
-        if ($media?->collection === 'avatar') {
-            ModerateContent::avatar($media);
+        if (in_array($media?->collection, ['avatar', 'gallery'], true)) {
+            ModerateContent::photo($media);
         } elseif ($media?->collection === 'cover' && $media->mediable instanceof Experience) {
             ModerateContent::experience($media->mediable);
         }

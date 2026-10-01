@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Storage;
 /**
  * Revisión automática con IA en segundo plano. Las experiencias quedan marcadas para el
  * equipo (la decisión sigue siendo humana); los mensajes graves se retienen y se denuncian
- * solos; las fotos de perfil inaceptables se ocultan.
+ * solos; las fotos de perfil o de galería inaceptables se ocultan.
  */
 class ModerateContent implements ShouldQueue
 {
@@ -48,7 +48,8 @@ class ModerateContent implements ShouldQueue
         self::dispatchIfEnabled($message);
     }
 
-    public static function avatar(Media $media): void
+    /** Foto de perfil o de la galería de una experiencia. */
+    public static function photo(Media $media): void
     {
         self::dispatchIfEnabled($media);
     }
@@ -70,7 +71,9 @@ class ModerateContent implements ShouldQueue
         $result = match (true) {
             $subject instanceof Experience => $this->reviewExperience($subject, $moderator),
             $subject instanceof Message => $moderator->review('mensaje entre un viajero y un anfitrión', ['mensaje' => $subject->body]),
-            $subject instanceof Media => $moderator->review('foto de perfil de una persona', [], $this->image($subject, 'md')),
+            $subject instanceof Media => $subject->collection === 'avatar'
+                ? $moderator->review('foto de perfil de una persona', [], $this->image($subject, 'md'))
+                : $moderator->review('foto de la galería de una experiencia', ['experiencia' => $subject->mediable?->title], $this->image($subject, 'thumb')),
         };
         if ($result === null) {
             return;

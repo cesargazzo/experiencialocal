@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 #[Fillable([
@@ -99,6 +100,19 @@ class Experience extends Model
     }
 
     /** Última foto subida, esté lista o no: sirve para mostrar si se está procesando o falló. */
+    /** Fotos de la galería que ya se pueden mostrar, en el orden que eligió el anfitrión. */
+    public function galleryPhotos(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'mediable')->where('collection', 'gallery')
+            ->whereIn('status', Media::VISIBLE_STATUSES)->orderBy('position')->orderBy('id');
+    }
+
+    /** Todas las fotos de la galería, también las que se están procesando o se rechazaron. */
+    public function galleryUploads(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'mediable')->where('collection', 'gallery')->orderBy('position')->orderBy('id');
+    }
+
     public function latestCoverUpload(): MorphOne
     {
         return $this->morphOne(Media::class, 'mediable')->ofMany(['id' => 'max'], fn ($query) => $query->where('collection', 'cover'));

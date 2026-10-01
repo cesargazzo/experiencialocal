@@ -57,6 +57,9 @@ class ManageExperience extends Component
 
     public ?TemporaryUploadedFile $cover = null;
 
+    /** @var list<TemporaryUploadedFile> Fotos nuevas para la galería. */
+    public array $photos = [];
+
     // Fechas: una sola o varias por días de la semana dentro de un rango.
     public string $date_mode = 'single';
 
@@ -148,6 +151,47 @@ class ManageExperience extends Component
         $this->notice = ($needsReview
             ? 'Guardamos los cambios. Como cambiaste el contenido, la revisamos de nuevo antes de publicarla.'
             : 'Guardamos los cambios.');
+    }
+
+    /** Suma fotos a la galería. No vuelve a revisión: cada foto la revisa la IA y el equipo la ve. */
+    public function updatedPhotos(ImageService $images): void
+    {
+        $this->authorize('update', $this->experience);
+        $max = (int) config('tinku.images.collections.gallery.max');
+        $current = $this->experience->galleryUploads()->whereNot('status', 'rejected')->count();
+
+        $this->validate(['photos' => ['array', 'max:'.max(0, $max - $current)], 'photos.*' => [ImageSize::forCollection('gallery')]], [
+            'photos.max' => "La galería admite hasta {$max} fotos. Quitá alguna para sumar otras.",
+        ]);
+
+        $position = (int) $this->experience->galleryUploads()->max('position');
+        foreach ($this->photos as $photo) {
+            $images->store($this->experience, 'gallery', $photo, $this->experience->title)->update(['position' => ++$position]);
+        }
+
+        $this->photos = [];
+        $this->notice = 'Sumamos las fotos. En unos segundos aparecen en tu experiencia.';
+    }
+
+    public function removePhoto(int $mediaId): void
+    {
+        $this->authorize('update', $this->experience);
+        $this->experience->galleryUploads()->whereKey($mediaId)->firstOrFail()->delete();
+    }
+
+    /** Mueve una foto un lugar antes (-1) o después (1). */
+    public function movePhoto(int $mediaId, int $direction): void
+    {
+        $this->authorize('update', $this->experience);
+        $photos = $this->experience->galleryUploads()->get()->values();
+        $index = $photos->search(fn ($photo) => $photo->id === $mediaId);
+        $target = $index === false ? null : $index + ($direction < 0 ? -1 : 1);
+        if ($target === null || ! isset($photos[$target])) {
+            return;
+        }
+
+        [$photos[$index], $photos[$target]] = [$photos[$target], $photos[$index]];
+        DB::transaction(fn () => $photos->each(fn ($photo, $i) => $photo->update(['position' => $i + 1])));
     }
 
     /** Busca la dirección en Georef, la normaliza y centra el mapa. */
@@ -309,6 +353,8 @@ class ManageExperience extends Component
             'categories' => Category::orderBy('sort_order')->get(),
             'upcomingDates' => $this->experience->dates()->where('status', 'open')->where('starts_at', '>', now())->get(),
             'mapCenter' => $this->latitude === null ? $this->mapFallbackCenter() : [$this->latitude, $this->longitude],
+            'gallery' => $this->experience->galleryUploads()->get(),
+            'galleryMax' => (int) config('tinku.images.collections.gallery.max'),
             'weekdayNames' => [1 => 'Lun', 2 => 'Mar', 3 => 'Mié', 4 => 'Jue', 5 => 'Vie', 6 => 'Sáb', 7 => 'Dom'],
         ]);
     }

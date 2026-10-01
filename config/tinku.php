@@ -151,6 +151,16 @@ return [
                     'og' => [1200, 630, 'jpg'],
                 ],
             ],
+            // Galería de una experiencia: varias fotos ordenables, además de la portada.
+            'gallery' => [
+                'single' => false,
+                'min_side' => 600,
+                'max' => 12,
+                'variants' => [
+                    'thumb' => [480, 360],
+                    'large' => [1600, 1200],
+                ],
+            ],
         ],
     ],
 

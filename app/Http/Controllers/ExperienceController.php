@@ -16,7 +16,7 @@ class ExperienceController extends Controller
 
         abort_unless($experience->status === ExperienceStatus::Published || $isOwner || $user?->hasTeamPermission(TeamPermission::ModerateExperiences), 404);
 
-        $experience->load(['host.user.avatar', 'category', 'province', 'cover', 'upcomingDates', 'reviews.user']);
+        $experience->load(['host.user.avatar', 'category', 'province', 'cover', 'galleryPhotos', 'upcomingDates', 'reviews.user']);
 
         return view('experiences.show', ['experience' => $experience]);
     }

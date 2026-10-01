@@ -124,4 +124,38 @@
     <div class="field"><label for="description">Descripción</label><textarea id="description" rows="6" wire:model="description"></textarea><x-char-count :min="80" />@error('description')<span class="error" style="display:block">{{ $message }}</span>@enderror</div>
     <div class="wizard__actions"><a class="btn btn--ghost" href="{{ route('anfitrion.panel') }}">Volver</a><button class="btn btn--primary" type="button" wire:click="save" wire:loading.attr="disabled">Guardá los cambios</button></div>
   </section>
+
+  <section class="wizard__panel" id="fotos" @if ($gallery->contains(fn ($photo) => $photo->isProcessing())) wire:poll.3s @endif>
+    <h2>Más fotos</h2>
+    <p>Hasta {{ $galleryMax }} fotos además de la portada: el lugar, la comida, la gente, el paisaje. Las primeras se ven primero. Sumar fotos no saca tu experiencia de la vista.</p>
+    @if ($gallery->isNotEmpty())
+      <ul class="gallery-manager">
+        @foreach ($gallery as $photo)
+          <li wire:key="photo-{{ $photo->id }}" @class(['is-rejected' => $photo->status === 'rejected'])>
+            @if ($url = $photo->url('thumb'))
+              <img src="{{ $url }}" alt="Foto {{ $loop->iteration }}" loading="lazy">
+            @else
+              <span class="gallery-manager__state">@if ($photo->isProcessing())<span class="spinner" aria-hidden="true"></span> Preparando…@else No se pudo procesar @endif</span>
+            @endif
+            @if ($photo->status === 'rejected')<span class="gallery-manager__badge">No cumple las normas: no se muestra</span>@endif
+            <div class="gallery-manager__actions">
+              <button type="button" class="btn btn--ghost btn--sm" wire:click="movePhoto({{ $photo->id }}, -1)" @disabled($loop->first) aria-label="Mover antes">←</button>
+              <button type="button" class="btn btn--ghost btn--sm" wire:click="movePhoto({{ $photo->id }}, 1)" @disabled($loop->last) aria-label="Mover después">→</button>
+              <button type="button" class="btn btn--ghost btn--sm" wire:click="removePhoto({{ $photo->id }})" wire:confirm="¿Quitamos esta foto?" aria-label="Quitar"><x-icon name="trash" :size="16" /></button>
+            </div>
+          </li>
+        @endforeach
+      </ul>
+    @endif
+    <div class="upload" x-data="{ uploading: false, progress: 0 }" x-on:livewire-upload-start="uploading = true; progress = 0" x-on:livewire-upload-progress="progress = $event.detail.progress" x-on:livewire-upload-finish="uploading = false" x-on:livewire-upload-error="uploading = false">
+      <div class="upload__body">
+        <input id="photos" class="sr-only" type="file" wire:model="photos" accept="image/jpeg,image/png,image/webp" multiple>
+        <label for="photos" class="btn btn--tertiary btn--sm upload__pick">Sumá fotos</label>
+        <span class="hint">Podés elegir varias a la vez. JPG, PNG o WebP de al menos 600 px de cada lado.</span>
+        <x-upload-progress />
+        @error('photos')<span class="error" style="display:block">{{ $message }}</span>@enderror
+        @foreach ($errors->get('photos.*') as $messages)<span class="error" style="display:block">{{ $messages[0] }}</span>@endforeach
+      </div>
+    </div>
+  </section>
 </main>

@@ -96,6 +96,26 @@
     <div class="container detail-layout">
       <div>
         <div class="detail-block"><h2>La experiencia</h2><p>{{ $experience->description }}</p></div>
+        @if ($experience->galleryPhotos->isNotEmpty())
+          @php($galleryItems = $experience->galleryPhotos->map(fn ($photo) => ['src' => $photo->url('large'), 'alt' => $photo->alt ?: $experience->title])->values())
+          <div class="detail-block" id="fotos"><h2>Fotos</h2>
+            <div class="gallery" x-data="{ open: null, items: @js($galleryItems), show(i) { this.open = (i + this.items.length) % this.items.length } }"
+              x-on:keydown.escape.window="open = null" x-on:keydown.arrow-right.window="open !== null && show(open + 1)" x-on:keydown.arrow-left.window="open !== null && show(open - 1)">
+              @foreach ($experience->galleryPhotos as $photo)
+                <button type="button" class="gallery__item" x-on:click="show({{ $loop->index }})" aria-label="Ver la foto {{ $loop->iteration }} de {{ $loop->count }}">
+                  <img src="{{ $photo->url('thumb') }}" alt="{{ $photo->alt ?: $experience->title }}" loading="lazy" width="480" height="360">
+                </button>
+              @endforeach
+              <div class="lightbox" x-show="open !== null" x-cloak x-transition.opacity role="dialog" aria-modal="true" aria-label="Fotos de la experiencia" x-on:click.self="open = null">
+                <button type="button" class="lightbox__close" x-on:click="open = null" aria-label="Cerrar"><x-icon name="x" :size="24" /></button>
+                <button type="button" class="lightbox__nav lightbox__nav--prev" x-on:click="show(open - 1)" aria-label="Foto anterior">‹</button>
+                <img x-bind:src="open !== null ? items[open].src : ''" x-bind:alt="open !== null ? items[open].alt : ''">
+                <button type="button" class="lightbox__nav lightbox__nav--next" x-on:click="show(open + 1)" aria-label="Foto siguiente">›</button>
+                <span class="lightbox__count" x-text="open !== null ? (open + 1) + ' / ' + items.length : ''"></span>
+              </div>
+            </div>
+          </div>
+        @endif
         @if ($experience->difficulty || $experience->what_to_bring || $experience->min_age || $experience->features?->isNotEmpty())
           <div class="detail-block"><h2>Bueno saber</h2>
             <ul class="menu-list">
