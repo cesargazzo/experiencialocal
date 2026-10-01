@@ -32,7 +32,8 @@
       <div class="search__field"><label for="search-cat">Qué querés hacer</label>
         <select id="search-cat" name="cat"><option value="">Todas las experiencias</option>@foreach ($categories as $c)<option value="{{ $c->slug }}" @selected($activeCategory?->id === $c->id)>{{ $c->name }}</option>@endforeach</select></div>
       <div class="search__field"><label for="search-lugar">Dónde</label><input id="search-lugar" name="lugar" type="text" value="{{ request('lugar') }}" placeholder="La Rioja, Chilecito…"></div>
-      <div class="search__field"><label for="search-fecha">Cuándo</label><input id="search-fecha" name="fecha" type="date" value="{{ request('fecha') }}"></div>
+      <div class="search__field"><label for="search-fecha">Cuándo</label><input id="search-fecha" name="fecha" type="date" min="{{ now(config('tinku.timezone'))->toDateString() }}" value="{{ request('fecha') }}"></div>
+      <div class="search__field search__field--narrow"><label for="search-personas">Personas</label><input id="search-personas" name="personas" type="number" min="1" max="50" inputmode="numeric" value="{{ request('personas') }}" placeholder="2"></div>
       <div class="search__submit"><button class="btn btn--secondary" type="submit">Buscar</button></div>
     </form>
   </div>
@@ -65,6 +66,46 @@
           <a class="chip {{ $activeCategory?->id === $c->id ? 'is-active' : '' }}" href="{{ route('home', [...request()->except('cat'), 'cat' => $c->slug]) }}#experiencias" @if ($activeCategory?->id === $c->id) aria-current="true" @endif><x-icon :name="$c->icon" :size="16" /> {{ $c->name }}</a>
         @endforeach
       </div>
+      <details class="filters-panel" @if ($search->extraFilterCount()) open @endif>
+        <summary>Más filtros @if ($count = $search->extraFilterCount())<span class="filters-panel__count">{{ $count }}</span>@endif</summary>
+        <form method="get" action="{{ route('home') }}#experiencias">
+          @foreach (['cat', 'lugar', 'fecha', 'personas'] as $kept)
+            @if (request()->filled($kept))<input type="hidden" name="{{ $kept }}" value="{{ request($kept) }}">@endif
+          @endforeach
+          <div class="filters-panel__grid">
+            <fieldset>
+              <legend>Comida</legend>
+              @foreach (\App\Enums\DietaryOption::cases() as $option)
+                <label class="check"><input type="checkbox" name="comida[]" value="{{ $option->value }}" @checked(in_array($option->value, $search->selected('comida'), true))> {{ $option->label() }}</label>
+              @endforeach
+            </fieldset>
+            <fieldset>
+              <legend>Necesito</legend>
+              @foreach (\App\Enums\ExperienceFeature::cases() as $feature)
+                <label class="check"><input type="checkbox" name="necesito[]" value="{{ $feature->value }}" @checked(in_array($feature->value, $search->selected('necesito'), true))> {{ $feature->label() }}</label>
+              @endforeach
+            </fieldset>
+            <fieldset>
+              <legend>Dificultad</legend>
+              @foreach (\App\Enums\Difficulty::cases() as $level)
+                <label class="check"><input type="checkbox" name="dificultad[]" value="{{ $level->value }}" @checked(in_array($level->value, $search->selected('dificultad'), true))> {{ $level->label() }}</label>
+              @endforeach
+            </fieldset>
+            <fieldset>
+              <legend>Precio y orden</legend>
+              <div class="field"><label for="precio_max">Hasta (por persona)</label><input id="precio_max" name="precio_max" type="number" min="1" step="1000" inputmode="numeric" value="{{ $search->filters['precio_max'] ?? '' }}" placeholder="$ 50.000"></div>
+              <div class="field"><label for="orden">Ordenar por</label>
+                <select id="orden" name="orden">@foreach (\App\Support\ExperienceSearch::SORTS as $key => $label)<option value="{{ $key }}" @selected(($search->filters['orden'] ?? 'recomendadas') === $key)>{{ $label }}</option>@endforeach</select>
+              </div>
+            </fieldset>
+          </div>
+          <div class="filters-panel__actions">
+            <a class="btn btn--ghost btn--sm" href="{{ route('home', request()->only(['cat', 'lugar', 'fecha', 'personas'])) }}#experiencias">Sacá los filtros</a>
+            <button class="btn btn--secondary btn--sm" type="submit">Aplicá los filtros</button>
+          </div>
+        </form>
+      </details>
+      <p class="hint results-count" role="status">{{ plural_es($experiences->count(), 'experiencia', 'experiencias') }}@if ($search->filters || $activeCategory) con esos filtros · <a href="{{ route('home') }}#experiencias">Ver todas</a>@endif</p>
       <div class="grid">
         @forelse ($experiences as $e)
           <x-experience-card :experience="$e" />

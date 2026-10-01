@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Experience;
 use App\Models\Plan;
 use App\Models\Review;
+use App\Support\ExperienceSearch;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -17,16 +18,12 @@ class HomeController extends Controller
         $categories = Category::orderBy('sort_order')->get();
         $activeCategory = $categories->firstWhere('slug', $request->query('cat'));
 
-        $experiences = Experience::published()
-            ->with(['host.user.avatar', 'host.plan', 'category', 'province', 'cover'])
-            ->when($activeCategory, fn ($q) => $q->where('category_id', $activeCategory->id))
-            ->when($request->filled('lugar'), function ($query) use ($request) {
-                $place = '%'.$request->string('lugar')->trim()->toString().'%';
-                $query->where(fn ($q) => $q->where('city', 'ilike', $place)->orWhereHas('province', fn ($p) => $p->where('name', 'ilike', $place)));
-            })
-            ->orderByDesc('rating_avg')
-            ->orderByDesc('reviews_count')
-            ->get();
+        $search = new ExperienceSearch($request->query());
+        $experiences = $search->apply(
+            Experience::published()
+                ->with(['host.user.avatar', 'host.plan', 'category', 'province', 'cover'])
+                ->when($activeCategory, fn ($q) => $q->where('category_id', $activeCategory->id))
+        )->get();
 
         // Al anfitrión se le aclara que lo suyo sin publicar no aparece en esta lista.
         $hostProfile = $request->user()?->hostProfile;
@@ -39,6 +36,7 @@ class HomeController extends Controller
             'categories' => $categories,
             'activeCategory' => $activeCategory,
             'experiences' => $experiences,
+            'search' => $search,
             'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(),
             'testimonials' => Review::with(['user.avatar', 'experience'])->whereNotNull('published_at')->where('rating', '>=', 5)->latest('published_at')->take(3)->get(),
             'stats' => [

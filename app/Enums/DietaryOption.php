@@ -52,11 +52,7 @@ enum DietaryOption: string
      */
     public function isCoveredBy(iterable $offered): bool
     {
-        $accepted = match ($this) {
-            self::Vegetarian => [self::Vegetarian, self::Vegan],
-            self::GlutenFree => [self::GlutenFree, self::SinTacc],
-            default => [$this],
-        };
+        $accepted = $this->coveringOptions();
 
         foreach ($offered as $option) {
             if (in_array($option, $accepted, true)) {
@@ -65,6 +61,20 @@ enum DietaryOption: string
         }
 
         return false;
+    }
+
+    /**
+     * Ofertas que cubren esta necesidad.
+     *
+     * @return list<self>
+     */
+    public function coveringOptions(): array
+    {
+        return match ($this) {
+            self::Vegetarian => [self::Vegetarian, self::Vegan],
+            self::GlutenFree => [self::GlutenFree, self::SinTacc],
+            default => [$this],
+        };
     }
 
     public function hint(): string
