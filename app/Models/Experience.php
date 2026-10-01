@@ -155,11 +155,11 @@ class Experience extends Model
     public function statusLabel(): string
     {
         return match ($this->status) {
-            ExperienceStatus::Draft => $this->rejection_reason ? 'Para corregir' : 'Borrador',
-            ExperienceStatus::InReview => $this->approved_at ? 'Aprobada, falta el domicilio' : 'En revisión',
-            ExperienceStatus::Published => 'Publicada',
-            ExperienceStatus::Paused => 'Pausada',
-            ExperienceStatus::Archived => 'Archivada',
+            ExperienceStatus::Draft => $this->rejection_reason ? __('Para corregir') : __('Borrador'),
+            ExperienceStatus::InReview => $this->approved_at ? __('Aprobada, falta el domicilio') : __('En revisión'),
+            ExperienceStatus::Published => __('Publicada'),
+            ExperienceStatus::Paused => __('Pausada'),
+            ExperienceStatus::Archived => __('Archivada'),
         };
     }
 

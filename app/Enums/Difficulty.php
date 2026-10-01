@@ -13,20 +13,20 @@ enum Difficulty: string
     public function label(): string
     {
         return match ($this) {
-            self::Easy => 'Baja',
-            self::Moderate => 'Media',
-            self::Hard => 'Alta',
-            self::Expert => 'Exigente',
+            self::Easy => __('Baja'),
+            self::Moderate => __('Media'),
+            self::Hard => __('Alta'),
+            self::Expert => __('Exigente'),
         };
     }
 
     public function hint(): string
     {
         return match ($this) {
-            self::Easy => 'Caminata tranquila y terreno parejo. Apta para casi todos.',
-            self::Moderate => 'Algunas subidas o varias horas en movimiento.',
-            self::Hard => 'Terreno irregular o desnivel. Hace falta buen estado físico.',
-            self::Expert => 'Para personas con experiencia en montaña o trekking.',
+            self::Easy => __('Caminata tranquila y terreno parejo. Apta para casi todos.'),
+            self::Moderate => __('Algunas subidas o varias horas en movimiento.'),
+            self::Hard => __('Terreno irregular o desnivel. Hace falta buen estado físico.'),
+            self::Expert => __('Para personas con experiencia en montaña o trekking.'),
         };
     }
 }

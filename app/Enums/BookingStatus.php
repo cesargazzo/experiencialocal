@@ -14,12 +14,12 @@ enum BookingStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Requested => 'Solicitada',
-            self::Confirmed => 'Confirmada',
-            self::Declined => 'Rechazada',
-            self::Cancelled => 'Cancelada',
-            self::Completed => 'Realizada',
-            self::Refunded => 'Reembolsada',
+            self::Requested => __('Solicitada'),
+            self::Confirmed => __('Confirmada'),
+            self::Declined => __('Rechazada'),
+            self::Cancelled => __('Cancelada'),
+            self::Completed => __('Realizada'),
+            self::Refunded => __('Reembolsada'),
         };
     }
 

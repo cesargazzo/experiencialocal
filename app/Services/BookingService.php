@@ -24,13 +24,13 @@ class BookingService
     public function request(User $user, ExperienceDate $date, int $guests, ?string $note = null): Booking
     {
         if ($user->isSuspended()) {
-            throw new BookingException('Tu cuenta está suspendida.');
+            throw new BookingException(__('Tu cuenta está suspendida.'));
         }
         if (! $user->hasVerificationLevel(VerificationLevel::Document)) {
-            throw new BookingException('Para reservar necesitás validar tu documento de identidad.');
+            throw new BookingException(__('Para reservar necesitás validar tu documento de identidad.'));
         }
         if ($guests < 1) {
-            throw new BookingException('Indicá cuántas personas van.');
+            throw new BookingException(__('Indicá cuántas personas van.'));
         }
 
         $booking = DB::transaction(function () use ($user, $date, $guests, $note) {
@@ -39,13 +39,13 @@ class BookingService
             $experience = $locked->experience()->with('host.plan')->firstOrFail();
 
             if ($experience->status !== ExperienceStatus::Published) {
-                throw new BookingException('Esta experiencia no está recibiendo reservas.');
+                throw new BookingException(__('Esta experiencia no está recibiendo reservas.'));
             }
             if (! $locked->isOpen()) {
-                throw new BookingException('Esta fecha ya no está disponible.');
+                throw new BookingException(__('Esta fecha ya no está disponible.'));
             }
             if ($experience->host->user_id === $user->getKey()) {
-                throw new BookingException('No podés reservar tu propia experiencia.');
+                throw new BookingException(__('No podés reservar tu propia experiencia.'));
             }
             // Una reserva activa por fecha: para cambiar la cantidad de personas se cancela y se pide de nuevo.
             // Se controla después del bloqueo de la fecha, así dos pedidos simultáneos no pasan los dos.
@@ -55,10 +55,10 @@ class BookingService
                 ->whereIn('status', [BookingStatus::Requested, BookingStatus::Confirmed])
                 ->first();
             if ($existing) {
-                throw new BookingException("Ya tenés una reserva para esta fecha (código {$existing->code}). Si querés cambiar la cantidad de personas, cancelala desde Tus reservas y pedí de nuevo.");
+                throw new BookingException(__('Ya tenés una reserva para esta fecha (código :code). Si querés cambiar la cantidad de personas, cancelala desde Tus reservas y pedí de nuevo.', ['code' => $existing->code]));
             }
             if ($locked->seatsLeft() < $guests) {
-                throw new BookingException(sprintf('Quedan %d lugares en esta fecha.', $locked->seatsLeft()));
+                throw new BookingException(__('Quedan :count lugares en esta fecha.', ['count' => $locked->seatsLeft()]));
             }
 
             $unit = (float) $experience->price;
@@ -126,10 +126,10 @@ class BookingService
         $isGuest = $booking->user_id === $actor->getKey();
         $isHost = $booking->experience->host->user_id === $actor->getKey();
         if (! $isGuest && ! $isHost && ! $actor->isAdmin()) {
-            throw new BookingException('No podés cancelar esta reserva.');
+            throw new BookingException(__('No podés cancelar esta reserva.'));
         }
         if (! in_array($booking->status, [BookingStatus::Requested, BookingStatus::Confirmed], true)) {
-            throw new BookingException('Esta reserva ya no se puede cancelar.');
+            throw new BookingException(__('Esta reserva ya no se puede cancelar.'));
         }
 
         $this->release($booking, BookingStatus::Cancelled, 'cancelled_at');
@@ -164,14 +164,14 @@ class BookingService
     private function assertHostOwns(Booking $booking, User $host): void
     {
         if ($booking->experience->host->user_id !== $host->getKey() && ! $host->isAdmin()) {
-            throw new BookingException('Esta reserva no es de una experiencia tuya.');
+            throw new BookingException(__('Esta reserva no es de una experiencia tuya.'));
         }
     }
 
     private function assertStatus(Booking $booking, BookingStatus $expected): void
     {
         if ($booking->status !== $expected) {
-            throw new BookingException(sprintf('La reserva está %s.', mb_strtolower($booking->status->label())));
+            throw new BookingException(__('La reserva está :status.', ['status' => mb_strtolower($booking->status->label())]));
         }
     }
 }

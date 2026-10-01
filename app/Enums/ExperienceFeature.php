@@ -13,10 +13,10 @@ enum ExperienceFeature: string
     public function label(): string
     {
         return match ($this) {
-            self::KidFriendly => 'Apta para chicos',
-            self::PetFriendly => 'Se aceptan mascotas',
-            self::WheelchairAccessible => 'Accesible en silla de ruedas',
-            self::TransportIncluded => 'Incluye traslado',
+            self::KidFriendly => __('Apta para chicos'),
+            self::PetFriendly => __('Se aceptan mascotas'),
+            self::WheelchairAccessible => __('Accesible en silla de ruedas'),
+            self::TransportIncluded => __('Incluye traslado'),
         };
     }
 
@@ -24,10 +24,10 @@ enum ExperienceFeature: string
     public function needLabel(): string
     {
         return match ($this) {
-            self::KidFriendly => 'Voy con chicos',
-            self::PetFriendly => 'Viajo con mi mascota',
-            self::WheelchairAccessible => 'Necesito accesibilidad para silla de ruedas',
-            self::TransportIncluded => 'Necesito traslado incluido',
+            self::KidFriendly => __('Voy con chicos'),
+            self::PetFriendly => __('Viajo con mi mascota'),
+            self::WheelchairAccessible => __('Necesito accesibilidad para silla de ruedas'),
+            self::TransportIncluded => __('Necesito traslado incluido'),
         };
     }
 }

@@ -69,7 +69,7 @@ class BookExperience extends Component
             return;
         }
         if (! auth()->user()->hasVerificationLevel(VerificationLevel::Document)) {
-            session()->flash('status', 'Para reservar necesitás validar tu documento de identidad.');
+            session()->flash('status', __('Para reservar necesitás validar tu documento de identidad.'));
             $this->redirectRoute('verificacion');
 
             return;

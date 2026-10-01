@@ -20,13 +20,13 @@ enum DietaryOption: string
     public function label(): string
     {
         return match ($this) {
-            self::Vegan => 'Apto vegano',
-            self::Vegetarian => 'Apto vegetariano',
-            self::SinTacc => 'Sin TACC',
-            self::GlutenFree => 'Opción sin gluten',
-            self::LactoseFree => 'Sin lactosa',
-            self::Kosher => 'Kosher',
-            self::Halal => 'Halal',
+            self::Vegan => __('Apto vegano'),
+            self::Vegetarian => __('Apto vegetariano'),
+            self::SinTacc => __('Sin TACC'),
+            self::GlutenFree => __('Opción sin gluten'),
+            self::LactoseFree => __('Sin lactosa'),
+            self::Kosher => __('Kosher'),
+            self::Halal => __('Halal'),
         };
     }
 
@@ -34,13 +34,13 @@ enum DietaryOption: string
     public function needLabel(): string
     {
         return match ($this) {
-            self::Vegan => 'Alimentación vegana',
-            self::Vegetarian => 'Alimentación vegetariana',
-            self::SinTacc => 'Celiaquía (sin TACC)',
-            self::GlutenFree => 'Sin gluten',
-            self::LactoseFree => 'Sin lactosa',
-            self::Kosher => 'Kosher',
-            self::Halal => 'Halal',
+            self::Vegan => __('Alimentación vegana'),
+            self::Vegetarian => __('Alimentación vegetariana'),
+            self::SinTacc => __('Celiaquía (sin TACC)'),
+            self::GlutenFree => __('Sin gluten'),
+            self::LactoseFree => __('Sin lactosa'),
+            self::Kosher => __('Kosher'),
+            self::Halal => __('Halal'),
         };
     }
 
@@ -80,13 +80,13 @@ enum DietaryOption: string
     public function hint(): string
     {
         return match ($this) {
-            self::Vegan => 'Sin ningún ingrediente de origen animal.',
-            self::Vegetarian => 'Sin carne ni pescado.',
-            self::SinTacc => 'Apto celíacos: se cocina aparte, sin contaminación cruzada.',
-            self::GlutenFree => 'Hay platos sin gluten, pero la cocina no es libre de TACC.',
-            self::LactoseFree => 'Sin leche ni derivados, o con opción deslactosada.',
-            self::Kosher => 'Preparado según las normas kosher.',
-            self::Halal => 'Preparado según las normas halal.',
+            self::Vegan => __('Sin ningún ingrediente de origen animal.'),
+            self::Vegetarian => __('Sin carne ni pescado.'),
+            self::SinTacc => __('Apto celíacos: se cocina aparte, sin contaminación cruzada.'),
+            self::GlutenFree => __('Hay platos sin gluten, pero la cocina no es libre de TACC.'),
+            self::LactoseFree => __('Sin leche ni derivados, o con opción deslactosada.'),
+            self::Kosher => __('Preparado según las normas kosher.'),
+            self::Halal => __('Preparado según las normas halal.'),
         };
     }
 }
