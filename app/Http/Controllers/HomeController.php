@@ -37,6 +37,11 @@ class HomeController extends Controller
             'activeCategory' => $activeCategory,
             'experiences' => $experiences,
             'search' => $search,
+            // Para el mapa, solo la zona aproximada: la dirección exacta se comparte con la reserva confirmada.
+            'mapItems' => $experiences->map(fn (Experience $experience) => ($zone = $experience->approximateLocation()) ? [
+                'lat' => $zone['lat'], 'lng' => $zone['lng'], 'title' => $experience->title, 'url' => route('experiencias.show', $experience),
+                'place' => $experience->placeLabel(), 'price' => money($experience->price),
+            ] : null)->filter()->values(),
             'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(),
             'testimonials' => Review::with(['user.avatar', 'experience'])->whereNotNull('published_at')->where('rating', '>=', 5)->latest('published_at')->take(3)->get(),
             'stats' => [

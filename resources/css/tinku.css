@@ -216,7 +216,15 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--font-titulos); font-weight: 700; 
 .filters-panel .check { display: flex; gap: 8px; align-items: center; font-size: 15px; line-height: 20px; padding: 4px 0; cursor: pointer; }
 .filters-panel .field { margin-bottom: 8px; }
 .filters-panel__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
-.results-count { margin: 0 0 12px; }
+.results-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.results-count { margin: 0; }
+.view-toggle { display: flex; gap: 6px; }
+.view-toggle .chip { cursor: pointer; border: 0; }
+.map.map--results { height: 520px; }
+.map-popup { display: grid; gap: 2px; font: 500 14px/18px var(--font-texto); }
+.map-popup a { color: var(--texto-petroleo); font-weight: 700; }
+.map-popup span { color: var(--tinta-suave); }
+@media (max-width: 720px) { .map.map--results { height: 420px; } }
 @media (max-width: 900px) { .filters-panel__grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 540px) { .filters-panel__grid { grid-template-columns: 1fr; } }
 

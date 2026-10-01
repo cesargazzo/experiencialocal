@@ -105,13 +105,30 @@
           </div>
         </form>
       </details>
+      <div x-data="{ view: 'lista' }">
+      <div class="results-bar">
       <p class="hint results-count" role="status">{{ plural_es($experiences->count(), 'experiencia', 'experiencias') }}@if ($search->filters || $activeCategory) con esos filtros · <a href="{{ route('home') }}#experiencias">Ver todas</a>@endif</p>
-      <div class="grid">
+        @if ($mapItems->isNotEmpty())
+          <div class="view-toggle" role="group" aria-label="Cómo ver los resultados">
+            <button type="button" class="chip" x-bind:class="view === 'lista' && 'is-active'" x-bind:aria-pressed="view === 'lista'" x-on:click="view = 'lista'"><x-icon name="list" :size="16" /> Lista</button>
+            <button type="button" class="chip" x-bind:class="view === 'mapa' && 'is-active'" x-bind:aria-pressed="view === 'mapa'" x-on:click="view = 'mapa'; $nextTick(() => $dispatch('show-map'))"><x-icon name="map-pin" :size="16" /> Mapa</button>
+          </div>
+        @endif
+      </div>
+      @if ($mapItems->isNotEmpty())
+        <div x-show="view === 'mapa'" x-cloak>
+          <div wire:ignore class="map map--results" role="region" aria-label="Mapa de experiencias"
+            x-data="tinkuExperiencesMap({ config: @js(config('tinku.maps')), items: @js($mapItems) })" x-on:show-map.window="show()"></div>
+          <p class="hint" style="margin-top:8px">Cada punto es la zona aproximada: la dirección exacta se comparte con la reserva confirmada.@if ($mapItems->count() < $experiences->count()) {{ plural_es($experiences->count() - $mapItems->count(), 'experiencia todavía no tiene', 'experiencias todavía no tienen') }} punto en el mapa.@endif</p>
+        </div>
+      @endif
+      <div class="grid" x-show="view === 'lista'">
         @forelse ($experiences as $e)
           <x-experience-card :experience="$e" />
         @empty
           <div class="empty">Todavía no hay experiencias con ese filtro. Si sabés hacer algo así, publicalo vos.</div>
         @endforelse
+      </div>
       </div>
     </div>
   </section>

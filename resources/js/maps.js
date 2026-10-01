@@ -1,6 +1,7 @@
 // Mapas con Leaflet sobre la base Argenmap del IGN.
 // tinkuMap: muestra una zona aproximada (círculo) o un punto.
 // tinkuMapPicker: el anfitrión marca el punto de encuentro con un clic o arrastrando.
+// tinkuExperiencesMap: todas las experiencias de una búsqueda, cada una en su zona aproximada.
 // Leaflet se descarga solo en las páginas que tienen un mapa.
 let L = null;
 async function leaflet() {
@@ -19,6 +20,19 @@ function baseMap(el, config, center, zoom) {
     return map;
 }
 
+// Ficha chica de la experiencia en el mapa. Se arma con nodos, nunca con HTML del usuario.
+function popup(item) {
+    const box = document.createElement('div');
+    box.className = 'map-popup';
+    const link = document.createElement('a');
+    link.href = item.url;
+    link.textContent = item.title;
+    const meta = document.createElement('span');
+    meta.textContent = `${item.place} · ${item.price}`;
+    box.append(link, meta);
+    return box;
+}
+
 function pin(latlng, draggable = false) {
     return L.circleMarker(latlng, { radius: 10, color: '#FFFFFF', weight: 3, fillColor: brand.coral, fillOpacity: 1, interactive: draggable });
 }
@@ -32,6 +46,24 @@ document.addEventListener('alpine:init', () => {
                 L.circle([lat, lng], { radius, color: brand.petroleo, weight: 2, fillColor: brand.petroleo, fillOpacity: 0.15 }).addTo(map);
             } else {
                 pin([lat, lng]).addTo(map);
+            }
+        },
+    }));
+
+    window.Alpine.data('tinkuExperiencesMap', ({ config, items }) => ({
+        map: null,
+        async show() {
+            await leaflet();
+            if (this.map) {
+                this.map.invalidateSize();
+                return;
+            }
+            const center = items.length ? [items[0].lat, items[0].lng] : [-34.6, -64.4];
+            this.map = baseMap(this.$el, config, center, items.length ? 12 : 4);
+            const icon = L.divIcon({ className: 'map-pin', iconSize: [22, 22], iconAnchor: [11, 11] });
+            const markers = items.map((item) => L.marker([item.lat, item.lng], { icon, title: item.title }).bindPopup(() => popup(item)).addTo(this.map));
+            if (markers.length > 1) {
+                this.map.fitBounds(L.featureGroup(markers).getBounds().pad(0.2), { maxZoom: 13 });
             }
         },
     }));

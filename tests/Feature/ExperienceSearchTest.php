@@ -63,4 +63,15 @@ class ExperienceSearchTest extends TestCase
         $this->assertSame(['Una'], $this->titles(['comida' => ['pizza'], 'personas' => 'muchas', 'orden' => 'raro', 'fecha' => '2020-01-01']));
         $this->get(route('home', ['comida' => ['vegan']]))->assertSee('Más filtros')->assertSee('con esos filtros');
     }
+
+    #[Test]
+    public function the_results_map_only_shows_the_approximate_zone(): void
+    {
+        $experience = Experience::factory()->create(['latitude' => -29.413812, 'longitude' => -66.856221]);
+        $zone = $experience->approximateLocation();
+
+        $items = $this->get(route('home'))->assertOk()->assertSee('tinkuExperiencesMap', false)->viewData('mapItems');
+        $this->assertSame([$zone['lat'], $zone['lng']], [$items[0]['lat'], $items[0]['lng']]);
+        $this->get(route('home'))->assertDontSee('-29.413812')->assertDontSee('-66.856221');
+    }
 }
