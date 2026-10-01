@@ -30,7 +30,7 @@
   <div class="container">
     <form class="search" method="get" action="{{ route('home') }}#experiencias" role="search">
       <div class="search__field"><label for="search-cat">{{ __('Qué querés hacer') }}</label>
-        <select id="search-cat" name="cat"><option value="">{{ __('Todas las experiencias') }}</option>@foreach ($categories as $c)<option value="{{ $c->slug }}" @selected($activeCategory?->id === $c->id)>{{ $c->name }}</option>@endforeach</select></div>
+        <select id="search-cat" name="cat"><option value="">{{ __('Todas las experiencias') }}</option>@foreach ($categories as $c)<option value="{{ $c->slug }}" @selected($activeCategory?->id === $c->id)>{{ $c->label() }}</option>@endforeach</select></div>
       <div class="search__field"><label for="search-lugar">{{ __('Dónde') }}</label><input id="search-lugar" name="lugar" type="text" value="{{ request('lugar') }}" placeholder="La Rioja, Chilecito…"></div>
       <div class="search__field"><label for="search-fecha">{{ __('Cuándo') }}</label><input id="search-fecha" name="fecha" type="date" min="{{ now(config('tinku.timezone'))->toDateString() }}" value="{{ request('fecha') }}"></div>
       <div class="search__field search__field--narrow"><label for="search-personas">{{ __('Personas') }}</label><input id="search-personas" name="personas" type="number" min="1" max="50" inputmode="numeric" value="{{ request('personas') }}" placeholder="2"></div>
@@ -63,7 +63,7 @@
       <div class="chips">
         <a class="chip {{ $activeCategory ? '' : 'is-active' }}" href="{{ route('home', request()->except('cat')) }}#experiencias" @if (! $activeCategory) aria-current="true" @endif>{{ __('Todas') }}</a>
         @foreach ($categories as $c)
-          <a class="chip {{ $activeCategory?->id === $c->id ? 'is-active' : '' }}" href="{{ route('home', [...request()->except('cat'), 'cat' => $c->slug]) }}#experiencias" @if ($activeCategory?->id === $c->id) aria-current="true" @endif><x-icon :name="$c->icon" :size="16" /> {{ $c->name }}</a>
+          <a class="chip {{ $activeCategory?->id === $c->id ? 'is-active' : '' }}" href="{{ route('home', [...request()->except('cat'), 'cat' => $c->slug]) }}#experiencias" @if ($activeCategory?->id === $c->id) aria-current="true" @endif><x-icon :name="$c->icon" :size="16" /> {{ $c->label() }}</a>
         @endforeach
       </div>
       <details class="filters-panel" @if ($search->extraFilterCount()) open @endif>

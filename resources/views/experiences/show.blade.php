@@ -1,7 +1,7 @@
 @php
   $nextDate = $experience->upcomingDates->first(fn ($d) => $d->seatsLeft() > 0) ?? $experience->upcomingDates->first();
   $shareImage = $experience->coverUrl('og');
-  $metaDescription = $experience->summary.' Con '.$experience->host->user->first_name.' en '.$experience->placeLabel().'. Desde '.money($experience->price).' por persona.';
+  $metaDescription = $experience->summary.' '.__('Con :name en :place. Desde :price por persona.', ['name' => $experience->host->user->first_name, 'place' => $experience->placeLabel(), 'price' => money($experience->price)]);
   $jsonLd = ['@context' => 'https://schema.org', '@graph' => array_values(array_filter([
       $nextDate ? [
           '@type' => 'Event',
@@ -42,7 +42,7 @@
             <p class="eyebrow">{{ __(':type con :name', ['type' => $experience->type_label, 'name' => $experience->host->publicName()]) }}</p>
             <h1>{{ $experience->title }}</h1>
             <div class="meta">
-              <span><x-icon name="star" :size="16" /> {{ $experience->reviews_count > 0 ? number_format($experience->rating_avg, 1, ',', '.').' · '.plural_es($experience->reviews_count, __('opinión'), __('opiniones')) : __('Nueva en Tinku') }}</span>
+              <span><x-icon name="star" :size="16" /> {{ $experience->reviews_count > 0 ? decimal($experience->rating_avg).' · '.plural_es($experience->reviews_count, __('opinión'), __('opiniones')) : __('Nueva en Tinku') }}</span>
               <span><x-icon name="clock" :size="16" /> {{ $experience->durationLabel() }}</span>
               <span><x-icon name="users" :size="16" /> {{ __('Hasta :count personas', ['count' => $experience->max_guests]) }}</span>
               <span><x-icon name="map-pin" :size="16" /> {{ $experience->placeLabel() }}</span>

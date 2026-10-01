@@ -32,7 +32,7 @@
           @endfor
         </select>
         @if ($this->selectedDate)
-          <span class="hint">{{ $this->selectedDate->seatsLeft() === 0 ? __('Esta fecha está completa.') : __('Quedan :count lugares en esta fecha.', ['count' => $this->selectedDate->seatsLeft()]) }}</span>
+          <span class="hint">{{ $this->selectedDate->seatsLeft() === 0 ? __('Esta fecha está completa.') : ($this->selectedDate->seatsLeft() === 1 ? __('Queda 1 lugar en esta fecha.') : __('Quedan :count lugares en esta fecha.', ['count' => $this->selectedDate->seatsLeft()])) }}</span>
         @endif
         @error('guests') <span class="error" style="display:block">{{ $message }}</span> @enderror
       </div>

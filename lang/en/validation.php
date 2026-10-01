@@ -197,6 +197,18 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'first_name' => 'first name',
+        'last_name' => 'last name',
+        'birth_date' => 'date of birth',
+        'nationality_code' => 'nationality',
+        'country_code' => 'country',
+        'province_id' => 'province',
+        'postal_code' => 'postal code',
+        'dateId' => 'date',
+        'guests' => 'number of guests',
+        'body' => 'message',
+        'code' => 'code',
+    ],
 
 ];

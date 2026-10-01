@@ -16,10 +16,10 @@ enum VerificationLevel: int
     public function label(): string
     {
         return match ($this) {
-            self::None => 'Sin verificar',
-            self::Contact => 'Contacto confirmado',
-            self::Document => 'Documento validado',
-            self::Residence => 'Identidad y domicilio validados',
+            self::None => __('Sin verificar'),
+            self::Contact => __('Contacto confirmado'),
+            self::Document => __('Documento validado'),
+            self::Residence => __('Identidad y domicilio validados'),
         };
     }
 

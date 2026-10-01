@@ -19,7 +19,7 @@ class TwoFactorStepUpController extends Controller
     {
         abort_unless($request->user()->hasTwoFactor(), 404);
 
-        return view('auth.two-factor', ['action' => route('cuenta.2fa.verify'), 'submitLabel' => 'Confirmá']);
+        return view('auth.two-factor', ['action' => route('cuenta.2fa.verify'), 'submitLabel' => __('Confirmá')]);
     }
 
     public function store(Request $request, TwoFactorGuard $guard, SecurityLog $securityLog): RedirectResponse

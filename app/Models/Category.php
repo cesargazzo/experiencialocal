@@ -21,4 +21,10 @@ class Category extends Model
     {
         return $this->hasMany(Experience::class);
     }
+
+    /** Nombre en el idioma de la interfaz; una categoría nueva sin traducción se muestra como se cargó. */
+    public function label(): string
+    {
+        return __($this->name);
+    }
 }

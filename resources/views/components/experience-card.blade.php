@@ -9,7 +9,7 @@
   <div class="card__body">
     <div class="card__meta">
       @if ($e->reviews_count > 0)
-        <span><x-stars :rating="$e->rating_avg" /> <span class="rating">{{ number_format($e->rating_avg, 1, ',', '.') }}</span> · {{ plural_es($e->reviews_count, __('opinión'), __('opiniones')) }}</span>
+        <span><x-stars :rating="$e->rating_avg" /> <span class="rating">{{ decimal($e->rating_avg) }}</span> · {{ plural_es($e->reviews_count, __('opinión'), __('opiniones')) }}</span>
       @else
         <span class="is-new">{{ __('Nueva en Tinku') }}</span>
       @endif

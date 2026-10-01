@@ -150,7 +150,7 @@
         </div>
         <div><h4>{{ __('Explorar') }}</h4><ul>
           @foreach (\App\Models\Category::orderBy('sort_order')->get() as $c)
-            <li><a href="{{ route('home', ['cat' => $c->slug]) }}#experiencias">{{ $c->name }}</a></li>
+            <li><a href="{{ route('home', ['cat' => $c->slug]) }}#experiencias">{{ $c->label() }}</a></li>
           @endforeach
         </ul></div>
         <div><h4>{{ __('Anfitriones') }}</h4><ul><li><a href="{{ route('anfitrion.registro') }}">{{ __('Publicar una experiencia') }}</a></li><li><a href="{{ route('home') }}#planes">{{ __('Planes') }}</a></li><li><a href="{{ route('home') }}#como-ganas">{{ __('Cómo ganás') }}</a></li><li><a href="{{ route('terminos') }}">{{ __('Términos y condiciones') }}</a></li></ul></div>

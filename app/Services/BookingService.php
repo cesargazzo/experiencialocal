@@ -58,7 +58,7 @@ class BookingService
                 throw new BookingException(__('Ya tenés una reserva para esta fecha (código :code). Si querés cambiar la cantidad de personas, cancelala desde Tus reservas y pedí de nuevo.', ['code' => $existing->code]));
             }
             if ($locked->seatsLeft() < $guests) {
-                throw new BookingException(__('Quedan :count lugares en esta fecha.', ['count' => $locked->seatsLeft()]));
+                throw new BookingException(($locked->seatsLeft() === 1 ? __('Queda 1 lugar en esta fecha.') : __('Quedan :count lugares en esta fecha.', ['count' => $locked->seatsLeft()])));
             }
 
             $unit = (float) $experience->price;

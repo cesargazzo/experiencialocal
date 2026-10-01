@@ -20,3 +20,13 @@ if (! function_exists('plural_es')) {
         return $count.' '.($count === 1 ? $singular : $plural);
     }
 }
+
+if (! function_exists('decimal')) {
+    /** Número con decimales en el formato del idioma: "4,8" en castellano y portugués, "4.8" en inglés. */
+    function decimal(float|int|string $value, int $decimals = 1): string
+    {
+        return app()->getLocale() === 'en'
+            ? number_format((float) $value, $decimals, '.', ',')
+            : number_format((float) $value, $decimals, ',', '.');
+    }
+}
