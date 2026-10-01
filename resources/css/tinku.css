@@ -864,3 +864,49 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .faq summary { cursor: pointer; font-weight: 700; font-size: 17px; }
 .faq details p { margin: 8px 0 0; color: var(--tinta-suave); }
 .faq a, .wizard__panel ul a { color: var(--texto-petroleo); text-decoration: underline; }
+
+/* ---------- Mediakit ---------- */
+.mediakit { padding: 48px 0 104px; max-width: 1040px; }
+.mediakit__hero { max-width: 760px; margin-bottom: var(--esp-5); }
+.mediakit__actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: var(--esp-4); }
+.mediakit__section { margin-bottom: var(--esp-6); }
+.mediakit__section > h2 { font: 700 clamp(26px, 3vw, 34px)/1.15 var(--font-titulos); letter-spacing: -0.01em; margin: 0 0 8px; }
+.mediakit__tiles { margin-top: var(--esp-3); grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 720px) { .mediakit__tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.mediakit__tiles .kpi__val { font-variant-numeric: proportional-nums; }
+.mediakit__audience { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--esp-3); margin-top: var(--esp-3); }
+.share { margin: 0; padding: var(--esp-4); border-radius: var(--radio-md); box-shadow: inset 0 0 0 1px var(--linea); background: var(--superficie); }
+.share figcaption { font: 700 16px/22px var(--font-titulos); margin-bottom: 12px; }
+.share__list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.share__list li { display: grid; grid-template-columns: minmax(0, 7.5em) 1fr 3em; align-items: center; gap: 10px; font-size: 14px; line-height: 18px; }
+.share__label { color: var(--tinta); overflow-wrap: anywhere; }
+.share__track { height: 12px; border-radius: 0 4px 4px 0; background: rgba(8, 122, 157, .12); overflow: hidden; }
+.share__bar { display: block; height: 100%; background: var(--abrazo); border-radius: 0 4px 4px 0; }
+.share__value { text-align: right; color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
+.mediakit__traits, .mediakit__principles { list-style: none; padding: 0; margin: var(--esp-4) 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--esp-3); }
+.mediakit__traits li { padding: var(--esp-3) var(--esp-4); background: var(--superficie-calida); border-radius: var(--radio-md); color: var(--tinta-suave); font-size: 15px; line-height: 22px; }
+.mediakit__traits strong { display: block; color: var(--tinta); margin-bottom: 4px; }
+.mediakit__principles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mediakit__principles li { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; line-height: 22px; color: var(--tinta-suave); }
+.mediakit__principles .icon { flex: none; color: var(--texto-petroleo); margin-top: 1px; }
+.mediakit__principles strong { color: var(--tinta); }
+.mediakit__formats { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--esp-3); margin-top: var(--esp-3); }
+.format { padding: var(--esp-4); border-radius: var(--radio-md); background: var(--superficie); box-shadow: inset 0 0 0 1px var(--linea); }
+.format h3 { font: 700 19px/24px var(--font-titulos); margin: 0 0 8px; }
+.format p { margin: 0; color: var(--tinta-suave); font-size: 15px; line-height: 22px; }
+.format .format__meta { margin-top: 12px; font-size: 14px; }
+.format__meta strong { color: var(--tinta); margin-right: 4px; }
+.print-only { display: none; }
+@media (max-width: 900px) { .mediakit__audience, .mediakit__traits { grid-template-columns: 1fr; } .mediakit__principles { grid-template-columns: 1fr; } }
+
+@media print {
+  .proto-banner, .header, .footer, .toast, .no-print { display: none !important; }
+  .print-only { display: block; }
+  body { background: #fff; }
+  .mediakit { padding: 0; max-width: none; }
+  .mediakit__section, .share, .format, .kpi { break-inside: avoid; }
+  .mediakit__audience, .mediakit__traits { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mediakit__principles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mediakit__print-logo { display: block; width: 110px; margin-bottom: 16px; }
+  .share__track, .share__bar, .kpi, .mediakit__traits li { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

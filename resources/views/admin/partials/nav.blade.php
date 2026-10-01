@@ -3,6 +3,7 @@
     @php($badge = match ($section['route']) {
         'admin.experiencias' => \App\Models\Experience::where('status', \App\Enums\ExperienceStatus::InReview)->whereNull('approved_at')->count(),
         'admin.denuncias' => \App\Models\Message::whereNotNull('reported_at')->count(),
+        'admin.anunciantes' => \App\Models\AdvertiserInquiry::where('status', 'new')->count(),
         default => 0,
     })
     <a @class(['chip', 'is-active' => request()->routeIs($section['active'])]) href="{{ route($section['route']) }}">{{ $section['label'] }}@if ($badge) ({{ $badge }})@endif</a>

@@ -17,6 +17,7 @@ class AdminSections
         ['route' => 'admin.verificaciones', 'label' => 'Verificaciones', 'active' => 'admin.verificaciones', 'permission' => TeamPermission::VerifyIdentity],
         ['route' => 'admin.experiencias', 'label' => 'Experiencias', 'active' => 'admin.experiencias*', 'permission' => TeamPermission::ModerateExperiences],
         ['route' => 'admin.denuncias', 'label' => 'Denuncias', 'active' => 'admin.denuncias', 'permission' => TeamPermission::HandleReports],
+        ['route' => 'admin.anunciantes', 'label' => 'Anunciantes', 'active' => 'admin.anunciantes', 'permission' => TeamPermission::ManagePlatform],
         ['route' => 'admin.equipo', 'label' => 'Equipo', 'active' => 'admin.equipo', 'permission' => TeamPermission::ManagePlatform],
         ['route' => 'admin.terminos', 'label' => 'Términos', 'active' => 'admin.terminos*', 'permission' => TeamPermission::ManagePlatform],
         ['route' => 'admin.contrasenas', 'label' => 'Contraseñas', 'active' => 'admin.contrasenas', 'permission' => TeamPermission::ManagePlatform],
