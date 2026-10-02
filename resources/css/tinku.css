@@ -898,3 +898,14 @@ input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius
 .format__meta strong { color: var(--tinta); margin-right: 4px; }
 @media (max-width: 900px) { .mediakit__audience, .mediakit__traits { grid-template-columns: 1fr; } .mediakit__principles { grid-template-columns: 1fr; } }
 
+
+/* Cartel de cookies: abajo, sin tapar todo, con aceptar y rechazar al mismo nivel. */
+.cookie-banner { position: fixed; z-index: 60; left: 16px; right: 16px; bottom: 16px; max-width: 760px; margin: 0 auto; background: var(--superficie); color: var(--tinta); border-radius: var(--radio-md); box-shadow: 0 12px 40px rgba(13, 23, 39, 0.22), inset 0 0 0 1px var(--linea); padding: 18px 20px; display: grid; gap: 12px; }
+.cookie-banner p { margin: 0; font-size: 15px; line-height: 22px; }
+.cookie-banner a { color: var(--texto-petroleo); text-decoration: underline; }
+.cookie-banner__actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cookie-banner__actions form { margin: 0; }
+.cookie-banner__actions .btn--ghost { text-decoration: none; color: var(--tinta-suave); }
+.cookie-table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+.cookie-table th, .cookie-table td { text-align: left; vertical-align: top; padding: 10px 8px; border-bottom: 1px solid var(--linea); }
+.cookie-table code { font-size: 13px; overflow-wrap: anywhere; }

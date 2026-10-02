@@ -28,6 +28,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
+use App\Http\Controllers\CookieConsentController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HomeController;
@@ -57,6 +58,8 @@ Route::get('/invitacion/{token}', InvitationAcceptController::class)->middleware
 Route::get('/experiencias/{experience}', [ExperienceController::class, 'show'])->name('experiencias.show');
 Route::get('/terminos', [TermsController::class, 'show'])->name('terminos');
 Route::get('/ayuda', [PageController::class, 'help'])->name('ayuda');
+Route::get('/cookies', [PageController::class, 'cookies'])->name('cookies');
+Route::post('/cookies', CookieConsentController::class)->middleware('throttle:30,1')->name('cookies.guardar');
 Route::get('/anunciantes', [MediaKitController::class, 'show'])->name('mediakit');
 Route::post('/anunciantes', [MediaKitController::class, 'store'])->middleware('throttle:5,10')->name('mediakit.store');
 Route::get('/seguridad', [PageController::class, 'safety'])->name('seguridad');

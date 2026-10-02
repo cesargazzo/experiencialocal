@@ -7,6 +7,7 @@ use App\Models\ExperienceDate;
 use App\Models\User;
 use App\Notifications\VerificationCodeNotification;
 use App\Services\VerificationService;
+use App\Support\CookieConsent;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -74,12 +75,16 @@ class SeoAndMailTest extends TestCase
     }
 
     #[Test]
-    public function google_analytics_loads_only_when_configured(): void
+    public function google_analytics_loads_only_when_configured_and_accepted(): void
     {
+        config(['services.google_analytics.id' => 'G-TINKU123']);
         $this->get(route('home'))->assertDontSee('googletagmanager.com');
 
+        config(['services.google_analytics.id' => null]);
+        $this->withCookie(CookieConsent::COOKIE, CookieConsent::VERSION.':1')->get(route('home'))->assertDontSee('googletagmanager.com');
+
         config(['services.google_analytics.id' => 'G-TINKU123']);
-        $this->get(route('home'))->assertSee('googletagmanager.com/gtag/js?id=G-TINKU123', false);
+        $this->withCookie(CookieConsent::COOKIE, CookieConsent::VERSION.':1')->get(route('home'))->assertSee('googletagmanager.com/gtag/js?id=G-TINKU123', false);
     }
 
     #[Test]

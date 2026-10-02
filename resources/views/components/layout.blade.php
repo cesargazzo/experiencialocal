@@ -21,6 +21,9 @@
     $imageAlt ??= 'Tinku. Viví el lugar con su gente.';
     $indexable = config('tinku.indexable') && ! $noindex;
     $analyticsId = config('services.google_analytics.id');
+    $cookieConsent = \App\Support\CookieConsent::fromRequest(request());
+    $loadAnalytics = $analyticsId && $cookieConsent?->analytics;
+    $askCookieConsent = \App\Support\CookieConsent::hasOptionalCookies() && $cookieConsent === null && ! request()->routeIs('cookies');
 @endphp
 <!doctype html>
 <html lang="{{ config('tinku.locales.'.app()->getLocale().'.html', 'es-AR') }}">
@@ -71,13 +74,14 @@
       ],
   ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 
-  @if ($analyticsId)
+  {{-- Google Analytics solo con el permiso de la persona (ver /cookies). Sus cookies quedan en este dominio para poder borrarlas si lo retira. --}}
+  @if ($loadAnalytics)
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ urlencode($analyticsId) }}"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', @json($analyticsId));
+      gtag('config', @json($analyticsId), { cookie_domain: @json(request()->getHost()), allow_google_signals: false, allow_ad_personalization_signals: false });
     </script>
   @endif
   @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -141,6 +145,18 @@
   @endauth
   {{ $slot }}
 
+  @if ($askCookieConsent)
+    <section class="cookie-banner" role="region" aria-label="{{ __('Cookies') }}">
+      <p><strong>{{ __('Cookies:') }}</strong> {{ __('usamos cookies propias, necesarias para que Tinku funcione (tu sesión, la seguridad y tu idioma). Si nos dejás, también usamos las de Google Analytics para entender cómo se usa el sitio y mejorarlo. No usamos cookies de publicidad ni armamos perfiles para mostrarte anuncios.') }}
+        <a href="{{ route('cookies') }}">{{ __('Más información sobre las cookies') }}</a> · <a href="{{ route('cookies') }}#terceros">{{ __('Ver con quién trabajamos') }}</a></p>
+      <div class="cookie-banner__actions">
+        <form method="post" action="{{ route('cookies.guardar') }}">@csrf<input type="hidden" name="analytics" value="1"><button class="btn btn--secondary btn--sm" type="submit">{{ __('Aceptar todas') }}</button></form>
+        <form method="post" action="{{ route('cookies.guardar') }}">@csrf<input type="hidden" name="analytics" value="0"><button class="btn btn--secondary btn--sm" type="submit">{{ __('Solo las necesarias') }}</button></form>
+        <a class="btn btn--ghost btn--sm" href="{{ route('cookies') }}#preferencias">{{ __('Configurar') }}</a>
+      </div>
+    </section>
+  @endif
+
   <footer class="footer">
     <div class="container">
       <div class="footer__grid">
@@ -154,7 +170,7 @@
           @endforeach
         </ul></div>
         <div><h4>{{ __('Anfitriones') }}</h4><ul><li><a href="{{ route('anfitrion.registro') }}">{{ __('Publicar una experiencia') }}</a></li><li><a href="{{ route('home') }}#planes">{{ __('Planes') }}</a></li><li><a href="{{ route('home') }}#como-ganas">{{ __('Cómo ganás') }}</a></li><li><a href="{{ route('terminos') }}">{{ __('Términos y condiciones') }}</a></li></ul></div>
-        <div><h4>Tinku</h4><ul><li><a href="{{ route('verificacion') }}">{{ __('Verificación de identidad') }}</a></li><li><a href="{{ route('seguridad') }}">{{ __('Seguridad') }}</a></li><li><a href="{{ route('ayuda') }}">{{ __('Ayuda') }}</a></li><li><a href="{{ route('mediakit') }}">{{ __('Anunciá en Tinku') }}</a></li></ul></div>
+        <div><h4>Tinku</h4><ul><li><a href="{{ route('verificacion') }}">{{ __('Verificación de identidad') }}</a></li><li><a href="{{ route('seguridad') }}">{{ __('Seguridad') }}</a></li><li><a href="{{ route('ayuda') }}">{{ __('Ayuda') }}</a></li><li><a href="{{ route('mediakit') }}">{{ __('Anunciá en Tinku') }}</a></li><li><a href="{{ route('cookies') }}">{{ __('Política de cookies') }}</a></li></ul></div>
       </div>
       <div class="footer__bottom">
         <span>© {{ date('Y') }} Tinku</span>
